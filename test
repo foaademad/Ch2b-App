@@ -1,0 +1,18 @@
+ // useEffect(() => {
+  //   setIsRTL(language === 'ar');
+  //   // في صفحة المنتجات، يمكنك إضافة طلب API هنا لتحديث البيانات عند تغيير اللغة
+  //   // مثال:
+  //   /*
+  //   const fetchProductDetails = async () => {
+  //     try {
+  //       const response = await axios.get('https://your-api-endpoint/products/1', {
+  //         params: { lang: language },
+  //       });
+  //       setProduct(response.data);
+  //     } catch (error) {
+  //       console.error('Error fetching product:', error);
+  //     }
+  //   };
+  //   fetchProductDetails();
+  //   */
+  // }, [language]);
