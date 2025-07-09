@@ -2,17 +2,6 @@ import { setAuthState, setError, setLoading } from '../slice/authSlice';
 import api from '../utility/api/api';
 import { IRegisterUser } from '../utility/interfaces/authInterface';
 
-// Password (string)
-  // ConfirmPassword (string)
-  // IsComanyOrShop (boolean)
-  // CommercialRegister (choose file)
-  // IsMarketer (boolean) 
-  // IsComapny (boolean)
-  // Location (string)
-  // Email (string)
-  // FullName (string)
-  // PhoneNumber (string)
-
 
 export const registerUser =  (data: IRegisterUser ) => {
   return async (dispatch: any) => {

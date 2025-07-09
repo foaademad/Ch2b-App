@@ -16,6 +16,10 @@ interface IAuthModel {
     createdAt?: string;
     updatedAt?: string;
   } | null;
+  token: string | null;
+  result: {
+    userId: string;
+  } | null;
 }
 
 interface AuthState {

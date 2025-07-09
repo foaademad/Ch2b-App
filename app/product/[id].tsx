@@ -13,8 +13,10 @@ import {
 } from "react-native";
 import Video from "react-native-video";
 import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from '../../src/store/api/cartApi';
 import { getProductById } from "../../src/store/api/productApi";
 import { AppDispatch, RootState } from "../../src/store/store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -23,12 +25,16 @@ export default function ProductDetails() {
   const { currentProduct, loading, error } = useSelector(
     (state: RootState) => state.product
   );
+  const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
+  console.log("userId", userId);
 
   const [quantities, setQuantities] = useState<{ [id: string]: number }>({});
   const [activeTab, setActiveTab] = useState("specs");
+  const [singleQuantity, setSingleQuantity] = useState(0);
 
   useEffect(() => {
     if (id) dispatch(getProductById(id as string));
+    
   }, [id]);
 
   console.log("Current product state:", currentProduct);
@@ -46,8 +52,6 @@ export default function ProductDetails() {
   }
   const featured = getFeaturedMap(vendor?.featuredValues);
 
-  // Example: extract general info from product.attributes or product.generalInformation
-  // For now, fallback to a static array if not available
   const generalInfo = product?.attributes || [
     { label: "Brand", value: "RELANDER/" },
     { label: "Model", value: "RB-G91" },
@@ -104,13 +108,13 @@ export default function ProductDetails() {
     });
   };
 
-  const totalQuantity = Object.values(quantities).reduce((a, b) => a + b, 0);
+  const totalQuantity = Object.values(quantities).reduce((a, b) => a + b, 0) + singleQuantity;
   const totalPrice =
-    product.configuredItems?.reduce((sum, item) => {
+    (product.configuredItems?.reduce((sum, item) => {
       const qty = quantities[item.id] || 0;
       const price = item.price?.convertedPriceList?.internal?.price || 0;
       return sum + qty * price;
-    }, 0) || 0;
+    }, 0) || 0) + (singleQuantity * (product.price?.convertedPriceList?.internal?.price || 0));
 
   return (
     <ScrollView style={styles.container}>
@@ -135,7 +139,7 @@ export default function ProductDetails() {
         {product.pictures?.length ? (
           product.pictures.map((pic, idx) => (
             <Image
-              key={pic.url || `pic-${idx}`}
+              key={`pic-${idx}-${pic.url || 'no-url'}`}
               source={{ uri: pic.url }}
               style={styles.mainImage}
               resizeMode="cover"
@@ -204,13 +208,10 @@ export default function ProductDetails() {
         </Text>
         <Text style={styles.label}>
           Available Quantity:{" "}
-          <Text style={styles.value}>{product.masterQuantity}</Text>
+          <Text style={styles.value}>{product.masterQuantity - singleQuantity}</Text>
         </Text>
-        {/* <Text style={styles.label}>Seller: <Text style={styles.value}>{product.vendorDisplayName || product.vendorName}</Text></Text>
-     
-        <Text style={styles.label}>External Category ID: <Text style={styles.value}>{product.externalCategoryId}</Text></Text>
-        <Text style={styles.label}>Vendor ID: <Text style={styles.value}>{product.vendorId}</Text></Text>
-        <Text style={styles.label}>Vendor Score: <Text style={styles.value}>{product.vendorScore}</Text></Text> */}
+        
+        
 
         {/* Configured Items Cards */}
         <View
@@ -220,8 +221,8 @@ export default function ProductDetails() {
             justifyContent: "center",
           }}
         >
-          {product.configuredItems?.map((item) => (
-            <View key={item.id} style={styles.configCard}>
+          {product.configuredItems?.map((item, configIdx) => (
+            <View key={`config-${item.id}-${configIdx}`} style={styles.configCard}>
               <Image
                 source={{
                   uri: product.pictures?.[0]?.url || product.mainPictureUrl,
@@ -296,8 +297,65 @@ export default function ProductDetails() {
             </View>
           ))}
         </View>
+        
+
+        
         {/* Cart Summary and Add to Cart Button */}
         <View style={styles.cartSummary}>
+          {/* If there are no configuredItems, add a card for the product itself */}
+          {(!product.configuredItems || product.configuredItems.length === 0) && (
+            <View style={styles.configCard}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginVertical: 4,
+                }}
+              >
+                <TouchableOpacity
+                  style={styles.qtyBtn}
+                  onPress={() => setSingleQuantity(q => Math.max(0, q - 1))}
+                >
+                  <Text style={{ fontSize: 18, color: "#36c7f6" }}>-</Text>
+                </TouchableOpacity>
+                <Text style={{ marginHorizontal: 10, fontSize: 16 }}>
+                  {singleQuantity}
+                </Text>
+                <TouchableOpacity
+                  style={styles.qtyBtn}
+                  onPress={() => setSingleQuantity(q => Math.min(product.masterQuantity - q, q + 1))}
+                >
+                  <Text style={{ fontSize: 18, color: "#36c7f6" }}>+</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.addToCartBtn,
+                  { backgroundColor: singleQuantity > 0 ? '#36c7f6' : '#ccc' },
+                ]}
+                disabled={singleQuantity === 0}
+                onPress={() => {
+                  if (userId && singleQuantity > 0) {
+                    const cartItem = {
+                      productId: product.id,
+                      name: product.name,
+                      title: product.title,
+                      image: product.mainPictureUrl,
+                      quantity: singleQuantity,
+                      price: product.price?.convertedPriceList?.internal?.price,
+                      totalPrice: (product.price?.convertedPriceList?.internal?.price || 0) * singleQuantity,
+                    };
+                    dispatch(addToCart(userId, cartItem));
+                  }
+                }}
+              >
+                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+                  Add to Cart
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           <Text style={{ fontSize: 16, fontWeight: "bold" }}>
             Total Quantity:{" "}
             <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
@@ -320,6 +378,8 @@ export default function ProductDetails() {
             </Text>
           </TouchableOpacity>
         </View>
+
+
       </View>
       {/* Vendor Info */}
       <View style={styles.vendorCard}>
@@ -534,11 +594,11 @@ export default function ProductDetails() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            style={{ marginVertical: 10 }}
+            style={{ marginVertical: 10}}
           >
             {(product?.pictures || []).map((pic, idx) => (
               <Image
-                key={pic.url || `pic-${idx}`}
+                key={`desc-pic-${idx}-${pic.url || 'no-url'}`}
                 source={{ uri: pic.url }}
                 style={{
                   width: 120,
@@ -577,7 +637,7 @@ export default function ProductDetails() {
                   <ScrollView horizontal style={{ marginTop: 6 }}>
                     {review.images.map((img: any, i: any) => (
                       <Image
-                        key={img || `img-${i}`}
+                        key={`review-img-${i}-${img || 'no-url'}`}
                         source={{ uri: img }}
                         style={{
                           width: 60,
@@ -604,7 +664,7 @@ export default function ProductDetails() {
           <Text style={styles.sectionTitle}>Products from Same Vendor</Text>
           <FlatList
             data={vendorProducts}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
@@ -634,7 +694,7 @@ export default function ProductDetails() {
           <Text style={styles.sectionTitle}>Related Products</Text>
           <FlatList
             data={relatedProducts}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item, index) => `${item.id}-${index}`}
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
@@ -774,17 +834,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   configCard: {
-    width: 150,
-    backgroundColor: "#fff",
+    width: "100%",
+
     borderRadius: 12,
     marginTop: 10,
     marginBottom: 10,
     padding: 10,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+
   },
   qtyBtn: {
     width: 32,
