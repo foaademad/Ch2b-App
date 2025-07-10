@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from '../../src/store/api/cartApi';
 import { getProductById } from "../../src/store/api/productApi";
 import { AppDispatch, RootState } from "../../src/store/store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -26,7 +26,9 @@ export default function ProductDetails() {
     (state: RootState) => state.product
   );
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
+  const token = useSelector((state: RootState) => state.auth.authModel?.result?.token);
   console.log("userId", userId);
+  console.log("token", token);
 
   const [quantities, setQuantities] = useState<{ [id: string]: number }>({});
   const [activeTab, setActiveTab] = useState("specs");
@@ -334,18 +336,28 @@ export default function ProductDetails() {
                   { backgroundColor: singleQuantity > 0 ? '#36c7f6' : '#ccc' },
                 ]}
                 disabled={singleQuantity === 0}
-                onPress={() => {
+                onPress={async () => {
                   if (userId && singleQuantity > 0) {
                     const cartItem = {
                       productId: product.id,
                       name: product.name,
                       title: product.title,
-                      image: product.mainPictureUrl,
-                      quantity: singleQuantity,
+                      image: product.mainPictureUrl?.slice(0, 1000),
+                      LinkUrl: product.mainPictureUrl?.slice(0, 1000),
+                      Quntity: singleQuantity,
                       price: product.price?.convertedPriceList?.internal?.price,
                       totalPrice: (product.price?.convertedPriceList?.internal?.price || 0) * singleQuantity,
                     };
-                    dispatch(addToCart(userId, cartItem));
+                    console.log('cartItem:', cartItem);
+                    try {
+                      await dispatch(addToCart(userId, cartItem));
+                    } catch (error: any) {
+                      Toast.show({
+                        type: "error",
+                        text1: error.message
+                      });
+                      console.error(error);
+                    }
                   }
                 }}
               >
@@ -369,8 +381,36 @@ export default function ProductDetails() {
               { backgroundColor: totalQuantity > 0 ? "#36c7f6" : "#ccc" },
             ]}
             disabled={totalQuantity === 0}
-            onPress={() => {
-              /* handle add to cart */
+            onPress={async () => {
+              
+                if (userId && totalQuantity > 0) {
+                  product.configuredItems?.forEach(async (item) => {
+                    const qty = quantities[item.id] || 0;
+                    if (qty > 0) {
+                      const cartItem = {
+                        productId: product.id,
+                        name: product.name,
+                        title: `${product.title} (${item.configurators?.map(c => `${c.pid}: ${c.vid}`).join(", ")})`,
+                        image: product.mainPictureUrl?.slice(0, 1000),
+                        LinkUrl: product.mainPictureUrl?.slice(0, 1000),
+                        Quntity: qty,
+                        price: item.price?.convertedPriceList?.internal?.price,
+                        totalPrice: qty * (item.price?.convertedPriceList?.internal?.price || 0),
+                      };
+                      console.log('cartItem:', cartItem);
+                      try {
+                        await dispatch(addToCart(userId, cartItem));
+                      } catch (error: any) {
+                        Toast.show({
+                          type: "error",
+                          text1: error.message
+                        });
+                        console.error(error);
+                      }
+                    }
+                  });
+                }
+              
             }}
           >
             <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>

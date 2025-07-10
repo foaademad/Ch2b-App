@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
 import { useLanguage } from "../src/context/LanguageContext";
 import { loginUser } from "../src/store/api/authApi";
-import { RootState } from "../src/store/store";
+
 
 // مخطط التحقق من صحة الإدخال باستخدام Yup
 const LoginSchema = (t: any) =>

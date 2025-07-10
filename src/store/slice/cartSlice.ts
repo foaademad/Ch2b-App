@@ -6,7 +6,7 @@ interface ICartState {
   isLoading: boolean;
   error: string | null;
   totalItems: number;
-
+    
   totalPrice: number;
 
 }

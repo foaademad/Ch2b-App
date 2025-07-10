@@ -3,30 +3,33 @@ import api from "../utility/api/api";
 import { CartItemDto } from "../utility/interfaces/cartInterface";
 import { AppDispatch } from "../store";
 import { RootState } from "../store";
-export const getCart = async () => {
-    const response = await api.get("/cart");
-    return response.data;
-}
-
+import Toast from "react-native-toast-message";
 
 export const addToCart = (userId: string, cartItem: CartItemDto) => {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
-    const token = getState().auth.authModel?.token;
+    const token = getState().auth.authModel?.result?.token;
     console.log("token", token);
     try {
       dispatch(setLoading(true));
       const response = await api.post(`/Cart/addtocart/${userId}`, cartItem, {
         headers: {
           "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          
         },
-      });
+    });
+    console.log(token);
+   
       dispatch(addToCartAction(response.data));
       dispatch(setLoading(false));
       console.log("response", response.data);
+      Toast.show({
+        type: "success",
+        text1: "Item added to cart successfully"
+      });
       return response.data;
     } catch (error: any) {
-      dispatch(setError(error.message));
-      dispatch(setLoading(false));
+      console.log("error", error);
       throw error;
     }
   };

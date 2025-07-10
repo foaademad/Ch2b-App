@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IRegisterUser, UserRole } from "../utility/interfaces/authInterface";
 
 interface IAuthModel {
@@ -19,6 +19,7 @@ interface IAuthModel {
   token: string | null;
   result: {
     userId: string;
+    token: string;
   } | null;
 }
 

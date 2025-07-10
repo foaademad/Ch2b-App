@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
+import { store } from '../../../store/store';
+import { logout } from '../../slice/authSlice';
 
 const api = axios.create({
   baseURL: "http://localhost:5000/api",
@@ -15,17 +17,26 @@ api.interceptors.request.use(
       const authModelString = await AsyncStorage.getItem("authModel");
       const authModel = authModelString ? JSON.parse(authModelString) : null;
 
-      if (authModel?.token) {
-        config.headers.Authorization = `Bearer ${authModel.token}`;
+      if (authModel?.result?.refreshTokenExpiresOn) {
+        const now = new Date();
+        const refreshTokenExpiresOn = new Date(authModel.result.refreshTokenExpiresOn);
+        if (refreshTokenExpiresOn <= now) {
+          // انتهت صلاحية الريفريش توكن: سجل خروج
+          const dispatch = store.dispatch;
+          await dispatch(logout());
+          throw new Error('انتهت الجلسة، يرجى تسجيل الدخول من جديد');
+        }
       }
 
+      if (authModel?.result?.token) {
+        config.headers.Authorization = `Bearer ${authModel.result.token}`;
+      }
       config.headers["X-Client-Type"] = "mobile";
       config.headers["Accept-Language"] = "ar";
-
       return config;
     } catch (error) {
       console.error("Interceptor error:", error);
-      return config;
+      return Promise.reject(error);
     }
   },
   (error) => {

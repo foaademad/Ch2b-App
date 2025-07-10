@@ -1,4 +1,5 @@
 import { setAuthState, setError, setLoading } from '../slice/authSlice';
+import { RootState } from '../store';
 import api from '../utility/api/api';
 import { IRegisterUser } from '../utility/interfaces/authInterface';
 
@@ -95,5 +96,24 @@ export const registerUser =  (data: IRegisterUser ) => {
     }
   }
 }
+
+
+export const getUserById = async (userId: string) => {
+  return async (dispatch: any , getState: () => RootState) => {
+    try {
+      const token = getState().auth.authModel?.result?.token;
+      const response = await api.get(`/User/getuserbyid/${userId}`  , {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      dispatch(setAuthState(response.data));
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      throw error;
+    }
+  }
+}
+
 
 
