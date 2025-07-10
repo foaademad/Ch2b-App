@@ -29,11 +29,12 @@ const CartSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    setCartItems: (state, action: PayloadAction<CartItemDto[]>) => {
-      // Just store the items as they are, no need for conversion
-      state.items = action.payload;
-      state.totalItems = action.payload.reduce((sum, item) => sum + (item.quantity || 0), 0);
-      state.totalPrice = action.payload.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    setCartItems: (state, action: PayloadAction<CartItemDto[] | any>) => {
+      // Handle case where payload might not be an array
+      const items = Array.isArray(action.payload) ? action.payload : [];
+      state.items = items;
+      state.totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      state.totalPrice = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
     },
     addToCart: (state, action: PayloadAction<CartItemDto>) => {
       const existingItem = state.items.find(item => item.productId === action.payload.productId);

@@ -1,32 +1,48 @@
-import { useShop } from '@/src/context/ShopContext';
+import { getCartItems, removeFromCart, updateCartItem } from '@/src/store/api/cartApi';
+import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
 import { Minus, Plus, Trash2 } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 
 const CartScreen = () => {
   const { t } = useTranslation();
   const router = useRouter();
-  const { cart, removeFromCart, updateCartItemQuantity } = useShop();
+  const dispatch = useDispatch();
+  const { items: cart, isLoading } = useSelector((state: RootState) => state.cart);
+  const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
 
-  const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+  useEffect(() => {
+    if (userId) {
+      dispatch(getCartItems() as any);
+    }
+  }, [dispatch, userId]);
 
-  const handleQuantityChange = (itemId: number, change: number) => {
-    const item = cart.find(i => i.id === itemId);
-    if (item) {
+  const total = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+
+  const handleQuantityChange = (itemId: string, change: number) => {
+    const item = cart.find(i => i.productId === itemId);
+    if (item && userId) {
       const newQuantity = Math.max(1, (item.quantity || 1) + change);
-      updateCartItemQuantity(itemId.toString(), newQuantity);
+      dispatch(updateCartItem(userId, itemId, newQuantity, item) as any);
     }
   };
 
-  const handleProductPress = (productId: number) => {
+  const handleProductPress = (productId: string) => {
     router.push(`/product/${productId}`);
   };
 
   const handleCheckout = () => {
     if (cart.length > 0) {
       router.push('/checkout');
+    }
+  };
+
+  const handleRemoveFromCart = (itemId: string) => {
+    if (userId) {
+      dispatch(removeFromCart(userId, itemId) as any);
     }
   };
 
@@ -37,51 +53,57 @@ const CartScreen = () => {
         <Text style={styles.itemCount}>{cart.length} {t('items')}</Text>
       </View>
 
-      <ScrollView style={styles.content}>
-        {cart.map((item, index) => (
-          <TouchableOpacity 
-            key={`cart-item-${item.id}-${index}`} 
-            style={styles.cartItem}
-            onPress={() => handleProductPress(item.id)}
-          >
-            <Image source={{ uri: item.image }} style={styles.itemImage} />
-            <View style={styles.itemDetails}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemPrice}>${(item.price * (item.quantity || 1)).toFixed(2)}</Text>
-              <View style={styles.quantityContainer}>
-                <TouchableOpacity 
-                  style={styles.quantityButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleQuantityChange(item.id, -1);
-                  }}
-                >
-                  <Minus size={16} color="#666" />
-                </TouchableOpacity>
-                <Text style={styles.quantity}>{item.quantity || 1}</Text>
-                <TouchableOpacity 
-                  style={styles.quantityButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleQuantityChange(item.id, 1);
-                  }}
-                >
-                  <Plus size={16} color="#666" />
-                </TouchableOpacity>
-              </View>
-            </View>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <Text>Loading...</Text>
+        </View>
+      ) : (
+        <ScrollView style={styles.content}>
+          {cart.map((item, index) => (
             <TouchableOpacity 
-              style={styles.removeButton}
-              onPress={(e) => {
-                e.stopPropagation();
-                removeFromCart(item.id.toString());
-              }}
+              key={`cart-item-${item.productId}-${index}`} 
+              style={styles.cartItem}
+              onPress={() => handleProductPress(item.productId || '')}
             >
-              <Trash2 size={20} color="#ff3b30" />
+              <Image source={{ uri: item.image }} style={styles.itemImage} />
+              <View style={styles.itemDetails}>
+                <Text style={styles.itemName}>{item.title}</Text>
+                <Text style={styles.itemPrice}>${(item.totalPrice || 0).toFixed(2)}</Text>
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity 
+                    style={styles.quantityButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleQuantityChange(item.productId || '', -1);
+                    }}
+                  >
+                    <Minus size={16} color="#666" />
+                  </TouchableOpacity>
+                  <Text style={styles.quantity}>{item.quantity || 1}</Text>
+                  <TouchableOpacity 
+                    style={styles.quantityButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleQuantityChange(item.productId || '', 1);
+                    }}
+                  >
+                    <Plus size={16} color="#666" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <TouchableOpacity 
+                style={styles.removeButton}
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleRemoveFromCart(item.productId || '');
+                }}
+              >
+                <Trash2 size={20} color="#ff3b30" />
+              </TouchableOpacity>
             </TouchableOpacity>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+          ))}
+        </ScrollView>
+      )}
 
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
@@ -126,6 +148,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   cartItem: {
     flexDirection: 'row',
