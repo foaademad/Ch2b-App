@@ -223,7 +223,8 @@ export default function ProductDetails() {
             justifyContent: "center",
           }}
         >
-          {product.configuredItems?.map((item, configIdx) => (
+          {
+          product.configuredItems?.map((item, configIdx) => (
             <View key={`config-${item.id}-${configIdx}`} style={styles.configCard}>
               <Image
                 source={{
@@ -301,7 +302,6 @@ export default function ProductDetails() {
         </View>
         
 
-        
         {/* Cart Summary and Add to Cart Button */}
         <View style={styles.cartSummary}>
           {/* If there are no configuredItems, add a card for the product itself */}
@@ -330,6 +330,13 @@ export default function ProductDetails() {
                   <Text style={{ fontSize: 18, color: "#36c7f6" }}>+</Text>
                 </TouchableOpacity>
               </View>
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                Total Quantity:{" "}
+                <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
+              </Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6" }}>
+                Total Price: SAR {totalPrice.toFixed(2)}
+              </Text>
               <TouchableOpacity
                 style={[
                   styles.addToCartBtn,
@@ -361,6 +368,7 @@ export default function ProductDetails() {
                   }
                 }}
               >
+                
                 <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
                   Add to Cart
                 </Text>
@@ -368,14 +376,18 @@ export default function ProductDetails() {
             </View>
           )}
 
-          <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-            Total Quantity:{" "}
-            <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
-          </Text>
-          <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6" }}>
-            Total Price: SAR {totalPrice.toFixed(2)}
-          </Text>
-          <TouchableOpacity
+          {product.configuredItems?.length > 0 && (
+            <>
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                Total Quantity:{" "}
+                <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
+              </Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6" }}>
+                Total Price: SAR {totalPrice.toFixed(2)}
+              </Text>
+            </>
+          )}
+          {product.configuredItems?.length > 0 && <TouchableOpacity
             style={[
               styles.addToCartBtn,
               { backgroundColor: totalQuantity > 0 ? "#36c7f6" : "#ccc" },
@@ -417,6 +429,7 @@ export default function ProductDetails() {
               Add to Cart
             </Text>
           </TouchableOpacity>
+          }
         </View>
 
 

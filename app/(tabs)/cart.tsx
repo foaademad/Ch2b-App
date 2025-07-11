@@ -1,7 +1,7 @@
 import { getCartItems, removeFromCart, updateCartItem } from '@/src/store/api/cartApi';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
-import { Minus, Plus, Trash2 } from 'lucide-react-native';
+import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -60,6 +60,17 @@ const CartScreen = () => {
       {isLoading ? (
         <View style={styles.loadingContainer}>
           <Text>Loading...</Text>
+        </View>
+      ) : cart.length === 0 ? (
+        <View style={styles.emptyCartContainer}>
+          <ShoppingCart size={70} color="#ccc" style={styles.emptyCartIcon} />
+          <Text style={styles.emptyCartText}>No products in your cart</Text>
+          <TouchableOpacity 
+            style={styles.shopNowButton}
+            onPress={() => router.push('/(tabs)')}
+          >
+            <Text style={styles.shopNowButtonText}>Shop Now</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <ScrollView style={styles.content}>
@@ -230,22 +241,48 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   totalAmount: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#36c7f6',
   },
   checkoutButton: {
     backgroundColor: '#36c7f6',
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
   },
   checkoutButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
   },
   disabledButton: {
     backgroundColor: '#ccc',
+  },
+  emptyCartContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  emptyCartIcon: {
+    marginBottom: 16,
+  },
+  emptyCartText: {
+    fontSize: 18,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  shopNowButton: {
+    backgroundColor: '#36c7f6',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  shopNowButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

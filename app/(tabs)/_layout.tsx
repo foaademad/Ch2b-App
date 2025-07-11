@@ -4,11 +4,12 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useLanguage } from "../../src/context/LanguageContext";
 import { useShop } from "../../src/context/ShopContext";
-
+import { useSelector } from 'react-redux';
+import { RootState } from '../../src/store/store';
 export default function TabLayout() {
   const { language } = useLanguage();
   const { cart, wishlist} = useShop();
-
+  const cartItems = useSelector((state: RootState) => state.cart.items);
   // تعريف التبويبات في مصفوفة
   const tabScreens = [
     {
@@ -32,7 +33,7 @@ export default function TabLayout() {
       name: 'cart',
       title: { ar: 'السلة', en: 'Cart' },
       icon: 'cart-outline',
-      badge: cart.length > 0 ? cart.length : undefined,
+      badge: cartItems.length > 0 ? cartItems.length : undefined,
     },
     {
       name: 'profile',
