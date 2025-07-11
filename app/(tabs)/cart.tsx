@@ -1,3 +1,4 @@
+import CartItem from '@/components/cart/CartItem';
 import { getCartItems, removeFromCart, updateCartItem } from '@/src/store/api/cartApi';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
@@ -15,8 +16,12 @@ const CartScreen = () => {
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
 
   useEffect(() => {
-    if (userId) {
-      dispatch(getCartItems() as any);
+    try{
+      if (userId) {
+        dispatch(getCartItems() as any);
+      }
+    }catch(error){
+      console.log("error", error);
     }
   }, [dispatch, userId]);
 
@@ -40,9 +45,10 @@ const CartScreen = () => {
     }
   };
 
-  const handleRemoveFromCart = (itemId: string) => {
+  const handleRemoveFromCart = (id: number) => {
     if (userId) {
-      dispatch(removeFromCart(userId, itemId) as any);
+      dispatch(removeFromCart(userId, id.toString() ) as any);
+      dispatch(getCartItems() as any);
     }
   };
 
@@ -95,7 +101,7 @@ const CartScreen = () => {
                 style={styles.removeButton}
                 onPress={(e) => {
                   e.stopPropagation();
-                  handleRemoveFromCart(item.productId || '');
+                    handleRemoveFromCart(item.id || 0 );
                 }}
               >
                 <Trash2 size={20} color="#ff3b30" />
