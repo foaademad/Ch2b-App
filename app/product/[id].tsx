@@ -11,12 +11,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import Video from "react-native-video";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from '../../src/store/api/cartApi';
 import { getProductById } from "../../src/store/api/productApi";
 import { AppDispatch, RootState } from "../../src/store/store";
-import Toast from "react-native-toast-message";
+import { addToSallerWishlistApi } from "../../src/store/api/wishlistApi";
+import { Ionicons } from "@expo/vector-icons";
+
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -361,7 +364,7 @@ export default function ProductDetails() {
                     } catch (error: any) {
                       Toast.show({
                         type: "error",
-                        text1: error.message
+                        text1: "This card is already in the cart"
                       });
                       console.error(error);
                     }
@@ -415,9 +418,9 @@ export default function ProductDetails() {
                       } catch (error: any) {
                         Toast.show({
                           type: "error",
-                          text1: error.message
+                          text1: "This card is already in the cart"
                         });
-                        console.error(error);
+                        
                       }
                     }
                   });
@@ -441,6 +444,7 @@ export default function ProductDetails() {
             flexDirection: "row",
             alignItems: "center",
             marginBottom: 12,
+            position: 'relative',
           }}
         >
           <Image
@@ -473,6 +477,34 @@ export default function ProductDetails() {
               </Text>
             </View>
           </View>
+          <TouchableOpacity
+            style={{
+              padding: 8,
+              borderRadius: 20,
+              marginLeft: 10,
+              position: 'absolute',
+              top: 0, 
+              right: 0,
+              backgroundColor: 'rgba(255,255,255,0.9)',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+              
+            }}
+            onPress={() => {
+              if (vendor?.id) {
+                dispatch(addToSallerWishlistApi(vendor) as any);
+              }
+            }}
+          >
+            <Ionicons 
+              name={'heart-outline'} 
+              size={24} 
+              color={'#888'} 
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.vendorInfoRow}>
           <Text style={styles.vendorInfoLabel}>Shop Logo:</Text>
@@ -918,6 +950,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   header: {
+    paddingTop: 50,
     flexDirection: "row",
     alignItems: "center",
     padding: 10,

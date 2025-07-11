@@ -1,19 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { addToWishlistApi } from '../../src/store/api/wishlistApi';
 import { ProductDto } from '../../src/store/utility/interfaces/productInterface';
-
 interface ProductCardProps {
   product: ProductDto;
   onPress?: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
-  const [favourited, setFavourited] = useState(false);
   const rating = Number(product.featuredValues?.find(value => value.name === 'rating')?.value) || 0;
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
   const starsArray = Array(fullStars).fill('★');
+  const dispatch = useDispatch();
   return (
     <TouchableOpacity
       style={styles.productCard}
@@ -30,10 +31,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
           style={styles.favIcon}
           onPress={e => {
             e.stopPropagation();
-            setFavourited(fav => !fav);
+            
+            dispatch(addToWishlistApi(product) as any);
           }}
         >
-          <Ionicons name={favourited ? 'heart' : 'heart-outline'} size={22} color={favourited ? '#e74c3c' : '#888'} />
+           <Ionicons name={'heart-outline'} size={22} color={'#888'} />
         </TouchableOpacity>
       </View>
       <View style={styles.productInfo}>

@@ -30,7 +30,7 @@ export const addToCart = (userId: string, cartItem: CartItemDto) => {
       return response.data;
     } catch (error: any) {
       console.log("error", error);
-      dispatch(setError(error.message));
+      dispatch(setError("error.message"));
       dispatch(setLoading(false));
       
       Toast.show({
