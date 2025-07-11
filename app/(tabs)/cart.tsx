@@ -1,4 +1,3 @@
-import CartItem from '@/components/cart/CartItem';
 import { getCartItems, removeFromCart, updateCartItem } from '@/src/store/api/cartApi';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
@@ -27,11 +26,11 @@ const CartScreen = () => {
 
   const total = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
-  const handleQuantityChange = (itemId: string, change: number) => {
-    const item = cart.find(i => i.productId === itemId);
+  const handleQuantityChange = (itemId: number, change: number) => {
+    const item = cart.find(i => i.id === itemId);
     if (item && userId) {
-      const newQuantity = Math.max(1, (item.quantity || 1) + change);
-      dispatch(updateCartItem(userId, itemId, newQuantity, item) as any);
+      const newQuantity = Math.max(1, (item.quntity || 1) + change);
+      dispatch(updateCartItem(userId, itemId.toString(), newQuantity, item) as any);
     }
   };
 
@@ -47,8 +46,7 @@ const CartScreen = () => {
 
   const handleRemoveFromCart = (id: number) => {
     if (userId) {
-      dispatch(removeFromCart(userId, id.toString() ) as any);
-      dispatch(getCartItems() as any);
+      dispatch(removeFromCart(userId, id.toString()) as any);
     }
   };
 
@@ -80,17 +78,17 @@ const CartScreen = () => {
                     style={styles.quantityButton}
                     onPress={(e) => {
                       e.stopPropagation();
-                      handleQuantityChange(item.productId || '', -1);
+                      handleQuantityChange(item.id || 0, -1);
                     }}
                   >
                     <Minus size={16} color="#666" />
                   </TouchableOpacity>
-                  <Text style={styles.quantity}>{item.quantity || 1}</Text>
+                  <Text style={styles.quantity}>{item.quntity || 1}</Text>
                   <TouchableOpacity 
                     style={styles.quantityButton}
                     onPress={(e) => {
                       e.stopPropagation();
-                      handleQuantityChange(item.productId || '', 1);
+                      handleQuantityChange(item.id || 0, 1);
                     }}
                   >
                     <Plus size={16} color="#666" />

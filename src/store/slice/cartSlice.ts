@@ -6,9 +6,7 @@ interface ICartState {
   isLoading: boolean;
   error: string | null;
   totalItems: number;
-    
   totalPrice: number;
-
 }
 
 const initialState: ICartState = {
@@ -33,19 +31,19 @@ const CartSlice = createSlice({
       // Handle case where payload might not be an array
       const items = Array.isArray(action.payload) ? action.payload : [];
       state.items = items;
-      state.totalItems = items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      state.totalItems = items.reduce((sum, item) => sum + (item.quntity || 0), 0);
       state.totalPrice = items.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
     },
     addToCart: (state, action: PayloadAction<CartItemDto>) => {
       const existingItem = state.items.find(item => item.productId === action.payload.productId);
       if (existingItem) {
-        existingItem.quantity = (existingItem.quantity || 0) + (action.payload.quantity || 1);
+        existingItem.quntity = (existingItem.quntity || 0) + (action.payload.quntity || 1);
         existingItem.totalPrice =
           (existingItem.totalPrice || 0) + (action.payload.totalPrice || 0);
       } else {
         state.items.push(action.payload);
       }
-      state.totalItems = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      state.totalItems = state.items.reduce((sum, item) => sum + (item.quntity || 0), 0);
       state.totalPrice = state.items.reduce(
         (sum, item) => sum + (item.totalPrice || 0),
         0
@@ -53,7 +51,7 @@ const CartSlice = createSlice({
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
       state.items = state.items.filter(item => item.id?.toString() !== action.payload);
-      state.totalItems = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+      state.totalItems = state.items.reduce((sum, item) => sum + (item.quntity || 0), 0);
       state.totalPrice = state.items.reduce(
         (sum, item) => sum + (item.totalPrice || 0),
         0
@@ -63,7 +61,7 @@ const CartSlice = createSlice({
       const index = state.items.findIndex(item => item.id === action.payload.id);
       if (index !== -1) {
         state.items[index] = action.payload;
-        state.totalItems = state.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
+        state.totalItems = state.items.reduce((sum, item) => sum + (item.quntity || 0), 0);
         state.totalPrice = state.items.reduce(
           (sum, item) => sum + (item.totalPrice || 0),
           0

@@ -6,8 +6,8 @@ export interface CartItemDto {
     totalPrice?: number;
     totalPriceWithSAR?: number;
     discount?: number;
-    quantity?: number;
     quntity?: number;
+    price?: number;
     physicalParameters?: string;
     attributeItems?: AttributeItemDto[];
     cartId?: string;
@@ -18,7 +18,7 @@ export interface CartItemDto {
   export interface AttributeItemDto {
     id: number;
     configId?: string;
-    quantity?: number;
+    quntity?: number;
     attributesJson?: string;
     priceWithSAR?: number;
     price?: number;
