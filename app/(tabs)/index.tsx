@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { Shadows } from '../../constants/Shadows';
 import { getProducts } from '../../src/store/api/productApi';
 import { AppDispatch, RootState } from '../../src/store/store';
 import { ProductDto } from '../../src/store/utility/interfaces/productInterface';
@@ -52,8 +53,8 @@ function AnimatedSearchBar({ onChangeText }: { onChangeText: (text: string) => v
               inputRange: [0, 1],
               outputRange: ["70%", "100%"],
             }),
-            shadowOpacity: isFocused ? 0.25 : 0.1,
             backgroundColor: isFocused ? "#f0f8ff" : "#fff",
+            ...(isFocused ? Shadows.primary : Shadows.medium),
           },
         ]}
       >
@@ -86,10 +87,7 @@ const searchStyles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingHorizontal: 18,
     paddingVertical: 8,
-    shadowColor: "#36c7f6",
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 4,
+    ...Shadows.primary,
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
@@ -168,11 +166,7 @@ const HomeScreen = () => {
         backgroundColor: '#fff',
         borderRadius: 16,
         padding: 10,
-        elevation: 4,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 4,
+        ...Shadows.card,
         flexDirection: 'row',
         alignItems: 'center',
       }}

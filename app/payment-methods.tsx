@@ -3,6 +3,7 @@ import { CreditCard, Plus, Trash2, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Shadows } from '../constants/Shadows';
 import { useLanguage } from '../src/context/LanguageContext';
 
 interface Card {
@@ -342,14 +343,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.medium,
   },
   cardHeader: {
     flexDirection: 'row',

@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -14,11 +15,11 @@ import {
 import Toast from "react-native-toast-message";
 import Video from "react-native-video";
 import { useDispatch, useSelector } from "react-redux";
+import { Shadows } from '../../constants/Shadows';
 import { addToCart } from '../../src/store/api/cartApi';
 import { getProductById } from "../../src/store/api/productApi";
-import { AppDispatch, RootState } from "../../src/store/store";
 import { addToSallerWishlistApi } from "../../src/store/api/wishlistApi";
-import { Ionicons } from "@expo/vector-icons";
+import { AppDispatch, RootState } from "../../src/store/store";
 
 
 export default function ProductDetails() {
@@ -486,12 +487,7 @@ export default function ProductDetails() {
               top: 0, 
               right: 0,
               backgroundColor: 'rgba(255,255,255,0.9)',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-              
+              ...Shadows.icon,
             }}
             onPress={() => {
               if (vendor?.id) {
@@ -808,7 +804,10 @@ export default function ProductDetails() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f7fafd" },
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
   centered: {
     flex: 1,
     justifyContent: "center",
@@ -829,10 +828,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     margin: 12,
     padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    ...Shadows.light,
   },
   title: {
     fontSize: 16,
@@ -861,10 +857,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     margin: 12,
     padding: 18,
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 2,
+    ...Shadows.lighter,
   },
   vendorImageLarge: {
     width: 60,
@@ -920,13 +913,12 @@ const styles = StyleSheet.create({
   },
   configCard: {
     width: "100%",
-
     borderRadius: 12,
     marginTop: 10,
     marginBottom: 10,
     padding: 10,
     alignItems: "center",
-
+    ...Shadows.veryLight,
   },
   qtyBtn: {
     width: 32,
@@ -975,10 +967,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     margin: 12,
     padding: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    ...Shadows.light,
   },
   tabsRow: {
     flexDirection: "row",
@@ -1036,10 +1025,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.03,
-    shadowRadius: 2,
-    elevation: 1,
+    ...Shadows.veryLight,
   },
   reviewUser: {
     fontWeight: "bold",

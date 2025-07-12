@@ -1,17 +1,36 @@
+import { ShopProvider } from '@/src/context/ShopContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
-import { LanguageProvider } from '../src/context/LanguageContext';
-import { ShopProvider } from '@/src/context/ShopContext';
 import Toast from 'react-native-toast-message';
+import { Provider, useDispatch } from 'react-redux';
 import '../src/config/i18n';
-import { Provider, useDispatch, useSelector } from 'react-redux';
-import { store, RootState } from '../src/store/store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LanguageProvider } from '../src/context/LanguageContext';
 import { loadAuthFromStorage } from '../src/store/slice/authSlice';
-import { View, ActivityIndicator } from 'react-native';
+import { store } from '../src/store/store';
+
+// Suppress deprecation warnings
+if (typeof window !== 'undefined') {
+  const originalWarn = console.warn;
+  console.warn = (...args) => {
+    const message = args[0];
+    if (typeof message === 'string') {
+      // Suppress pointerEvents deprecation warning
+      if (message.includes('props.pointerEvents is deprecated')) {
+        return;
+      }
+      // Suppress shadow deprecation warning
+      if (message.includes('shadow*" style props are deprecated')) {
+        return;
+      }
+    }
+    originalWarn.apply(console, args);
+  };
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -86,6 +105,17 @@ export default function RootLayout() {
                             <Stack.Screen name="(tabs)" />
                             <Stack.Screen name="signin" options={{ presentation: 'modal' }} />
                             <Stack.Screen name="signup" options={{ presentation: 'modal' }} />
+                            <Stack.Screen name="addresses" />
+                            <Stack.Screen name="category-products" />
+                            <Stack.Screen name="checkout" />
+                            <Stack.Screen name="edit-profile" />
+                            <Stack.Screen name="notifications" />
+                            <Stack.Screen name="orders" />
+                            <Stack.Screen name="payment-methods" />
+                            <Stack.Screen name="privacy" />
+                            <Stack.Screen name="product/[id]" />
+                            <Stack.Screen name="settings" />
+                            <Stack.Screen name="support" />
                         </Stack>
                         <Toast />
                     </AppInitializer>

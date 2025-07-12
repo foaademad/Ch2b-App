@@ -10,9 +10,10 @@ import {
     ScrollView,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import { Shadows } from '../../../constants/Shadows';
 import { useLanguage } from "../../../src/context/LanguageContext";
 import { getCategoriesApi } from "../../../src/store/api/categoryApi";
 import { getallProductByCategoryId } from "../../../src/store/api/productApi";
@@ -276,11 +277,7 @@ const Categories = () => {
               backgroundColor: "#fff",
               borderRadius: 12,
               padding: 16,
-              elevation: 5,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
+              ...Shadows.medium,
             }}
             onPress={(e) => e.stopPropagation()}
           >

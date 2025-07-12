@@ -5,22 +5,23 @@ import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Animated,
-  Dimensions,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Animated,
+    Dimensions,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
+import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from "react-redux";
 import * as Yup from "yup";
+import { Shadows } from "../constants/Shadows";
 import { useLanguage } from "../src/context/LanguageContext";
 import { registerUser } from "../src/store/api/authApi";
 import { RootState } from "../src/store/store";
-import Toast from 'react-native-toast-message';
 
 interface FormValues {
   username: string;
@@ -899,11 +900,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderRadius: 20,
     padding: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    ...Shadows.large,
     backdropFilter: "blur(10px)",
   },
   blurContainer: {

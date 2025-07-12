@@ -4,17 +4,18 @@ import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Animated,
-  Dimensions,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Animated,
+    Dimensions,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Toast from "react-native-toast-message";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import * as Yup from "yup";
+import { Shadows } from "../constants/Shadows";
 import { useLanguage } from "../src/context/LanguageContext";
 import { loginUser } from "../src/store/api/authApi";
 
@@ -273,13 +274,8 @@ const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
     maxWidth: 400,
-    // borderRadius: 20,
     padding: 30,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    ...Shadows.large,
     borderRadius: 20,
     backdropFilter: "blur(10px)",
     backgroundColor: "transparent",
@@ -369,11 +365,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: "100%",
     marginBottom: 16,
-    shadowColor: "#36C7F6",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    ...Shadows.primary,
   },
   loginButtonText: {
     color: "#fff",

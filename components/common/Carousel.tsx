@@ -27,6 +27,17 @@ const Carousel: React.FC<CarouselProps> = ({
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   
+  // Safety check for data
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.slide}>
+          <Text style={styles.noDataText}>No data available</Text>
+        </View>
+      </View>
+    );
+  }
+  
   useEffect(() => {
     if (autoPlay && data.length > 1) {
       const timer = setInterval(() => {
@@ -116,6 +127,11 @@ const Carousel: React.FC<CarouselProps> = ({
       marginHorizontal: 4,
       backgroundColor: '#fff',
     },
+    noDataText: {
+      fontSize: 16,
+      color: '#666',
+      textAlign: 'center',
+    },
   });
 
   return (
@@ -143,15 +159,17 @@ const Carousel: React.FC<CarouselProps> = ({
         ))}
       </ScrollView>
       
-      <View style={styles.pagination}>
-        {data.map((_, index) => (
-          <TouchableOpacity
-            key={`dot-${index}`}
-            style={index === activeIndex ? styles.activeDot : styles.dot}
-            onPress={() => handleDotPress(index)}
-          />
-        ))}
-      </View>
+      {data.length > 1 && (
+        <View style={styles.pagination}>
+          {data.map((_, index) => (
+            <TouchableOpacity
+              key={`dot-${index}`}
+              style={index === activeIndex ? styles.activeDot : styles.dot}
+              onPress={() => handleDotPress(index)}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 };

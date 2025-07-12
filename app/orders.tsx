@@ -5,6 +5,7 @@ import { ArrowLeft } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Shadows } from '../constants/Shadows';
 
 const OrdersScreen = () => {
   const { t } = useTranslation();
@@ -115,12 +116,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 12,
+    ...Shadows.medium,
   },
   orderHeader: {
     flexDirection: 'row',

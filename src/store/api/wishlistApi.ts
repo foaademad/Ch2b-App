@@ -67,17 +67,7 @@ export const addToSallerWishlistApi = (saller: any) => {
         try {
             dispatch(setLoading(true));
             const sallerWishlistItem = {
-                // "name": "string",
-                // "providerType": "string",
-                // "displayName": "string",
-                // "shopName": "string",
-                // "displayPictureUrl": "string",
-                // "deliveryScore": 0,
-                // "itemScore": 0,
-                // "vendorId": "string",
-                // "serviceScore": 0,
-                // "stars": 0,
-                // "numberOfYear": 0
+              
                 sallerId: saller.id,
                 name: saller.name,
                 providerType: saller.providerType,

@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2 } from 'lucide-react-native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Shadows } from '../../constants/Shadows';
 
 type CartItemProps = {
   item: {
@@ -35,17 +36,13 @@ const CartItem: React.FC<CartItemProps> = ({
   };
 
   const styles = StyleSheet.create({
-    container: {
-      flexDirection: language === 'ar' ? 'row-reverse' : 'row',
+    cartItem: {
+      flexDirection: 'row',
+      backgroundColor: '#fff',
+      borderRadius: 12,
       padding: 12,
       marginBottom: 12,
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      elevation: 2,
+      ...Shadows.small,
     },
     image: {
       width: 80,
@@ -118,7 +115,7 @@ const CartItem: React.FC<CartItemProps> = ({
 
   return (
     <TouchableOpacity 
-      style={styles.container} 
+      style={styles.cartItem} 
       onPress={handlePress}
       activeOpacity={0.8}
     >

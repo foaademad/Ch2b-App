@@ -2,8 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { Shadows } from '../../constants/Shadows';
 import { addToWishlistApi } from '../../src/store/api/wishlistApi';
 import { ProductDto } from '../../src/store/utility/interfaces/productInterface';
+
 interface ProductCardProps {
   product: ProductDto;
   onPress?: () => void;
@@ -83,11 +85,7 @@ const styles = StyleSheet.create({
     width: 175,
     backgroundColor: '#fff',
     borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    elevation: 4,
+    ...Shadows.medium,
     overflow: 'hidden',
     position: 'relative',
     margin: 5,

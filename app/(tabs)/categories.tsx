@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { Shadows } from '../../constants/Shadows';
 import { getCategoriesApi } from '../../src/store/api/categoryApi';
 import { getallProductByCategoryId } from '../../src/store/api/productApi';
 import { RootState } from '../../src/store/store';
@@ -38,7 +39,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({ category, level, onPress, i
       <TouchableOpacity
         style={[
           styles.categoryItem,
-          {     backgroundColor: level === 0 ? '#fff' : '#eaf6fb', borderRadius: 18, marginVertical: 6, shadowOpacity: 0.15 },
+          { 
+            backgroundColor: level === 0 ? '#fff' : '#eaf6fb', 
+            borderRadius: 18, 
+            marginVertical: 6,
+            ...Shadows.primaryMedium,
+          },
         ]}
         onPress={handlePress}
         activeOpacity={0.8}
@@ -433,11 +439,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginVertical: 2,
     borderRadius: 18,
-    shadowColor: '#36c7f6',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.primaryMedium,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -497,11 +499,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     margin: 10,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...Shadows.small,
   },
   searchIcon: {
     marginRight: 10,

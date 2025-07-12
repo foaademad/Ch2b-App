@@ -3,6 +3,7 @@ import { Heart, ShoppingCart, Store } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Shadows } from '../../constants/Shadows';
 
 const WishlistScreen = () => {
   const { t } = useTranslation();
@@ -233,11 +234,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.medium,
   },
   sellerItem: {
     flexDirection: 'row',
@@ -245,11 +242,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...Shadows.medium,
   },
   itemImage: {
     width: 100,
@@ -324,9 +317,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#36c7f6',
   },
   removeButton: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#ff3b30',
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 4,
+    ...Shadows.small,
   },
   emptyState: {
     flex: 1,

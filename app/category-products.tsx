@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductCard from '../components/products/ProductCard';
+import { Shadows } from '../constants/Shadows';
 import { getallProductByCategoryId } from '../src/store/api/productApi';
 import { RootState } from '../src/store/store';
 import { ProductDto } from '../src/store/utility/interfaces/productInterface';
@@ -375,11 +376,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 25,
-    shadowColor: '#36c7f6',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    ...Shadows.primaryLight,
   },
   loadMoreText: {
     color: '#fff',
@@ -401,11 +398,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     margin: 10,
     borderRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    ...Shadows.small,
   },
   searchIcon: {
     marginRight: 10,

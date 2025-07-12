@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
 import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Shadows } from '../constants/Shadows';
 
 const { width } = Dimensions.get('window');
 
@@ -123,16 +124,10 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'rgb(54, 199, 246)',
-    borderRadius: 16,
-    overflow: 'hidden',
-      shadowColor: 'rgb(54, 199, 246)',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 8,
+    ...Shadows.primary,
   },
   buttonContent: {
     flexDirection: 'row',
