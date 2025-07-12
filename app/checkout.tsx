@@ -4,13 +4,29 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import type { Order } from '../src/context/ShopContext';
-import { useShop } from '../src/context/ShopContext';
+import { useSelector } from 'react-redux';
+import { RootState } from '../src/store/store';
 
 export default function CheckoutScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { cart, removeFromCart, addToOrderHistory, clearCart } = useShop();
+  
+  // استخدام Redux مباشرة بدلاً من ShopContext
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cart = cartItems.map(item => ({
+    id: item.id || 0,
+    name: item.title || '',
+    price: item.totalPrice || 0,
+    image: item.image || '',
+    rating: 0,
+    reviews: 0,
+    quantity: item.quntity || 1
+  }));
+  
+  // دوال مؤقتة - سيتم تنفيذها لاحقاً
+  const removeFromCart = (id: number) => console.log("Remove from cart:", id);
+  const addToOrderHistory = (order: any) => console.log("Add to order history:", order);
+  const clearCart = () => console.log("Clear cart");
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '',
     address: '',
@@ -75,7 +91,7 @@ export default function CheckoutScreen() {
       }
 
       // 4. Create order
-      const order: Order = {
+      const order: any = {
         id: Date.now().toString(),
         date: new Date().toISOString(),
         items: cart,

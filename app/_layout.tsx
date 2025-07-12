@@ -1,4 +1,4 @@
-import { ShopProvider } from '@/src/context/ShopContext';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter } from 'expo-router';
@@ -108,9 +108,8 @@ export default function RootLayout() {
 
     return (
         <Provider store={store}>
-            <ShopProvider>
-                <LanguageProvider>
-                    <AppInitializer>
+            <LanguageProvider>
+                <AppInitializer>
                         <Stack screenOptions={{ headerShown: false }}>
                             <Stack.Screen name="index" />
                             <Stack.Screen name="(tabs)" />
@@ -131,7 +130,6 @@ export default function RootLayout() {
                         <Toast />
                     </AppInitializer>
                 </LanguageProvider>
-            </ShopProvider>
         </Provider>
     );
 }

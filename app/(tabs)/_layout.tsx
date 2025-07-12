@@ -3,13 +3,18 @@ import { Tabs } from "expo-router";
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useLanguage } from "../../src/context/LanguageContext";
-import { useShop } from "../../src/context/ShopContext";
+
 import { useSelector } from 'react-redux';
 import { RootState } from '../../src/store/store';
 export default function TabLayout() {
   const { language } = useLanguage();
-  const { cart, wishlist} = useShop();
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.wishlist);
+  
+  // استخراج عدد العناصر المفضلة
+  const wishlistCount = wishlistItems.length > 0 && wishlistItems[0]?.favoriteItems 
+    ? wishlistItems[0].favoriteItems.length 
+    : 0;
   // تعريف التبويبات في مصفوفة
   const tabScreens = [
     {
@@ -27,7 +32,7 @@ export default function TabLayout() {
       name: 'whishList',
       title: { ar: 'المفضلة', en: 'WhishList' },
       icon: 'heart-outline',
-      badge: wishlist.length > 0 ? wishlist.length : undefined,
+      badge: wishlistCount > 0 ? wishlistCount : undefined,
     },
     {
       name: 'cart',

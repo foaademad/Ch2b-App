@@ -1,5 +1,5 @@
 import { useLanguage } from '@/src/context/LanguageContext';
-import { useShop } from '@/src/context/ShopContext';
+
 import { useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 import React from 'react';
@@ -11,7 +11,9 @@ const OrdersScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const router = useRouter();
-  const { orderHistory } = useShop();
+  
+  // استخدام Redux مباشرة بدلاً من ShopContext
+  const orderHistory: any[] = []; // سيتم تنفيذها لاحقاً
   const isRTL = language === 'ar';
   return (
     <View style={styles.container}>
@@ -49,7 +51,7 @@ const OrdersScreen = () => {
               </View>
 
               <View style={styles.itemsContainer}>
-                {order.items.map((item, index) => (
+                {order.items.map((item: any, index: number) => (
                   <View key={index} style={styles.itemRow}>
                     <Image source={{ uri: item.image }} style={styles.itemImage} />
                     <View style={styles.itemDetails}>

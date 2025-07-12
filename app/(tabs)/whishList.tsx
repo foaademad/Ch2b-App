@@ -1,15 +1,25 @@
-import { useShop } from '@/src/context/ShopContext';
+
+import { RootState } from '@/src/store/store';
 import { Heart, ShoppingCart, Store } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 
 const WishlistScreen = () => {
   const { t } = useTranslation();
-  const { wishlist, removeFromWishlist, addToCart } = useShop();
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'sellers'
-
+  const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
+  console.log("wishlist from Redux:", wishlist);
+  
+  // استخراج العناصر المفضلة من البيانات
+  const favoriteItems = wishlist.length > 0 && wishlist[0]?.favoriteItems 
+    ? wishlist[0].favoriteItems 
+    : [];
+  
+  console.log("favoriteItems extracted:", favoriteItems);
   // Sample favorite sellers data (you should replace this with your actual data)
   const favoriteSellers = [
     {
@@ -40,27 +50,33 @@ const WishlistScreen = () => {
 
   const renderFavoriteItems = () => (
     <ScrollView style={styles.content}>
-      {wishlist.map((item) => (
+      {favoriteItems.map((item) => (
         <View key={item.id} style={styles.wishlistItem}>
           <Image source={{ uri: item.image }} style={styles.itemImage} />
           <View style={styles.itemDetails}>
-            <Text style={styles.itemName}>{item.name}</Text>
+            <Text style={styles.itemName}>{item.title}</Text>
             <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
             <View style={styles.ratingContainer}>
-              <Text style={styles.rating}>★ {item.rating}</Text>
-              <Text style={styles.reviews}>({item.reviews} {t('reviews')})</Text>
+              <Text style={styles.rating}>★ {item.vendorRating}</Text>
+              <Text style={styles.reviews}>({item.vendorRating} {t('reviews')})</Text>
             </View>
           </View>
           <View style={styles.actionButtons}>
             <TouchableOpacity 
               style={[styles.actionButton, styles.addToCartButton]}
-              onPress={() => addToCart(item)}
+              onPress={() => {
+                // إضافة إلى السلة - سيتم تنفيذها لاحقاً
+                console.log("Add to cart:", item.title);
+              }}
             >
               <ShoppingCart size={20} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity 
               style={[styles.actionButton, styles.removeButton]}
-              onPress={() => removeFromWishlist(item.id)}
+              onPress={() => {
+                // إزالة من المفضلة - سيتم تنفيذها لاحقاً
+                console.log("Remove from wishlist:", item.id);
+              }}
             >
               <Heart size={20} color="#ff3b30" fill="#ff3b30" />
             </TouchableOpacity>
@@ -68,7 +84,7 @@ const WishlistScreen = () => {
         </View>
       ))}
 
-      {wishlist.length === 0 && (
+      {favoriteItems.length === 0 && (
         <View style={styles.emptyState}>
           <Heart size={48} color="#ccc" />
           <Text style={styles.emptyStateText}>{t('Your wishlist is empty')}</Text>
@@ -132,7 +148,7 @@ const WishlistScreen = () => {
             </Text>
             <View style={[styles.countBadge, activeTab === 'items' && styles.activeCountBadge]}>
               <Text style={[styles.countText, activeTab === 'items' && styles.activeCountText]}>
-                {wishlist.length}
+                {favoriteItems.length}
               </Text>
             </View>
           </View>

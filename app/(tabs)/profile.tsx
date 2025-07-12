@@ -1,22 +1,24 @@
 import { useLanguage } from '@/src/context/LanguageContext';
-import { useShop } from '@/src/context/ShopContext';
+
+import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSelector } from 'react-redux';
 
 import {
-  ArrowRight,
-  Bell,
-  CreditCard,
-  Globe,
-  Heart,
-  HelpCircle,
-  LogOut,
-  MapPin,
-  Package,
-  Settings,
-  Shield
+    ArrowRight,
+    Bell,
+    CreditCard,
+    Globe,
+    Heart,
+    HelpCircle,
+    LogOut,
+    MapPin,
+    Package,
+    Settings,
+    Shield
 } from 'lucide-react-native';
 
 const ProfileScreen = () => {
@@ -28,7 +30,13 @@ const ProfileScreen = () => {
   }, [language]);
   const { t } = useTranslation();
   const router = useRouter();
-  const { wishlistCount, orderHistory } = useShop();
+  
+  // استخدام Redux مباشرة بدلاً من ShopContext
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.wishlist);
+  const wishlistCount = wishlistItems.length > 0 && wishlistItems[0]?.favoriteItems 
+    ? wishlistItems[0].favoriteItems.length 
+    : 0;
+  const orderHistory = []; // سيتم تنفيذها لاحقاً
 
   const toggleLanguage = () => {
     const newLanguage = language === 'en' ? 'ar' : 'en';
