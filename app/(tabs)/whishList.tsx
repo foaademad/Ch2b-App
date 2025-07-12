@@ -1,12 +1,13 @@
 
+import { getWishlist, removeFromWishlistApi } from '@/src/store/api/wishlistApi';
 import { RootState } from '@/src/store/store';
-import { Heart, ShoppingCart, Store } from 'lucide-react-native';
+import { Heart, Store } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
-
+import { addToCart } from '../../src/store/api/cartApi';
 const WishlistScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -60,22 +61,28 @@ const WishlistScreen = () => {
               <Text style={styles.rating}>★ {item.vendorRating}</Text>
               <Text style={styles.reviews}>({item.vendorRating} {t('reviews')})</Text>
             </View>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity 
+                style={[styles.addToCartButton]}
+                onPress={async () => {
+                  await dispatch(addToCart(item.id.toString(), item) as any);
+                  // dispatch(getCartItems() as any);
+                }}
+              >
+                <Text style={styles.addToCartButtonText}>Add to cart</Text>
+              </TouchableOpacity>
+            </View>
           </View>
           <View style={styles.actionButtons}>
+
             <TouchableOpacity 
-              style={[styles.actionButton, styles.addToCartButton]}
-              onPress={() => {
-                // إضافة إلى السلة - سيتم تنفيذها لاحقاً
-                console.log("Add to cart:", item.title);
-              }}
-            >
-              <ShoppingCart size={20} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.removeButton]}
-              onPress={() => {
+        
+             style={[styles.actionButton, styles.removeButton]}
+              onPress={async () => {
                 // إزالة من المفضلة - سيتم تنفيذها لاحقاً
                 console.log("Remove from wishlist:", item.id);
+                await dispatch(removeFromWishlistApi(item.id.toString()) as any);
+                dispatch(getWishlist() as any);
               }}
             >
               <Heart size={20} color="#ff3b30" fill="#ff3b30" />
@@ -250,12 +257,14 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 12,
+    position:'relative',
     ...Shadows.medium,
   },
   sellerItem: {
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 12,
+    position:'relative',
     padding: 12,
     marginBottom: 12,
     ...Shadows.medium,
@@ -320,6 +329,8 @@ const styles = StyleSheet.create({
   actionButtons: {
     justifyContent: 'space-between',
     paddingLeft: 12,
+    
+    
   },
   actionButton: {
     width: 40,
@@ -331,14 +342,25 @@ const styles = StyleSheet.create({
   },
   addToCartButton: {
     backgroundColor: '#36c7f6',
+    borderRadius: 16,
+    padding: 4,
+    width: 100,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    ...Shadows.small,
+  },
+  addToCartButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   removeButton: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
+   
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 16,
     padding: 4,
+
     ...Shadows.small,
   },
   emptyState: {

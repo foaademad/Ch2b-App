@@ -14,6 +14,7 @@ const wishlistSlice = createSlice({
     reducers: {
         setWishlist: (state, action: PayloadAction<FavoriteDto[]>) => {
             state.wishlist = action.payload;
+            
         },
         addToWishlist: (state, action: PayloadAction<FavoriteDto[]>) => {
             state.wishlist = [...state.wishlist, ...action.payload];

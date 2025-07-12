@@ -17,7 +17,8 @@ export const getWishlist = () => {
             console.log("Wishlist API Response:", response.data);
             const wishlistData = response.data.result || [];
             console.log("Wishlist Data to set:", wishlistData);
-            dispatch(setWishlist(Array.isArray(wishlistData) ? wishlistData : []));
+            dispatch(setWishlist(wishlistData ? (Array.isArray(wishlistData) ? wishlistData : [wishlistData]) : []));
+            return wishlistData;
         } catch (error: any) {
             dispatch(setError(error.message));
         } finally {
@@ -125,12 +126,13 @@ export const removeFromWishlistApi = (productId: string) => {
         const token = getState().auth.authModel?.result?.token;
         try {
             dispatch(setLoading(true));
-            const response = await api.delete(`/Favourit/removefavourit/${userId}/${productId}`, {
+            const response = await api.delete(`/Favourit/deleteitem/${userId}/${productId}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
             dispatch(removeFromWishlist(response.data.result));
+            
             return response.data.result;
         } catch (error: any) {
             dispatch(setError(error.message));
