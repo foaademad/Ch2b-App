@@ -1,10 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Heart } from 'lucide-react-native';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
-import { addToWishlistApi } from '../../src/store/api/wishlistApi';
+import { addToWishlistApi, getWishlist } from '../../src/store/api/wishlistApi';
+import { RootState } from '../../src/store/store';
 import { ProductDto } from '../../src/store/utility/interfaces/productInterface';
+import { Ionicons } from '@expo/vector-icons';
 
 interface ProductCardProps {
   product: ProductDto;
@@ -17,6 +19,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const hasHalfStar = rating - fullStars >= 0.5;
   const starsArray = Array(fullStars).fill('★');
   const dispatch = useDispatch();
+  const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
+  const isFavorite = wishlist.some(
+    (fav) =>
+      fav.favoriteItems &&
+      fav.favoriteItems.some((item) => item.productId === product.id)
+  );
   return (
     <TouchableOpacity
       style={styles.productCard}
@@ -31,13 +39,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
         />
         <TouchableOpacity
           style={styles.favIcon}
-          onPress={e => {
+          onPress={async e => {
             e.stopPropagation();
-            
-            dispatch(addToWishlistApi(product) as any);
+            await dispatch(addToWishlistApi(product) as any);
+            dispatch(getWishlist() as any);
           }}
         >
-           <Ionicons name={'heart-outline'} size={22} color={'#888'} />
+          <Heart
+            size={24}
+            color={isFavorite ? "#ff3b30" : "#888"}
+            fill={isFavorite ? "#ff3b30" : "none"}
+          />
         </TouchableOpacity>
       </View>
       <View style={styles.productInfo}>

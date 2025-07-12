@@ -8,13 +8,15 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 import { addToCart } from '../../src/store/api/cartApi';
+import Toast from 'react-native-toast-message';
 const WishlistScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'sellers'
   const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
   console.log("wishlist from Redux:", wishlist);
-  
+  const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
+  console.log("Current userId:", userId);
   // استخراج العناصر المفضلة من البيانات
   const favoriteItems = wishlist.length > 0 && wishlist[0]?.favoriteItems 
     ? wishlist[0].favoriteItems 
@@ -49,6 +51,15 @@ const WishlistScreen = () => {
     },
   ];
 
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
+
+  const changeQuantity = (id: string, delta: number) => {
+    setQuantities(prev => ({
+      ...prev,
+      [id]: Math.max(1, (prev[id] || 1) + delta)
+    }));
+  };
+
   const renderFavoriteItems = () => (
     <ScrollView style={styles.content}>
       {favoriteItems.map((item) => (
@@ -61,25 +72,54 @@ const WishlistScreen = () => {
               <Text style={styles.rating}>★ {item.vendorRating}</Text>
               <Text style={styles.reviews}>({item.vendorRating} {t('reviews')})</Text>
             </View>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity 
-                style={[styles.addToCartButton]}
-                onPress={async () => {
-                  await dispatch(addToCart(item.id.toString(), item) as any);
-                  // dispatch(getCartItems() as any);
-                }}
-              >
-                <Text style={styles.addToCartButtonText}>Add to cart</Text>
+            <View>  
+            {/* أزرار الكمية */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+              <TouchableOpacity onPress={() => changeQuantity(item.id.toString(), -1)} style={styles.qtyButton}>
+                <Text style={styles.qtyButtonText}>-</Text>
               </TouchableOpacity>
+              <Text style={{ marginHorizontal: 10 }}>{quantities[item.id] || 1}</Text>
+              <TouchableOpacity onPress={() => changeQuantity(item.id.toString(), 1)} style={styles.qtyButton}>
+                <Text style={styles.qtyButtonText}>+</Text>
+              </TouchableOpacity>
+              
+            </View>
+            <View>
+            <TouchableOpacity 
+              style={[styles.addToCartButton]}
+              onPress={async () => {
+                const quantity = quantities[item.id] || 1;
+                const cartItem = {
+                  productId: (item.productId || item.id).toString(),
+                  name: item.name,
+                  title: item.title,
+                  image: (item.image || "").slice(0, 1000),
+                  LinkUrl: (item.image || "").slice(0, 1000),
+                  Quntity: quantity,
+                  price: item.price,
+                  totalPrice: (item.price || 0) * quantity,
+                };
+                try {
+                  await dispatch(addToCart(userId || "", cartItem) as any);
+                } catch (error: any) {
+                  Toast.show({
+                    type: "error",
+                    text1: "This card is already in the cart"
+                  });
+                  console.error(error);
+                }
+              }}
+            >
+              <Text style={styles.addToCartButtonText}>Add to cart</Text>
+            </TouchableOpacity>
+            </View>
             </View>
           </View>
           <View style={styles.actionButtons}>
-
+           
             <TouchableOpacity 
-        
-             style={[styles.actionButton, styles.removeButton]}
+              style={[styles.actionButton, styles.removeButton]}
               onPress={async () => {
-                // إزالة من المفضلة - سيتم تنفيذها لاحقاً
                 console.log("Remove from wishlist:", item.id);
                 await dispatch(removeFromWishlistApi(item.id.toString()) as any);
                 dispatch(getWishlist() as any);
@@ -380,6 +420,20 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginTop: 8,
+  },
+  qtyButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#e6f7ff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 2,
+  },
+  qtyButtonText: {
+    fontSize: 20,
+    color: '#36c7f6',
+    fontWeight: 'bold',
   },
 });
 
