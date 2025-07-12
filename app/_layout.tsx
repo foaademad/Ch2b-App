@@ -10,6 +10,8 @@ import Toast from 'react-native-toast-message';
 import { Provider, useDispatch } from 'react-redux';
 import '../src/config/i18n';
 import { LanguageProvider } from '../src/context/LanguageContext';
+import { getCartItems } from '../src/store/api/cartApi';
+import { getWishlist } from '../src/store/api/wishlistApi';
 import { loadAuthFromStorage } from '../src/store/slice/authSlice';
 import { store } from '../src/store/store';
 
@@ -49,6 +51,15 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
       dispatch(loadAuthFromStorage(parsed));
 
       if (parsed?.result?.isAuthenticated) {
+        // تحميل بيانات السلة والمفضلة إذا كان المستخدم مسجل دخول
+        try {
+          await Promise.all([
+            dispatch(getCartItems() as any),
+            dispatch(getWishlist() as any)
+          ]);
+        } catch (error) {
+          console.log("Failed to load cart or wishlist items:", error);
+        }
         
         setShouldRedirect("tabs");
       } else {

@@ -1,4 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 interface Product {
   id: number;
@@ -50,45 +52,59 @@ interface ShopContextType {
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<Product[]>([]);
-  const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [orderHistory, setOrderHistory] = useState<Order[]>([]);
+  // استخدام Redux store بدلاً من state محلي
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const wishlistItems = useSelector((state: RootState) => state.wishlist.wishlist);
+  
+  // تحويل البيانات من Redux إلى التنسيق المطلوب
+  const cart: Product[] = Array.isArray(cartItems) ? cartItems.map(item => ({
+    id: typeof item.productId === 'string' ? parseInt(item.productId) || 0 : (item.productId || 0),
+    name: item.title || '',
+    price: item.totalPrice || 0,
+    image: item.image || '',
+    rating: 0,
+    reviews: 0,
+    quantity: item.quntity || 1
+  })) : [];
+
+  const wishlist: Product[] = Array.isArray(wishlistItems) ? wishlistItems.flatMap(favorite => {
+    console.log("Processing favorite:", favorite);
+    if (favorite && favorite.favoriteItems && Array.isArray(favorite.favoriteItems)) {
+      return favorite.favoriteItems.map(item => ({
+        id: typeof item.productId === 'string' ? parseInt(item.productId) || 0 : (item.productId || 0),
+        name: item.title || '',
+        price: item.totalPrice || 0,
+        image: item.image || '',
+        rating: 0,
+        reviews: 0,
+        quantity: 1
+      }));
+    }
+    return [];
+  }) : [];
 
   const cartCount = cart.length;
   const wishlistCount = wishlist.length;
 
+  // هذه الدوال ستكون فارغة لأن Redux يتعامل مع العمليات
   const addToCart = (product: Product, quantity?: number) => {
-    setCart(prev => {
-      const existingItem = prev.find(item => item.id === product.id);
-      if (existingItem) {
-        // If item exists, update its quantity
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: quantity || 1 }
-            : item
-        );
-      }
-      // If item doesn't exist, add it with the specified quantity
-      return [...prev, { ...product, quantity: quantity || 1 }];
-    });
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const removeFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item.id.toString() !== productId));
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const updateCartItemQuantity = (productId: string, quantity: number) => {
-    setCart(prev => prev.map(item => 
-      item.id.toString() === productId ? { ...item, quantity } : item
-    ));
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const addToWishlist = (product: Product) => {
-    setWishlist(prev => [...prev, product]);
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const removeFromWishlist = (productId: number) => {
-    setWishlist(prev => prev.filter(item => item.id !== productId));
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const isInWishlist = (productId: number) => {
@@ -96,19 +112,15 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const toggleWishlist = (product: Product) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product);
-    }
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const clearCart = () => {
-    setCart([]);
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   const addToOrderHistory = (order: Order) => {
-    setOrderHistory(prev => [...prev, order]);
+    // سيتم التعامل معها من خلال Redux actions
   };
 
   return (
@@ -126,7 +138,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateCartItemQuantity,
         toggleWishlist,
         clearCart,
-        orderHistory,
+        orderHistory: [],
         addToOrderHistory
       }}
     >

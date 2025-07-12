@@ -1,5 +1,4 @@
-import { setError, setLoading } from "../slice/authSlice";
-import { addToSallerWishlist, addToWishlist, removeFromWishlist, removeSallerFromWishlist, setWishlist } from "../slice/wishlistSlice";
+import { addToSallerWishlist, addToWishlist, removeFromWishlist, removeSallerFromWishlist, setError, setLoading, setWishlist } from "../slice/wishlistSlice";
 import { AppDispatch, RootState } from "../store";
 import api from "../utility/api/api";
 import { ProductDto } from "../utility/interfaces/productInterface";
@@ -15,7 +14,10 @@ export const getWishlist = () => {
                     "Authorization": `Bearer ${token}`
                 }
             });
-            dispatch(setWishlist(response.data.result));
+            console.log("Wishlist API Response:", response.data);
+            const wishlistData = response.data.result || [];
+            console.log("Wishlist Data to set:", wishlistData);
+            dispatch(setWishlist(Array.isArray(wishlistData) ? wishlistData : []));
         } catch (error: any) {
             dispatch(setError(error.message));
         } finally {

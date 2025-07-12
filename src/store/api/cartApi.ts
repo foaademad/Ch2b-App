@@ -151,7 +151,9 @@ export const getCartItems = () => {
             }
             // Ensure we're passing an array to setCartItems
            const cartItems = response.data.result || [];
-            dispatch(setCartItems(cartItems));
+           console.log("Cart API Response:", response.data);
+           console.log("Cart Items to set:", cartItems);
+           dispatch(setCartItems(Array.isArray(cartItems) ? cartItems : []));
             dispatch(setLoading(false));
             return response.data;
         } catch (error: any) {

@@ -16,14 +16,15 @@ const CartScreen = () => {
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
 
   useEffect(() => {
-    try{
-      if (userId) {
+    // تحميل البيانات فقط إذا لم تكن محملة بالفعل وكان المستخدم موجود
+    if (userId && cart.length === 0 && !isLoading) {
+      try {
         dispatch(getCartItems() as any);
+      } catch (error) {
+        console.log("error loading cart items:", error);
       }
-    }catch(error){
-      console.log("error", error);
     }
-  }, [dispatch, userId]);
+  }, [dispatch, userId, cart.length, isLoading]);
 
   const total = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
