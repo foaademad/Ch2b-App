@@ -35,7 +35,9 @@ export default function ProductDetails() {
   const vendorItems = currentProduct?.vendorItems;
   const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
   const favoriteSallers = wishlist.length > 0 && wishlist[0]?.favoriteSallers ? wishlist[0].favoriteSallers : [];
-  const isFavorite = vendor && favoriteSallers.some(s => String(s.id) === String(vendor.id));
+  const isFavorite = vendor && favoriteSallers.some(
+    s => String(s.id) === String(vendor.id) || String(s.vendorId) === String(vendor.id)
+  );
 
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
   const token = useSelector((state: RootState) => state.auth.authModel?.result?.token);
@@ -495,10 +497,12 @@ export default function ProductDetails() {
               ...Shadows.icon,
             }}
             onPress={async () => {
-              
                 await dispatch(addToSallerWishlistApi(vendor) as any);
-                dispatch(getWishlist() as any);
-              
+                await dispatch(getWishlist() as any);
+                setTimeout(() => {
+                  console.log("favoriteSallers after add:", favoriteSallers);
+                  console.log("vendor:", vendor);
+                }, 1000);
             }}
           >
             <Heart
