@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slice/authSlice';
-import categoryReducer from './slice/categorySlice';
-import productReducer from './slice/productSlice';
 import cartReducer from './slice/cartSlice';
+import categoryReducer from './slice/categorySlice';
+import imageSearchReducer from './slice/imageSearchSlice';
+import productReducer from './slice/productSlice';
 import wishlistReducer from './slice/wishlistSlice';
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     category: categoryReducer,
     cart: cartReducer,
     wishlist: wishlistReducer,
+    imageSearch: imageSearchReducer,
   },
 });
 
