@@ -63,15 +63,13 @@ export const addToWishlistApi = (product: ProductDto) => {
         }
 }
 
-export const addToSallerWishlistApi = (saller: any) => {
+export const addToSallerWishlistApi = ( saller: any) => {
     return async (dispatch: AppDispatch, getState: () => RootState) => {
         const userId = getState().auth.authModel?.result?.userId;
         const token = getState().auth.authModel?.result?.token;
         try {
             dispatch(setLoading(true));
             const sallerWishlistItem = {
-              
-                sallerId: saller.id,
                 name: saller.name,
                 providerType: saller.providerType,
                 displayName: saller.displayName,
@@ -79,12 +77,14 @@ export const addToSallerWishlistApi = (saller: any) => {
                 displayPictureUrl: saller.displayPictureUrl,
                 deliveryScore: saller.deliveryScore,
                 itemScore: saller.itemScore,
-                vendorId: saller.vendorId,
+                vendorId: saller.id || saller.shopId || saller.vendorId || "",
                 serviceScore: saller.serviceScore,
                 stars: saller.stars,
                 numberOfYear: saller.numberOfYear
             }
-            const response = await api.post(`/Favourit/addfavourit/${saller.id}`, sallerWishlistItem, {
+            console.log("saller:", saller);
+            console.log("sallerWishlistItem:", sallerWishlistItem);
+            const response = await api.post(`/Favourit/addsaller/${userId}`, sallerWishlistItem, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -105,7 +105,7 @@ export const removeFromSallerWishlistApi = (sallerId: string) => {
         const token = getState().auth.authModel?.result?.token;
         try {
             dispatch(setLoading(true));
-            const response = await api.delete(`/Favourit/removefavourit/${userId}/${sallerId}`, {
+            const response = await api.delete(`/Favourit/deletesaller/${userId}/${sallerId}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }

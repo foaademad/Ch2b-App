@@ -1,14 +1,14 @@
 
-import { getWishlist, removeFromWishlistApi } from '@/src/store/api/wishlistApi';
+import { getWishlist, removeFromSallerWishlistApi, removeFromWishlistApi } from '@/src/store/api/wishlistApi';
 import { RootState } from '@/src/store/store';
 import { Heart, Store } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 import { addToCart } from '../../src/store/api/cartApi';
-import Toast from 'react-native-toast-message';
 const WishlistScreen = () => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -20,6 +20,9 @@ const WishlistScreen = () => {
   // استخراج العناصر المفضلة من البيانات
   const favoriteItems = wishlist.length > 0 && wishlist[0]?.favoriteItems 
     ? wishlist[0].favoriteItems 
+    : [];
+    const favoriteSallers = wishlist.length > 0 && wishlist[0]?.favoriteSallers 
+    ? wishlist[0].favoriteSallers 
     : [];
   
   console.log("favoriteItems extracted:", favoriteItems);
@@ -145,27 +148,33 @@ const WishlistScreen = () => {
 
   const renderFavoriteSellers = () => (
     <ScrollView style={styles.content}>
-      {favoriteSellers.map((seller) => (
-        <View key={seller.id} style={styles.sellerItem}>
-          <Image source={{ uri: seller.image }} style={styles.sellerImage} />
-          <View style={styles.sellerDetails}>
-            <Text style={styles.sellerName}>{seller.name}</Text>
-            <View style={styles.ratingContainer}>
-              <Text style={styles.rating}>★ {seller.rating}</Text>
-              <Text style={styles.reviews}>({seller.reviews} {t('reviews')})</Text>
+      {favoriteSallers.map((seller) => {
+        const isFavorite = favoriteSallers.some(s => s.vendorId === seller.vendorId);
+        return (
+          <View key={seller.id} style={styles.sellerItem}>
+            <Image source={{ uri: seller.displayPictureUrl }} style={styles.sellerImage} />
+            <View style={styles.sellerDetails}>
+              <Text style={styles.sellerName}>{seller.name}</Text>
+              <View style={styles.ratingContainer}>
+                <Text style={styles.rating}>★ {seller.deliveryScore}</Text>
+                <Text style={styles.reviews}>({seller.deliveryScore} {t('reviews')})</Text>
+              </View>
+              <Text style={styles.productsCount}>{seller.deliveryScore} {t('products')}</Text> 
             </View>
-            <Text style={styles.productsCount}>{seller.products} {t('products')}</Text>
+            <TouchableOpacity 
+              style={[styles.actionButton, styles.removeButton]}
+              onPress={async () => {
+                await dispatch(removeFromSallerWishlistApi(seller.id.toString()) as any);
+                dispatch(getWishlist() as any);
+              }}
+            >
+              <Heart size={20} color={isFavorite ? "#ff3b30" : "#888"} fill={isFavorite ? "#ff3b30" : "none"} />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.removeButton]}
-            onPress={() => {/* Handle remove seller */}}
-          >
-            <Heart size={20} color="#ff3b30" fill="#ff3b30" />
-          </TouchableOpacity>
-        </View>
-      ))}
+        );
+      })}
 
-      {favoriteSellers.length === 0 && (
+      {favoriteSallers.length === 0 && (
         <View style={styles.emptyState}>
           <Store size={48} color="#ccc" />
           <Text style={styles.emptyStateText}>{t('No favorite sellers')}</Text>
@@ -210,7 +219,7 @@ const WishlistScreen = () => {
             </Text>
             <View style={[styles.countBadge, activeTab === 'sellers' && styles.activeCountBadge]}>
               <Text style={[styles.countText, activeTab === 'sellers' && styles.activeCountText]}>
-                {favoriteSellers.length}
+                {favoriteSallers.length}
               </Text>
             </View>
           </View>

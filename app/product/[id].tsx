@@ -1,5 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Heart } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Shadows } from '../../constants/Shadows';
 import { addToCart } from '../../src/store/api/cartApi';
 import { getProductById } from "../../src/store/api/productApi";
-import { addToSallerWishlistApi } from "../../src/store/api/wishlistApi";
+import { addToSallerWishlistApi, getWishlist } from "../../src/store/api/wishlistApi";
 import { AppDispatch, RootState } from "../../src/store/store";
 
 
@@ -29,10 +29,19 @@ export default function ProductDetails() {
   const { currentProduct, loading, error } = useSelector(
     (state: RootState) => state.product
   );
+
+  const product = currentProduct?.product;
+  const vendor = currentProduct?.vendor;
+  const vendorItems = currentProduct?.vendorItems;
+  const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
+  const favoriteSallers = wishlist.length > 0 && wishlist[0]?.favoriteSallers ? wishlist[0].favoriteSallers : [];
+  const isFavorite = vendor && favoriteSallers.some(s => String(s.id) === String(vendor.id));
+
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
   const token = useSelector((state: RootState) => state.auth.authModel?.result?.token);
   console.log("userId", userId);
   console.log("token", token);
+
 
   const [quantities, setQuantities] = useState<{ [id: string]: number }>({});
   const [activeTab, setActiveTab] = useState("specs");
@@ -44,10 +53,6 @@ export default function ProductDetails() {
   }, [id]);
 
   console.log("Current product state:", currentProduct);
-
-  const product = currentProduct?.product;
-  const vendor = currentProduct?.vendor;
-  const vendorItems = currentProduct?.vendorItems;
 
   // Helper: Convert featuredValues array to object for easy access
   function getFeaturedMap(featuredValues: any[] = []) {
@@ -489,16 +494,17 @@ export default function ProductDetails() {
               backgroundColor: 'rgba(255,255,255,0.9)',
               ...Shadows.icon,
             }}
-            onPress={() => {
-              if (vendor?.id) {
-                dispatch(addToSallerWishlistApi(vendor) as any);
-              }
+            onPress={async () => {
+              
+                await dispatch(addToSallerWishlistApi(vendor) as any);
+                dispatch(getWishlist() as any);
+              
             }}
           >
-            <Ionicons 
-              name={'heart-outline'} 
-              size={24} 
-              color={'#888'} 
+            <Heart
+              size={24}
+              color={isFavorite ? "#ff3b30" : "#888"}
+              fill={isFavorite ? "#ff3b30" : "none"}
             />
           </TouchableOpacity>
         </View>
