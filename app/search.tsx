@@ -1,12 +1,13 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { ArrowLeft, Filter, Search, X } from 'lucide-react-native';
+import { ArrowLeft, Camera, Filter, Loader, Search, X } from 'lucide-react-native';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   FlatList, Image, Modal, ScrollView, StyleSheet,
   Text, TextInput, TouchableOpacity, View,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../constants/Shadows';
 import { RootState } from '../src/store/store';
@@ -28,9 +29,9 @@ const SearchScreen = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const params = useLocalSearchParams();
-  const imageFile = params.imageFile as any; // assuming imageFile passed via router
+  const imageFile = params.imageFile as any;
 
-  const { imageSearchResults, searchTextResults } = useSelector((state: RootState) => state.imageSearch);
+  const { imageSearchResults, searchTextResults, loading } = useSelector((state: RootState) => state.imageSearch);
 
   const [searchText, setSearchText] = useState('');
   const [filteredResults, setFilteredResults] = useState<ProductDto[]>([]);
@@ -51,11 +52,7 @@ const SearchScreen = () => {
 
   useEffect(() => {
     if (!imageFile && searchText.trim()) {
-      dispatch(searchByText({
-        title: searchText,
-        page: 1,
-        language,
-      }) as any);
+      dispatch(searchByText({ title: searchText, page: 1, language }) as any);
     }
   }, [searchText]);
 
@@ -87,6 +84,23 @@ const SearchScreen = () => {
     setActiveFilters(updatedFilters);
   };
 
+  const openImagePicker = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      const file = result.assets[0];
+      const image = {
+        uri: file.uri,
+        name: file.fileName || 'image.jpg',
+        type: file.type || 'image/jpeg',
+      } as any;
+      dispatch(searchImage({ file: image, page: 1 }) as any);
+    }
+  };
+
   const renderProduct = ({ item }: { item: ProductDto }) => (
     <TouchableOpacity
       style={styles.productCard}
@@ -106,6 +120,18 @@ const SearchScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <ArrowLeft size={24} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={openImagePicker}>
+          <Camera size={24} color="#333" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowFilterModal(true)}>
+          <Filter size={24} color="#333" />
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Search size={20} color="#666" style={styles.searchIcon} />
@@ -120,24 +146,34 @@ const SearchScreen = () => {
         </View>
       </View>
 
-      <FlatList
-        data={filteredResults}
-        renderItem={renderProduct}
-        keyExtractor={(item) => `search-${item.id}`}
-        contentContainerStyle={styles.resultsContainer}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>{t('No products found')}</Text>
-            <Text style={styles.emptySubText}>{t('Try different keywords or adjust your filters')}</Text>
-          </View>
-        }
-      />
+      {loading ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Loader size={32} color="#36c7f6" />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredResults}
+          renderItem={renderProduct}
+          keyExtractor={(item) => `search-${item.id}`}
+          contentContainerStyle={styles.resultsContainer}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>{t('No products found')}</Text>
+              <Text style={styles.emptySubText}>{t('Try different keywords or adjust your filters')}</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8f9fa' },
+  header: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 12, backgroundColor: '#fff',
+  },
   searchContainer: { padding: 16, backgroundColor: '#fff' },
   searchBar: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5',
@@ -155,9 +191,7 @@ const styles = StyleSheet.create({
     width: 80, height: 80, borderRadius: 8, backgroundColor: '#f4f4f4', marginRight: 12,
   },
   productInfo: { flex: 1 },
-  productTitle: {
-    fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4,
-  },
+  productTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 },
   productBrand: { fontSize: 14, color: '#666', marginBottom: 4 },
   productPrice: { fontSize: 16, fontWeight: 'bold', color: '#36c7f6' },
   emptyContainer: { alignItems: 'center', paddingVertical: 40 },
