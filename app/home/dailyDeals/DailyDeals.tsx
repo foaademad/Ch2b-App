@@ -8,31 +8,9 @@ import { ProductDto } from '../../../src/store/utility/interfaces/productInterfa
 
 const CATEGORY_IDS = [
   'otc-49',
-  'otc-50',
   'abb-10048',
-  'otc-51',
-  'abb-10054',
-  'abb-1031607',
-  'abb-1031633',
-  'abb-1033898',
-  'abb-124022010',
   'abb-1336',
-  'abb-201301601',
-  'abb-10112',
-  'abb-1045423',
-  'abb-345',
-  'abb-10054',
-  'abb-1031607',
   'abb-1031633',
-  'abb-1033898', 
-  'abb-1336',
-  'abb-201301601',
-  'abb-10112',
-  'abb-1045423',
-  'abb-345',
-  'abb-1008',
-
-
 ];
 const PAGE_SIZE = 20;
 

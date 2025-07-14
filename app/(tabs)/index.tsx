@@ -15,7 +15,7 @@ import BestSellers from '../home/bestSellers/BestSellers';
 import Categories from '../home/categories/Categories';
 import DailyDeals from '../home/dailyDeals/DailyDeals';
 import NewArrivals from '../home/newArrivals/NewArrivals';
-
+import { setError, setImageSearchResults, setLoading } from '../../src/store/slice/imageSearchSlice';
 function AnimatedSearchBar({ onChangeText }: { onChangeText: (text: string) => void }) {
   const { t } = useTranslation();
   const [isFocused, setIsFocused] = useState(false);
