@@ -134,6 +134,7 @@ export const getCartItems = () => {
         const userId = getState().auth.authModel?.result?.userId;
         const token = getState().auth.authModel?.result?.token;
         console.log("token", token);
+        console.log("userId", userId);
         try {
             dispatch(setLoading(true));
             const response = await api.get(`/Cart/getcart/${userId}`,{

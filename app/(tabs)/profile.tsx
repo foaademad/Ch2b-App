@@ -1,32 +1,40 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 
+import { getProfile } from '@/src/store/api/profileApi';
+import type { AppDispatch } from '@/src/store/store';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import {
-    ArrowRight,
-    Bell,
-    CreditCard,
-    Globe,
-    Heart,
-    HelpCircle,
-    LogOut,
-    MapPin,
-    Package,
-    Settings,
-    Shield
+  ArrowRight,
+  Bell,
+  CreditCard,
+  Globe,
+  Heart,
+  HelpCircle,
+  LogOut,
+  MapPin,
+  Package,
+  Settings,
+  Shield
 } from 'lucide-react-native';
 
 const ProfileScreen = () => {
   const { language, changeLanguage } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
   
+  const dispatch = useDispatch<AppDispatch>();
+  const profile = useSelector((state: RootState) => state.profile.profile);
+
   useEffect(() => {
     setIsRTL(language === "ar");
+    if (!profile) {
+      dispatch(getProfile());
+    }
   }, [language]);
   const { t } = useTranslation();
   const router = useRouter();
@@ -37,6 +45,14 @@ const ProfileScreen = () => {
     ? wishlistItems[0].favoriteItems.length 
     : 0;
   const orderHistory = []; // سيتم تنفيذها لاحقاً
+
+  // معلومات البروفايل من API أو ثابتة إذا لم تتوفر
+  const profileImage = 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D';
+  const userName = profile?.user?.fullName || 'John Doe';
+  const userEmail = profile?.user?.email || 'john.doe@example.com';
+  const ordersCount = profile?.orders?.length ?? 12;
+  const addressesCount = profile?.user?.cartItems?.length ?? 3;
+  const cardsCount = 2; // API لا يوفر عدد البطاقات
 
   const toggleLanguage = () => {
     const newLanguage = language === 'en' ? 'ar' : 'en';
@@ -97,12 +113,12 @@ const ProfileScreen = () => {
       <View style={[styles.header, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         <View style={[styles.profileInfo, { direction: isRTL ? 'rtl' : 'ltr' }]}>
           <Image
-            source={{ uri: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D' }}
+            source={{ uri: profileImage }}
             style={styles.profileImage}
           />
           <View style={[styles.userInfo, { marginLeft: isRTL ? 0 : 16, marginRight: isRTL ? 16 : 0 }]}>
-            <Text style={styles.userName}>John Doe</Text>
-            <Text style={styles.userEmail}>john.doe@example.com</Text>
+            <Text style={styles.userName}>{userName}</Text>
+            <Text style={styles.userEmail}>{userEmail}</Text>
           </View>
         </View>
         <View style={styles.headerButtons}>
@@ -125,17 +141,17 @@ const ProfileScreen = () => {
       {/* Quick Stats */}
       <View style={[styles.statsContainer, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>12</Text>
+          <Text style={styles.statNumber}>{ordersCount}</Text>
           <Text style={styles.statLabel}>{t('profile.orders.title')}</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>3</Text>
+          <Text style={styles.statNumber}>{addressesCount}</Text>
           <Text style={styles.statLabel}>{t('profile.addresses.title')}</Text>
         </View>
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
-          <Text style={styles.statNumber}>2</Text>
+          <Text style={styles.statNumber}>{cardsCount}</Text>
           <Text style={styles.statLabel}>{t('profile.cards')}</Text>
         </View>
       </View>

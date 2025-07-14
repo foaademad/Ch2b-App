@@ -5,6 +5,7 @@ import categoryReducer from './slice/categorySlice';
 import imageSearchReducer from './slice/imageSearchSlice';
 import productReducer from './slice/productSlice';
 import wishlistReducer from './slice/wishlistSlice';
+import profileReducer from './slice/profileSlice';
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -13,6 +14,7 @@ export const store = configureStore({
     cart: cartReducer,
     wishlist: wishlistReducer,
     imageSearch: imageSearchReducer,
+    profile: profileReducer,
   },
 });
 
