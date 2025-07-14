@@ -1,41 +1,13 @@
-// import {
-//   setError,
-//   setImageSearchResults,
-//   setLoading,
-// } from "../slice/imageSearchSlice";
-// import { AppDispatch } from "../store";
-// import api from "../utility/api/api";
-
-// export interface ImageSearchRequist {
-//   file: File;
-//   page: number;
-// }
-
-// export const searchImage = (data: ImageSearchRequist) => {
-//   return async (dispatch: AppDispatch) => {
-//     dispatch(setLoading(true));
-//     try {
-//       const formData = new FormData();
-//       formData.append("image", data.file);
-//       formData.append("page", data.page.toString());
-//       const response = await api.post("/Product/search-image", formData);
-//       console.log("Image search response:", response.data.result);
-      
-//       dispatch(setImageSearchResults(response.data.result));
-//     } catch (error: any) {
-//       dispatch(setError(error.message));
-//     } finally {
-//       dispatch(setLoading(false));
-//     }
-//   };
-// };
-
-// ===============================================================================
 import {
+  appendImageSearchResults,
+  appendSearchTextResults,
+  setCurrentPage,
   setError,
+  setHasMore,
   setImageSearchResults,
-  setSearchTextResults,
   setLoading,
+  setLoadingMore,
+  setSearchTextResults,
 } from "../slice/imageSearchSlice";
 import { AppDispatch } from "../store";
 import api from "../utility/api/api";
@@ -58,7 +30,11 @@ export interface TextSearchRequest {
 // 🔍 دالة البحث بالصورة
 export const searchImage = (data: ImageSearchRequest) => {
   return async (dispatch: AppDispatch) => {
-    dispatch(setLoading(true));
+    if (data.page === 1) {
+      dispatch(setLoading(true));
+    } else {
+      dispatch(setLoadingMore(true));
+    }
 
     try {
       const formData = new FormData();
@@ -76,12 +52,24 @@ export const searchImage = (data: ImageSearchRequest) => {
       });
 
       console.log("Image search response:", response.data.result);
-      dispatch(setImageSearchResults(response.data.result));
+      
+      if (data.page === 1) {
+        dispatch(setImageSearchResults(response.data.result));
+      } else {
+        dispatch(appendImageSearchResults(response.data.result));
+      }
+      
+      dispatch(setCurrentPage(data.page));
+      dispatch(setHasMore(response.data.result && response.data.result.length > 0));
     } catch (error: any) {
       console.error("Image search error:", error);
       dispatch(setError(error.message || "Unexpected error"));
     } finally {
-      dispatch(setLoading(false));
+      if (data.page === 1) {
+        dispatch(setLoading(false));
+      } else {
+        dispatch(setLoadingMore(false));
+      }
     }
   };
 };
@@ -89,7 +77,11 @@ export const searchImage = (data: ImageSearchRequest) => {
 // 🔎 دالة البحث النصي
 export const searchByText = (data: TextSearchRequest) => {
   return async (dispatch: AppDispatch) => {
-    dispatch(setLoading(true));
+    if (data.page === 1) {
+      dispatch(setLoading(true));
+    } else {
+      dispatch(setLoadingMore(true));
+    }
 
     try {
       const response = await api.get(
@@ -97,12 +89,24 @@ export const searchByText = (data: TextSearchRequest) => {
       );
 
       console.log("Text search response:", response.data.result);
-      dispatch(setSearchTextResults(response.data.result));
+      
+      if (data.page === 1) {
+        dispatch(setSearchTextResults(response.data.result));
+      } else {
+        dispatch(appendSearchTextResults(response.data.result));
+      }
+      
+      dispatch(setCurrentPage(data.page));
+      dispatch(setHasMore(response.data.result && response.data.result.length > 0));
     } catch (error: any) {
       console.error("Text search error:", error);
       dispatch(setError(error.message || "Unexpected error"));
     } finally {
-      dispatch(setLoading(false));
+      if (data.page === 1) {
+        dispatch(setLoading(false));
+      } else {
+        dispatch(setLoadingMore(false));
+      }
     }
   };
 };
