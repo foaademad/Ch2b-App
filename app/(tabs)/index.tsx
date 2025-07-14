@@ -4,20 +4,21 @@ import { useRouter } from 'expo-router';
 import { Search } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Animated, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 import { getProducts } from '../../src/store/api/productApi';
 import { AppDispatch, RootState } from '../../src/store/store';
-import { ProductDto } from '../../src/store/utility/interfaces/productInterface';
 import EnhancedCarousel from '../home/banners/Banners';
 import BestSellers from '../home/bestSellers/BestSellers';
 import Categories from '../home/categories/Categories';
 import DailyDeals from '../home/dailyDeals/DailyDeals';
 import NewArrivals from '../home/newArrivals/NewArrivals';
-import { setError, setImageSearchResults, setLoading } from '../../src/store/slice/imageSearchSlice';
-function AnimatedSearchBar({ onChangeText }: { onChangeText: (text: string) => void }) {
+import { ProductDto } from '@/src/store/utility/interfaces/productInterface';
+
+function AnimatedSearchBar() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
   const widthAnim = useRef(new Animated.Value(0.85)).current;
   const [value, setValue] = useState('');
@@ -38,9 +39,13 @@ function AnimatedSearchBar({ onChangeText }: { onChangeText: (text: string) => v
     }).start();
   };
 
+  const handleSearchPress = () => {
+    // Navigate to search page
+    router.push('/search');
+  };
+
   const handleChange = (text: string) => {
     setValue(text);
-    onChangeText(text);
   };
 
   return (
@@ -58,16 +63,21 @@ function AnimatedSearchBar({ onChangeText }: { onChangeText: (text: string) => v
           },
         ]}
       >
-        <TextInput
-          style={searchStyles.searchText}
-          placeholder={t("searchProducts")}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          placeholderTextColor="#aaa"
-          value={value}
-          onChangeText={handleChange}
-        />
-        <TouchableOpacity>
+        <TouchableOpacity 
+          style={searchStyles.searchTouchable}
+          onPress={handleSearchPress}
+          activeOpacity={0.8}
+        >
+          <TextInput
+            style={searchStyles.searchText}
+            placeholder={t("searchProducts")}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            placeholderTextColor="#aaa"
+            value={value}
+            onChangeText={handleChange}
+            editable={false}
+          />
           <Search size={22} color={isFocused ? "#36c7f6" : "#666"} style={searchStyles.icon} />
         </TouchableOpacity>
       </Animated.View>
@@ -91,6 +101,11 @@ const searchStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
+  searchTouchable: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
   searchText: {
     flex: 1,
     fontSize: 16,
@@ -108,122 +123,26 @@ const HomeScreen = () => {
   const { language } = useLanguage();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { currentCategory, productsBest, productsNew } = useSelector((state: RootState) => state.product);
-  const [searchText, setSearchText] = useState('');
-  const [searchResults, setSearchResults] = useState<ProductDto[]>([]);
+  const { currentCategory } = useSelector((state: RootState) => state.product);
   const [dailyDealsProducts, setDailyDealsProducts] = useState<ProductDto[]>([]);
 
   useEffect(() => {
     dispatch(getProducts());
   }, [dispatch]);
 
-  const dynamicSearchContainerStyle = {
-    ...styles.searchContainer,
-    flexDirection: language === 'ar' ? 'row-reverse' : 'row' as 'row-reverse' | 'row',
-  };
-
-  const dynamicSearchBarStyle = {
-    ...styles.searchBar,
-    flexDirection: language === 'ar' ? 'row-reverse' : 'row' as 'row-reverse' | 'row',
-  };
-
-  const dynamicSearchIconStyle = {
-    ...styles.searchIcon,
-    marginRight: language === 'ar' ? 0 : 8,
-    marginLeft: language === 'ar' ? 8 : 0,
-  };
-
-  const handleSearch = (text: string) => {
-    setSearchText(text);
-    if (text.trim() === '') {
-      setSearchResults([]);
-      return;
-    }
-    const lower = text.toLowerCase();
-    // Combine products and remove duplicates based on id
-    const allProducts = [...productsBest, ...productsNew, ...dailyDealsProducts];
-    const uniqueProducts = allProducts.filter((item, index, self) => 
-      index === self.findIndex(p => p.id === item.id)
-    );
-    const filtered = uniqueProducts.filter(
-      (item) =>
-        item.title?.toLowerCase().includes(lower) ||
-        item.name?.toLowerCase().includes(lower) ||
-        item.brandName?.toLowerCase().includes(lower)
-    );
-    setSearchResults(filtered);
-  };
-
-  const clearSearch = () => {
-    setSearchText('');
-    setSearchResults([]);
-  };
-
-  const renderProduct = ({ item }: { item: ProductDto }) => (
-    <TouchableOpacity
-      style={{
-        margin: 8,
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        padding: 10,
-        ...Shadows.card,
-        flexDirection: 'row',
-        alignItems: 'center',
-      }}
-      activeOpacity={0.85}
-      onPress={() => {
-        clearSearch();
-        router.push(`/product/${item.id}`);
-      }}
-    >
-      <Image
-        source={{ uri: item.mainPictureUrl }}
-        style={{
-          width: 70,
-          height: 70,
-          borderRadius: 12,
-          backgroundColor: '#f4f4f4',
-          marginRight: 12,
-        }}
-        resizeMode="cover"
-      />
-      <View style={{ flex: 1 }}>
-        <Text style={{ fontWeight: 'bold', fontSize: 15, marginBottom: 2 }} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={{ color: '#888', fontSize: 13, marginBottom: 2 }}>{item.brandName}</Text>
-        <Text style={{ color: '#36c7f6', fontWeight: 'bold', fontSize: 15 }}>
-          {item.price?.convertedPriceList?.internal?.sign} {item.price?.convertedPriceList?.internal?.price}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     <View style={styles.container}>
-      <AnimatedSearchBar onChangeText={handleSearch} />
-      {searchText ? (
-        <FlatList
-          data={searchResults}
-          renderItem={renderProduct}
-          keyExtractor={(item) => `search-${item.id}`}
-          contentContainerStyle={{ padding: 10 }}
-          ListEmptyComponent={<Text style={{ textAlign: 'center', color: '#888', marginTop: 30 }}>{t('No products found')}</Text>}
-        />
-      ) : (
-        <>
-          <ScrollView
-            style={styles.scrollView}
-            showsVerticalScrollIndicator={false}
-          >
-            <EnhancedCarousel />
-            <Categories />
-            <NewArrivals />
-            <BestSellers />
-            <DailyDeals onProductsChange={setDailyDealsProducts} />
-          </ScrollView>
-        </>
-      )}
+      <AnimatedSearchBar />
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        <EnhancedCarousel />
+        <Categories />
+        <NewArrivals />
+        <BestSellers />
+        <DailyDeals onProductsChange={setDailyDealsProducts} />
+      </ScrollView>
     </View>
   );
 };

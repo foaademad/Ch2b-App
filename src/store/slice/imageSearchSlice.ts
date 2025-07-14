@@ -5,6 +5,7 @@ const initialState = {
     imageSearchResults: [] as ProductDto[],
     loading: false,
     error: null as string | null,
+    searchTextResults: [] as ProductDto[],
 }
 
     const imageSearchSlice = createSlice({
@@ -20,8 +21,11 @@ const initialState = {
         setError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload || null;
         },
+        setSearchTextResults: (state, action: PayloadAction<ProductDto[]>) => {
+            state.searchTextResults = action.payload;
+        },
     },
 });
 
-export const { setImageSearchResults, setLoading, setError } = imageSearchSlice.actions;
+export const { setImageSearchResults, setLoading, setError, setSearchTextResults } = imageSearchSlice.actions;
 export default imageSearchSlice.reducer;
