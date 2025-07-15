@@ -124,16 +124,15 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: 'rgb(54, 199, 246)',
-    paddingHorizontal: 32,
-    paddingVertical: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
     borderRadius: 8,
     ...Shadows.primary,
   },
   buttonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+   
   },
   buttonText: {
     color: '#FFFFFF',

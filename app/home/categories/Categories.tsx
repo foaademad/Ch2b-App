@@ -3,14 +3,14 @@ import { ChevronDown, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    FlatList,
-    Modal,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  Dimensions,
+  FlatList,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Shadows } from '../../../constants/Shadows';
@@ -113,6 +113,8 @@ const Categories = () => {
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { categories, loading } = useSelector((state: RootState) => state.category);
+  const currentCategory = useSelector((state: RootState) => state.product.currentCategory);
+  const [pendingCategory, setPendingCategory] = useState<string | null>(null);
 
   const subCategories: CategoryDto[] = categories
     .filter((cat) => cat.parentId === null)
@@ -142,7 +144,7 @@ const Categories = () => {
     // إذا كانت الفئة "الكل" لا تذهب لأي تفاصيل
     if (categoryId === "all") return;
 
-    // جلب المنتجات الخاصة بالفئة
+    setPendingCategory(categoryId);
     dispatch(
       getallProductByCategoryId(
         categoryId,
@@ -153,9 +155,6 @@ const Categories = () => {
         selected?.nameEn
       ) as any
     );
-
-    // الانتقال لصفحة تفاصيل الكاتيجوري
-    router.push("/category-products");
 
     // تحريك الشريط الأفقي للفئة المختارة
     const index = categoriesWithAll.findIndex((cat) => (cat.categoryId || cat.id) === categoryId);
@@ -169,6 +168,14 @@ const Categories = () => {
       }
     }, 300);
   };
+
+  // راقب التغيير في currentCategory
+  useEffect(() => {
+    if (pendingCategory && currentCategory?.categoryId === pendingCategory) {
+      router.push("/category-products");
+      setPendingCategory(null);
+    }
+  }, [currentCategory, pendingCategory, router]);
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);

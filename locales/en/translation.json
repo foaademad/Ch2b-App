@@ -285,7 +285,7 @@
     "logout": "Logout",
    
     "cards": "Cards",
-    "change_language": "Change Language"
+    "change_language": "Change Lang"
   },
   "permission_required": "Permission Required",
   "gallery_permission_message": "Please allow access to your photo library to change your profile picture",
@@ -293,5 +293,9 @@
   "image_picker_error": "Failed to pick image. Please try again.",
   "cancel": "Cancel",
   "delete": "Delete",
-  "success": "Success"
+  "success": "Success",
+    "search": {
+      "placeholder": "Search products...",
+      "no_results": "No products found"
+    }
 }

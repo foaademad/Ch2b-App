@@ -72,6 +72,7 @@ const authSlice = createSlice({
       // إزالة من AsyncStorage
       AsyncStorage.removeItem("authModelAdmin").catch(console.error);
       AsyncStorage.removeItem("RefreshToken").catch(console.error);
+      AsyncStorage.removeItem("authModel").catch(console.error);
     },
 
     login: (state, action: PayloadAction<{ email: string; password: string }>) => {

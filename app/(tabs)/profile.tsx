@@ -1,10 +1,11 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 
+import { logoutApi } from '@/src/store/api/authApi';
 import { getProfile } from '@/src/store/api/profileApi';
 import type { AppDispatch } from '@/src/store/store';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -26,19 +27,25 @@ import {
 const ProfileScreen = () => {
   const { language, changeLanguage } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
-  
+  const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch<AppDispatch>();
   const profile = useSelector((state: RootState) => state.profile.profile);
-
+  const { t } = useTranslation();
+  const router = useRouter();
+  
   useEffect(() => {
     setIsRTL(language === "ar");
     if (!profile) {
       dispatch(getProfile());
     }
   }, [language]);
-  const { t } = useTranslation();
-  const router = useRouter();
+
+  const handleLogout = useCallback(async () => {
+    await logoutApi(dispatch);
+    router.replace('/');
+  }, [dispatch]);
   
+
   // استخدام Redux مباشرة بدلاً من ShopContext
   const wishlistItems = useSelector((state: RootState) => state.wishlist.wishlist);
   const wishlistCount = wishlistItems.length > 0 && wishlistItems[0]?.favoriteItems 
@@ -51,8 +58,8 @@ const ProfileScreen = () => {
   const userName = profile?.user?.fullName || 'John Doe';
   const userEmail = profile?.user?.email || 'john.doe@example.com';
   const ordersCount = profile?.orders?.length ?? 12;
-  const addressesCount = profile?.user?.cartItems?.length ?? 3;
-  const cardsCount = 2; // API لا يوفر عدد البطاقات
+
+  const cardsCount = cartItems.length; // API لا يوفر عدد البطاقات
 
   const toggleLanguage = () => {
     const newLanguage = language === 'en' ? 'ar' : 'en';
@@ -145,10 +152,7 @@ const ProfileScreen = () => {
           <Text style={styles.statLabel}>{t('profile.orders.title')}</Text>
         </View>
         <View style={styles.statDivider} />
-        <View style={styles.statItem}>
-          <Text style={styles.statNumber}>{addressesCount}</Text>
-          <Text style={styles.statLabel}>{t('profile.addresses.title')}</Text>
-        </View>
+
         <View style={styles.statDivider} />
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>{cardsCount}</Text>
@@ -200,8 +204,8 @@ const ProfileScreen = () => {
       </View>
 
       {/* Logout Button */}
-      <TouchableOpacity style={[styles.logoutButton, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-        <LogOut size={24} color="#ff3b30" />
+      <TouchableOpacity style={[styles.logoutButton, { direction: isRTL ? 'rtl' : 'ltr' }]} onPress={handleLogout}>
+        <LogOut size={24} color="#ff3b30"  />
         <Text style={styles.logoutText}>{t('profile.logout')}</Text>
       </TouchableOpacity>
 

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setAuthState, setError, setLoading } from '../slice/authSlice';
+import { logout, setAuthState, setError, setLoading } from '../slice/authSlice';
 import { RootState } from '../store';
 import api from '../utility/api/api';
 import { IRegisterUser } from '../utility/interfaces/authInterface';
@@ -132,3 +132,9 @@ export const getUserById = async (userId: string) => {
 
 
 
+export const logoutApi = async (dispatch: any) => {
+  await AsyncStorage.removeItem("authModelAdmin");
+  await AsyncStorage.removeItem("RefreshToken");
+  await AsyncStorage.removeItem("authModel");
+  return dispatch(logout());
+}
