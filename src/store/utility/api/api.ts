@@ -1,46 +1,9 @@
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import axios from "axios";
-
-// const api = axios.create({
-//   baseURL: "http://localhost:5000/api",
-//   headers: {
-//     "Content-Type": "application/json",
-//   },
-// });
-
-// // دمج كل الإعدادات في Interceptor واحد
-// api.interceptors.request.use(
-//   async (config) => {
-//     try {
-//       const authModelString = await AsyncStorage.getItem("authModel");
-//       const authModel = authModelString ? JSON.parse(authModelString) : null;
-
-//       // تم حذف التحقق من صلاحية الريفريش توكن بناءً على طلب المستخدم
-//       if (authModel?.result?.token) {
-//         config.headers.Authorization = `Bearer ${authModel.result.token}`;
-//       }
-//       config.headers["X-Client-Type"] = "mobile";
-//       config.headers["Accept-Language"] = "ar";
-//       return config;
-//     } catch (error) {
-//       console.error("Interceptor error:", error);
-//       return Promise.reject(error);
-//     }
-//   },
-//   (error) => {
-//     return Promise.reject(error);
-//   }
-// );
-
-// export default api;
-
-
-
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { router } from 'expo-router';
 import Toast from "react-native-toast-message";
+import { logout } from '../../slice/authSlice';
+import { store } from '../../store';
 
 const api = axios.create({
   baseURL: "http://localhost:5000/api", // تأكد أنها عنوان السيرفر الصحيح
@@ -53,7 +16,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async (config) => {
     try {
-      const authModelString = await AsyncStorage.getItem("authModel");
+      const authModelString = await AsyncStorage.getItem("authModelAdmin");
       const authModel = authModelString ? JSON.parse(authModelString) : null;
 
       if (authModel?.result?.token) {
@@ -89,9 +52,10 @@ api.interceptors.response.use(
         const refreshToken = await AsyncStorage.getItem("RefreshToken");
 
         if (!refreshToken) {
-          // throw new Error("No refresh token found");
           console.warn("No refresh token found");
-          await AsyncStorage.removeItem("authModel");
+          // تسجيل الخروج من Redux
+          store.dispatch(logout());
+          await AsyncStorage.removeItem("authModelAdmin");
           await AsyncStorage.removeItem("RefreshToken");
         
           // عرض تنبيه للمستخدم
@@ -100,9 +64,13 @@ api.interceptors.response.use(
             text1: "Session expired",
             text2: "Please login again."
           });
-          router.push("/signin");
+          
+          // الانتقال إلى صفحة تسجيل الدخول
+          setTimeout(() => {
+            router.replace("/signin");
+          }, 500);
         
-          return Promise.reject(error); // لا ترمي Error، فقط ارفض الـ Promise
+          return Promise.reject(error);
         }
 
         // طلب توكن جديد من الخادم
@@ -117,12 +85,12 @@ api.interceptors.response.use(
         );
 
         // تحديث البيانات في AsyncStorage
-        const authModelString = await AsyncStorage.getItem("authModel");
+        const authModelString = await AsyncStorage.getItem("authModelAdmin");
         const authModel = authModelString ? JSON.parse(authModelString) : {};
         authModel.result.token = data.token;
         authModel.result.refreshTokenExpiresOn = data.refreshTokenExpiresOn;
 
-        await AsyncStorage.setItem("authModel", JSON.stringify(authModel));
+        await AsyncStorage.setItem("authModelAdmin", JSON.stringify(authModel));
         await AsyncStorage.setItem("RefreshToken", data.refreshToken);
 
         // تعديل التوكن في الطلب الأصلي
@@ -132,7 +100,8 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // حذف البيانات وتوجيه المستخدم لتسجيل الدخول
-        await AsyncStorage.removeItem("authModel");
+        store.dispatch(logout());
+        await AsyncStorage.removeItem("authModelAdmin");
         await AsyncStorage.removeItem("RefreshToken");
 
         Toast.show({
@@ -141,8 +110,10 @@ api.interceptors.response.use(
           text2: "Please login again."
         });
 
-        // من الأفضل توجيه المستخدم لشاشة تسجيل الدخول
-        router.push("/signin");
+        // الانتقال إلى صفحة تسجيل الدخول
+        setTimeout(() => {
+          router.replace("/signin");
+        }, 500);
 
         return Promise.reject(refreshError);
       }

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { setAuthState, setError, setLoading } from '../slice/authSlice';
 import { RootState } from '../store';
 import api from '../utility/api/api';
@@ -24,6 +25,13 @@ export const registerUser =  (data: IRegisterUser ) => {
           "Content-Type": "multipart/form-data",
         },
       });
+      
+      // حفظ البيانات في AsyncStorage
+      await AsyncStorage.setItem("authModelAdmin", JSON.stringify(response.data));
+      if (response.data.result?.refreshToken) {
+        await AsyncStorage.setItem("RefreshToken", response.data.result.refreshToken);
+      }
+      
       dispatch(setAuthState(response.data));
       return { success: true, data: response.data };
     } catch (error: any) {
@@ -57,6 +65,13 @@ export const registerUser =  (data: IRegisterUser ) => {
     try {
       dispatch(setLoading(true));
       const response = await api.post("Account/login", data);
+      
+      // حفظ البيانات في AsyncStorage
+      await AsyncStorage.setItem("authModelAdmin", JSON.stringify(response.data));
+      if (response.data.result?.refreshToken) {
+        await AsyncStorage.setItem("RefreshToken", response.data.result.refreshToken);
+      }
+      
       dispatch(setAuthState(response.data));
       return { success: true, data: response.data };
     } catch (error: any) {

@@ -18,8 +18,11 @@ interface IAuthModel {
   } | null;
   token: string | null;
   result: {
+    isAuthenticated: boolean;
     userId: string;
     token: string;
+    refreshToken?: string;
+    refreshTokenExpiresOn?: string;
   } | null;
 }
 
@@ -46,6 +49,11 @@ const authSlice = createSlice({
 
       // حفظ في AsyncStorage
       AsyncStorage.setItem("authModelAdmin", JSON.stringify(action.payload)).catch(console.error);
+      
+      // حفظ refreshToken إذا كان موجوداً
+      if (action.payload.result?.refreshToken) {
+        AsyncStorage.setItem("RefreshToken", action.payload.result.refreshToken).catch(console.error);
+      }
     },
 
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -63,6 +71,7 @@ const authSlice = createSlice({
 
       // إزالة من AsyncStorage
       AsyncStorage.removeItem("authModelAdmin").catch(console.error);
+      AsyncStorage.removeItem("RefreshToken").catch(console.error);
     },
 
     login: (state, action: PayloadAction<{ email: string; password: string }>) => {

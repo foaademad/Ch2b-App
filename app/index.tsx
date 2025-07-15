@@ -1,21 +1,20 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Stack, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  Image,
   ImageBackground,
   StyleSheet,
   Text,
+  TextStyle,
   TouchableOpacity,
   View,
+  ViewStyle
 } from "react-native";
-import React, { useState, useEffect } from "react";
-import { Stack } from "expo-router";
-import { useRouter } from "expo-router"; // استيراد useRouter
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInRight, FadeOutRight } from "react-native-reanimated";
-import { useTranslation } from "react-i18next";
-import LanguageToggle from "../src/language/LanguageToggle";
 import { useLanguage } from "../src/context/LanguageContext";
-import { ViewStyle, TextStyle, ImageStyle } from "react-native";
+import LanguageToggle from "../src/language/LanguageToggle";
 
 type Props = {};
 const WelcomeScreen = (props: Props) => {
@@ -72,7 +71,7 @@ const WelcomeScreen = (props: Props) => {
                   exiting={FadeInDown.delay(700).duration(300)}
                 >
                   <TouchableOpacity
-                    onPress={() => router.push({ pathname: "/signup" })}
+                    onPress={() => router.replace("/signup")}
                   >
                     <View style={[styles.linkContent, isRTL && { flexDirection: "row-reverse" }]}>
                       <Ionicons name="mail-outline" size={18} color="black" />
@@ -113,7 +112,7 @@ const WelcomeScreen = (props: Props) => {
               <Text style={[styles.loginTxt, isRTL && { textAlign: "right" }]}>
                 {t("already_have_account")}
                 <TouchableOpacity
-                  onPress={() => router.push({ pathname: "/signin" })}
+                  onPress={() => router.replace("/signin")}
                 >
                   <Text style={[styles.linkTextSign, isRTL && { textAlign: "right" }]}>
                     {t("sign_in")}

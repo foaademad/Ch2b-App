@@ -4,13 +4,13 @@ import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Animated,
-    Dimensions,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { useDispatch } from "react-redux";
@@ -99,7 +99,8 @@ const LoginScreen = (props: Props) => {
         text2: t("login.login_success_description"),
         position: "top",
       });
-      router.push({ pathname: "/(tabs)" });
+      
+      // التنقل سيتم تلقائياً من خلال مراقبة حالة المصادقة في _layout.tsx
     } else {
       if (result?.errorType === "email_confirmation") {
         Toast.show({
@@ -240,7 +241,7 @@ const LoginScreen = (props: Props) => {
 
                 {/* Create Account Link */}
                 <TouchableOpacity
-                  onPress={() => router.push({ pathname: "/signup" })}
+                  onPress={() => router.replace("/signup")}
                 >
                   <Text style={[styles.signupText]}>
                     {t("login.dont_have_account")}

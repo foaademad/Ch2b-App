@@ -7,13 +7,13 @@ import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import 'react-native-reanimated';
 import Toast from 'react-native-toast-message';
-import { Provider, useDispatch } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import '../src/config/i18n';
 import { LanguageProvider } from '../src/context/LanguageContext';
 import { getCartItems } from '../src/store/api/cartApi';
 import { getWishlist } from '../src/store/api/wishlistApi';
 import { loadAuthFromStorage } from '../src/store/slice/authSlice';
-import { store } from '../src/store/store';
+import { RootState, store } from '../src/store/store';
 
 // Suppress deprecation warnings
 if (typeof window !== 'undefined') {
@@ -41,6 +41,10 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
   const [shouldRedirect, setShouldRedirect] = useState<null | "index" | "tabs">(null);
+  
+  // مراقبة حالة المصادقة من Redux
+  const authModel = useSelector((state: RootState) => state.auth.authModel);
+  const isAuthenticated = authModel?.result?.isAuthenticated;
 
   const initializeApp = useCallback(async () => {
     try {
@@ -50,7 +54,7 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
 
       dispatch(loadAuthFromStorage(parsed));
 
-      if (parsed?.result?.isAuthenticated) {
+      if (parsed?.result?.isAuthenticated && parsed?.result?.token) {
         // تحميل بيانات السلة والمفضلة إذا كان المستخدم مسجل دخول
         try {
           await Promise.all([
@@ -78,6 +82,16 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
     initializeApp();
   }, []);
 
+  // مراقبة التغييرات في حالة المصادقة
+  useEffect(() => {
+    if (isAuthLoaded) {
+      if (isAuthenticated && authModel?.result?.token) {
+        router.replace("/(tabs)");
+      } else {
+        router.replace("/");
+      }
+    }
+  }, [isAuthenticated, authModel?.result?.token, isAuthLoaded]);
 
   useEffect(() => {
     if (isAuthLoaded && shouldRedirect) {

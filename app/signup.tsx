@@ -5,15 +5,15 @@ import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Animated,
-    Dimensions,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from "react-redux";
@@ -248,7 +248,8 @@ const SignupScreen = () => {
           text2: t('signup.registration_successful'),
           position: 'top',
           onHide: () => {
-            router.push({ pathname: "/signin" });
+            // الانتقال إلى صفحة تسجيل الدخول بعد التسجيل الناجح
+            router.replace("/signin");
           },
         });
       } else {
@@ -860,7 +861,7 @@ const SignupScreen = () => {
                   )}
 
                   {/* رابط تسجيل الدخول */}
-                  <TouchableOpacity onPress={() => router.push({ pathname: "/signin" })}>
+                  <TouchableOpacity onPress={() => router.replace("/signin")}>
                     <Text style={styles.loginText}>
                       {t("signup.already_have_account")}
                       <Text style={styles.loginLink}> {t("signup.login")}</Text>

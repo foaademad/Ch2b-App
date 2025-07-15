@@ -311,9 +311,7 @@ const SearchScreen = () => {
         <TouchableOpacity onPress={() => router.back()}>
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={openImagePicker}>
-          <Camera size={24} color="#333" />
-        </TouchableOpacity>
+        
         <TouchableOpacity onPress={() => setShowFilterModal(true)}>
           <Filter size={24} color="#333" />
         </TouchableOpacity>
@@ -330,6 +328,9 @@ const SearchScreen = () => {
             onChangeText={setSearchText}
             autoFocus={!imageFile}
           />
+          <TouchableOpacity onPress={openImagePicker}>
+          <Camera size={24} color="#333" />
+        </TouchableOpacity>
         </View>
       </View>
 
