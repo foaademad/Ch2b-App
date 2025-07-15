@@ -308,7 +308,13 @@ const SearchScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => {
+          if (router.canGoBack()) {
+            router.back();
+          } else {
+            router.replace("/(tabs)");
+          }
+        }}>
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         
@@ -329,8 +335,8 @@ const SearchScreen = () => {
             autoFocus={!imageFile}
           />
           <TouchableOpacity onPress={openImagePicker}>
-          <Camera size={24} color="#333" />
-        </TouchableOpacity>
+            <Camera size={24} color="#333" />
+          </TouchableOpacity>
         </View>
       </View>
 

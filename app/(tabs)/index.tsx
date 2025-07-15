@@ -1,7 +1,8 @@
 import { useLanguage } from '@/src/context/LanguageContext';
+import { ProductDto } from '@/src/store/utility/interfaces/productInterface';
 import styles from '@/styles/home';
 import { useRouter } from 'expo-router';
-import { Search } from 'lucide-react-native';
+import { Camera, Search } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
@@ -14,7 +15,6 @@ import BestSellers from '../home/bestSellers/BestSellers';
 import Categories from '../home/categories/Categories';
 import DailyDeals from '../home/dailyDeals/DailyDeals';
 import NewArrivals from '../home/newArrivals/NewArrivals';
-import { ProductDto } from '@/src/store/utility/interfaces/productInterface';
 
 function AnimatedSearchBar() {
   const { t } = useTranslation();
@@ -78,6 +78,9 @@ function AnimatedSearchBar() {
             onChangeText={handleChange}
             editable={false}
           />
+          <TouchableOpacity onPress={handleSearchPress}>
+            <Camera size={24} color="#333" />
+          </TouchableOpacity>
           <Search size={22} color={isFocused ? "#36c7f6" : "#666"} style={searchStyles.icon} />
         </TouchableOpacity>
       </Animated.View>
