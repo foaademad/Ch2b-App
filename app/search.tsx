@@ -11,6 +11,7 @@ import {
     StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import ProductCard from '../components/products/ProductCard';
 import { Shadows } from '../constants/Shadows';
 import { ImageSearchRequest, searchByText, searchImage } from '../src/store/api/imageSearchApi';
 import { resetSearch } from '../src/store/slice/imageSearchSlice';
@@ -64,6 +65,7 @@ const SearchScreen = () => {
     brands: [],
     categories: [],
   });
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Extract available brands and categories
   const availableBrands = Array.from(new Set(searchTextResults.map(product => product.brandName).filter(Boolean)));
@@ -83,16 +85,21 @@ const SearchScreen = () => {
 
   // Handle image search on mount
   useEffect(() => {
-    if (imageFile) {
+    if (imageFile && !hasSearched) {
       if (imageFile.uri && imageFile.name && imageFile.type) {
         // مسح نتائج البحث النصي عند البحث بالصورة
         dispatch(resetSearch());
         dispatch(searchImage({ file: imageFile, page: 1 }) as any);
+        setHasSearched(true);
       } else {
         Alert.alert(t('Error'), t('Invalid image file'));
       }
     }
-  }, [imageFile, dispatch, t]);
+    // إذا لم يكن هناك صورة، أعد السماح بالبحث
+    if (!imageFile && hasSearched) {
+      setHasSearched(false);
+    }
+  }, [imageFile, dispatch, t, hasSearched]);
 
   // Handle text search
   useEffect(() => {
@@ -201,20 +208,9 @@ const SearchScreen = () => {
   };
 
   const renderProduct = ({ item }: { item: ProductDto }) => (
-    <TouchableOpacity
-      style={styles.productCard}
-      activeOpacity={0.85}
-      onPress={() => router.push(`/product/${item.id}`)}
-    >
-      <Image source={{ uri: item.mainPictureUrl }} style={styles.productImage} resizeMode="cover" />
-      <View style={styles.productInfo}>
-        <Text style={styles.productTitle} numberOfLines={2}>{item.title}</Text>
-        <Text style={styles.productBrand}>{item.brandName}</Text>
-        <Text style={styles.productPrice}>
-          {item.price?.convertedPriceList?.internal?.sign} {item.price?.convertedPriceList?.internal?.price}
-        </Text>
-      </View>
-    </TouchableOpacity>
+ 
+      <ProductCard product={item} onPress={() => router.push(`/product/${item.id}`)} />
+  
   );
 
   const renderLoadMoreButton = () => {
@@ -349,6 +345,14 @@ const SearchScreen = () => {
     </Modal>
   );
 
+  const renderEmptyComponent = () => (
+
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyText}>{t('No products found')}</Text>
+      <Text style={styles.emptySubText}>{t('Try to search for a text or image')}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -391,7 +395,7 @@ const SearchScreen = () => {
             style={styles.imagePreview}
             resizeMode="contain"
           />
-          <Text style={styles.imagePreviewText}>{t('search.image_search')}</Text>
+         
         </View>
       )}
 
@@ -437,18 +441,14 @@ const SearchScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={filteredResults}
+          data={filteredResults.length > 0 ? filteredResults : searchResults}
           renderItem={renderProduct}
           keyExtractor={(item) => `search-${item.id}`}
           contentContainerStyle={styles.resultsContainer}
           ListFooterComponent={renderLoadMoreButton}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>{t('No products found')}</Text>
-              <Text style={styles.emptySubText}>{t('Try different keywords or adjust your filters')}</Text>
-            </View>
-          }
+          ListEmptyComponent={renderEmptyComponent}
         />
+
       )}
 
       {renderFilterModal()}
@@ -475,8 +475,8 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   imagePreview: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
@@ -506,7 +506,16 @@ const styles = StyleSheet.create({
     color: '#1976d2',
     marginRight: 6,
   },
-  resultsContainer: { padding: 16 },
+  resultsContainer: {
+    paddingHorizontal: 16,
+   
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   productCard: {
     backgroundColor: '#fff', borderRadius: 12, padding: 12, marginBottom: 12,
     flexDirection: 'row', alignItems: 'center', ...Shadows.card,
@@ -518,7 +527,14 @@ const styles = StyleSheet.create({
   productTitle: { fontSize: 16, fontWeight: 'bold', color: '#333', marginBottom: 4 },
   productBrand: { fontSize: 14, color: '#666', marginBottom: 4 },
   productPrice: { fontSize: 16, fontWeight: 'bold', color: '#36c7f6' },
-  emptyContainer: { alignItems: 'center', paddingVertical: 40 },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
+    justifyContent: 'center',
+  },
   emptyText: { fontSize: 16, color: '#666', marginBottom: 8 },
   emptySubText: { fontSize: 14, color: '#999', textAlign: 'center' },
   loadMoreContainer: {
@@ -651,6 +667,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+
 });
 
 export default SearchScreen;
