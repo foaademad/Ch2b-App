@@ -32,38 +32,54 @@ export const searchImage = (data: ImageSearchRequest) => {
   return async (dispatch: AppDispatch) => {
     if (data.page === 1) {
       dispatch(setLoading(true));
+      dispatch(setError(null));
     } else {
       dispatch(setLoadingMore(true));
     }
 
     try {
       const formData = new FormData();
-      formData.append("image", {
-        uri: data.file.uri,
-        name: data.file.name,
-        type: data.file.type,
-      } as any);
+      // تحويل uri إلى Blob
+      const response = await fetch(data.file.uri);
+      const blob = await response.blob();
+      formData.append("Image", blob, data.file.name);
       formData.append("page", data.page.toString());
 
-      const response = await api.post("/Product/search-image", formData, {
+      const apiResponse = await api.post("/Product/search-image", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      console.log("Image search response:", response.data.result);
+      console.log("Image search response:", apiResponse.data.result);
       
       if (data.page === 1) {
-        dispatch(setImageSearchResults(response.data.result));
+        dispatch(setImageSearchResults(apiResponse.data.result));
       } else {
-        dispatch(appendImageSearchResults(response.data.result));
+        dispatch(appendImageSearchResults(apiResponse.data.result));
       }
       
       dispatch(setCurrentPage(data.page));
-      dispatch(setHasMore(response.data.result && response.data.result.length > 0));
+      dispatch(setHasMore(apiResponse.data.result && apiResponse.data.result.length > 0));
     } catch (error: any) {
       console.error("Image search error:", error);
-      dispatch(setError(error.message || "Unexpected error"));
+      
+      // معالجة أفضل للأخطاء
+      let errorMessage = "Unexpected error";
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors;
+        if (errors.Image) {
+          errorMessage = errors.Image.join(', ');
+        } else if (typeof errors === 'object') {
+          errorMessage = Object.values(errors).flat().join(', ');
+        }
+      } else if (error.response?.data?.title) {
+        errorMessage = error.response.data.title;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      dispatch(setError(errorMessage));
     } finally {
       if (data.page === 1) {
         dispatch(setLoading(false));
@@ -79,6 +95,7 @@ export const searchByText = (data: TextSearchRequest) => {
   return async (dispatch: AppDispatch) => {
     if (data.page === 1) {
       dispatch(setLoading(true));
+      dispatch(setError(null)); // مسح الأخطاء السابقة
     } else {
       dispatch(setLoadingMore(true));
     }

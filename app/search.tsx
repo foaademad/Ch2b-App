@@ -2,23 +2,32 @@ import { useLanguage } from '@/src/context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Camera, Filter, Search, X } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator, FlatList, Image, Modal, ScrollView,
+    ActivityIndicator,
+    Alert,
+    FlatList, Image, Modal, ScrollView,
     StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../constants/Shadows';
-import { searchByText, searchImage } from '../src/store/api/imageSearchApi';
+import { ImageSearchRequest, searchByText, searchImage } from '../src/store/api/imageSearchApi';
+import { resetSearch } from '../src/store/slice/imageSearchSlice';
 import { RootState } from '../src/store/store';
 import { ProductDto } from '../src/store/utility/interfaces/productInterface';
 
-interface FilterOptions {
-  priceRange: {
-    min: number;
-    max: number;
+// دالة debounce مخصصة
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+  let timeout: ReturnType<typeof setTimeout>;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
   };
+}
+
+interface FilterOptions {
+  priceRange: { min: number; max: number };
   brands: string[];
   categories: string[];
 }
@@ -29,7 +38,13 @@ const SearchScreen = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const params = useLocalSearchParams();
-  const imageFile = params.imageFile as any;
+  const imageFile = params.imageFile
+    ? typeof params.imageFile === 'string'
+      ? JSON.parse(params.imageFile) as ImageSearchRequest['file']
+      : typeof params.imageFile === 'object' && !Array.isArray(params.imageFile)
+        ? params.imageFile as ImageSearchRequest['file']
+        : undefined
+    : undefined;
 
   const { 
     imageSearchResults, 
@@ -37,7 +52,8 @@ const SearchScreen = () => {
     loading, 
     loadingMore, 
     currentPage, 
-    hasMore 
+    hasMore,
+    error
   } = useSelector((state: RootState) => state.imageSearch);
 
   const [searchText, setSearchText] = useState('');
@@ -49,45 +65,68 @@ const SearchScreen = () => {
     categories: [],
   });
 
-  // استخراج العلامات التجارية والفئات المتاحة من النتائج
+  // Extract available brands and categories
   const availableBrands = Array.from(new Set(searchTextResults.map(product => product.brandName).filter(Boolean)));
   const availableCategories = Array.from(new Set(searchTextResults.map(product => product.categoryId?.toString()).filter(Boolean)));
 
   const searchResults = imageFile ? imageSearchResults : searchTextResults;
 
+  // Debounced text search
+  const debouncedTextSearch = useCallback(
+    debounce((text: string) => {
+      if (text.trim()) {
+        dispatch(searchByText({ title: text, page: 1, language }) as any);
+      }
+    }, 500),
+    [dispatch, language]
+  );
+
+  // Handle image search on mount
   useEffect(() => {
     if (imageFile) {
-      dispatch(searchImage({ file: imageFile, page: 1 }) as any);
+      if (imageFile.uri && imageFile.name && imageFile.type) {
+        // مسح نتائج البحث النصي عند البحث بالصورة
+        dispatch(resetSearch());
+        dispatch(searchImage({ file: imageFile, page: 1 }) as any);
+      } else {
+        Alert.alert(t('Error'), t('Invalid image file'));
+      }
     }
-  }, [imageFile]);
+  }, [imageFile, dispatch, t]);
 
+  // Handle text search
   useEffect(() => {
-    if (!imageFile && searchText.trim()) {
-      dispatch(searchByText({ title: searchText, page: 1, language }) as any);
+    if (!imageFile) {
+      debouncedTextSearch(searchText);
     }
-  }, [searchText]);
+  }, [searchText, imageFile, debouncedTextSearch]);
 
+  // Apply filters
   useEffect(() => {
     applyFilters(searchResults, activeFilters);
   }, [searchResults, activeFilters]);
 
+  // Show error alert
+  useEffect(() => {
+    if (error && !loading) {
+      Alert.alert(t('Error'), error);
+    }
+  }, [error, loading, t]);
+
   const applyFilters = (products: ProductDto[], filters: FilterOptions) => {
     let filtered = products;
     
-    // فلتر السعر
     filtered = filtered.filter(product => {
       const price = product.price?.convertedPriceList?.internal?.price || 0;
       return price >= filters.priceRange.min && price <= filters.priceRange.max;
     });
     
-    // فلتر العلامات التجارية
     if (filters.brands.length > 0) {
       filtered = filtered.filter(product =>
         product.brandName && filters.brands.includes(product.brandName)
       );
     }
     
-    // فلتر الفئات
     if (filters.categories.length > 0) {
       filtered = filtered.filter(product =>
         product.categoryId && filters.categories.includes(product.categoryId.toString())
@@ -98,8 +137,7 @@ const SearchScreen = () => {
   };
 
   const updateFilters = (newFilters: Partial<FilterOptions>) => {
-    const updatedFilters = { ...activeFilters, ...newFilters };
-    setActiveFilters(updatedFilters);
+    setActiveFilters(prev => ({ ...prev, ...newFilters }));
   };
 
   const toggleBrand = (brand: string) => {
@@ -127,7 +165,6 @@ const SearchScreen = () => {
   const handleLoadMore = () => {
     if (hasMore && !loadingMore) {
       const nextPage = currentPage + 1;
-      
       if (imageFile) {
         dispatch(searchImage({ file: imageFile, page: nextPage }) as any);
       } else if (searchText.trim()) {
@@ -137,19 +174,29 @@ const SearchScreen = () => {
   };
 
   const openImagePicker = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert(t('Permission Required'), t('Please allow access to your photo library'));
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
-    if (!result.canceled && result.assets.length > 0) {
+
+    if (!result.canceled && result.assets?.length > 0) {
       const file = result.assets[0];
       const image = {
         uri: file.uri,
         name: file.fileName || 'image.jpg',
         type: file.type || 'image/jpeg',
-      } as any;
-      dispatch(searchImage({ file: image, page: 1 }) as any);
+      };
+      router.push({
+        pathname: '/search',
+        params: { imageFile: JSON.stringify(image) },
+      });
     }
   };
 
@@ -211,7 +258,6 @@ const SearchScreen = () => {
         </View>
 
         <ScrollView style={styles.modalContent}>
-          {/* فلتر السعر */}
           <View style={styles.filterSection}>
             <Text style={styles.filterSectionTitle}>{t('Price Range')}</Text>
             <View style={styles.priceRangeContainer}>
@@ -237,7 +283,6 @@ const SearchScreen = () => {
             </View>
           </View>
 
-          {/* فلتر العلامات التجارية */}
           {availableBrands.length > 0 && (
             <View style={styles.filterSection}>
               <Text style={styles.filterSectionTitle}>{t('Brands')}</Text>
@@ -263,7 +308,6 @@ const SearchScreen = () => {
             </View>
           )}
 
-          {/* فلتر الفئات */}
           {availableCategories.length > 0 && (
             <View style={styles.filterSection}>
               <Text style={styles.filterSectionTitle}>{t('Categories')}</Text>
@@ -340,7 +384,17 @@ const SearchScreen = () => {
         </View>
       </View>
 
-      {/* عرض الفلاتر النشطة */}
+      {imageFile && (
+        <View style={styles.imagePreviewContainer}>
+          <Image
+            source={{ uri: imageFile.uri }}
+            style={styles.imagePreview}
+            resizeMode="contain"
+          />
+          <Text style={styles.imagePreviewText}>{t('search.image_search')}</Text>
+        </View>
+      )}
+
       {(activeFilters.brands.length > 0 || activeFilters.categories.length > 0 || 
         activeFilters.priceRange.min > 0 || activeFilters.priceRange.max < 10000) && (
         <View style={styles.activeFiltersContainer}>
@@ -416,6 +470,22 @@ const styles = StyleSheet.create({
   },
   searchIcon: { marginRight: 12 },
   searchInput: { flex: 1, fontSize: 16, color: '#333' },
+  imagePreviewContainer: {
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  imagePreviewText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#666',
+  },
   activeFiltersContainer: {
     backgroundColor: '#fff',
     paddingVertical: 12,
@@ -477,7 +547,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
   },
-  // Modal styles
   modalContainer: {
     flex: 1,
     backgroundColor: '#fff',
