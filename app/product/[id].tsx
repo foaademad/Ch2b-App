@@ -1,21 +1,23 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Heart } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Image,
+    Linking,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Video from "react-native-video";
 import { useDispatch, useSelector } from "react-redux";
 import { Shadows } from '../../constants/Shadows';
+import { useLanguage } from "../../src/context/LanguageContext";
 import { addToCart } from '../../src/store/api/cartApi';
 import { getProductById } from "../../src/store/api/productApi";
 import { addToSallerWishlistApi, getWishlist } from "../../src/store/api/wishlistApi";
@@ -23,6 +25,8 @@ import { AppDispatch, RootState } from "../../src/store/store";
 
 
 export default function ProductDetails() {
+  const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const { id } = useLocalSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
@@ -66,21 +70,21 @@ export default function ProductDetails() {
   const featured = getFeaturedMap(vendor?.featuredValues);
 
   const generalInfo = product?.attributes || [
-    { label: "Brand", value: "RELANDER/" },
-    { label: "Model", value: "RB-G91" },
-    { label: "Goods number", value: "RB-G91J4125" },
-    { label: "Listing time", value: "2021.9" },
-    { label: "Brand area", value: "Domestically produced" },
-    { label: "Supply category", value: "Spot goods" },
-    { label: "Product Positioning", value: "Notebook game book" },
-    { label: "CPU type", value: "Ce Yang M" },
-    { label: "Hard drive capacity", value: "512" },
-    { label: "Screen size", value: "15.6 inches" },
-    { label: "Graphics card", value: "Performance graphics card" },
-    { label: "Wireless network card", value: "Have" },
-    { label: "Resolution", value: "1920*1200" },
-    { label: "Operating system", value: "ANDROID" },
-    { label: "Battery life", value: "3 hours" },
+    { label: t('product.brand'), value: "RELANDER/" },
+    { label: t('product.model'), value: "RB-G91" },
+    { label: t('product.goods_number'), value: "RB-G91J4125" },
+    { label: t('product.listing_time'), value: "2021.9" },
+    { label: t('product.brand_area'), value: "Domestically produced" },
+    { label: t('product.supply_category'), value: "Spot goods" },
+    { label: t('product.product_positioning'), value: "Notebook game book" },
+    { label: t('product.cpu_type'), value: "Ce Yang M" },
+    { label: t('product.hard_drive_capacity'), value: "512" },
+    { label: t('product.screen_size'), value: "15.6 inches" },
+    { label: t('product.graphics_card'), value: "Performance graphics card" },
+    { label: t('product.wireless_network_card'), value: "Have" },
+    { label: t('product.resolution'), value: "1920*1200" },
+    { label: t('product.operating_system'), value: "ANDROID" },
+    { label: t('product.battery_life'), value: "3 hours" },
   ];
 
   // Example reviews data (replace with currentProduct.reviews if available)
@@ -103,7 +107,7 @@ export default function ProductDetails() {
   if (!product || (!product.id && !product.title)) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.error}>No product data available</Text>
+        <Text style={styles.error}>{t('product.no_data_available')}</Text>
       </View>
     );
   }
@@ -130,15 +134,15 @@ export default function ProductDetails() {
     }, 0) || 0) + (singleQuantity * (product.price?.convertedPriceList?.internal?.price || 0));
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       {/* Back Button */}
-      <View style={styles.header}>
+      <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <Text style={styles.backArrow}>←</Text>
-          <Text style={styles.backText}>Back</Text>
+          <Text style={styles.backArrow}>{isRTL ? '←' : '←'}</Text>
+          <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -168,12 +172,12 @@ export default function ProductDetails() {
       </ScrollView>
       {/* Product Info */}
       <View style={styles.card}>
-        <Text style={styles.title}>{product.title}</Text>
-        <Text style={styles.price}>
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{product.title}</Text>
+        <Text style={[styles.price, { textAlign: isRTL ? 'right' : 'left' }]}>
           {product.price?.convertedPriceList?.internal?.sign}{" "}
           {product.price?.convertedPriceList?.internal?.price}
         </Text>
-        <Text style={styles.usdPrice}>
+        <Text style={[styles.usdPrice, { textAlign: isRTL ? 'right' : 'left' }]}>
           $
           {product.price?.convertedPriceList?.displayedMoneys?.[0]?.price ??
             "-"}{" "}
@@ -195,32 +199,32 @@ export default function ProductDetails() {
               resizeMode="contain"
             />
           ) : (
-            <Text style={[styles.desc]}>No video available</Text>
+            <Text style={[styles.desc, { textAlign: isRTL ? 'right' : 'left' }]}>{t('product.no_video_available')}</Text>
           )}
-        </View>: <Text style={[styles.desc]}>No video available</Text>}  
+        </View>: <Text style={[styles.desc, { textAlign: isRTL ? 'right' : 'left' }]}>{t('product.no_video_available')}</Text>}  
         <Text style={styles.label}>
-          Brand: <Text style={styles.value}>{product.brandName}</Text>
+          {t('product.brand')}: <Text style={styles.value}>{product.brandName}</Text>
         </Text>
         <Text style={styles.label}>
-          Weight:{" "}
+          {t('product.weight')}:{" "}
           <Text style={styles.value}>
             {product.physicalParameters?.weight ?? "-"}
           </Text>
         </Text>
         <Text style={styles.label}>
-          Height:{" "}
+          {t('product.height')}:{" "}
           <Text style={styles.value}>
             {product.physicalParameters?.height ?? "-"}
           </Text>
         </Text>
         <Text style={styles.label}>
-          Width:{" "}
+          {t('product.width')}:{" "}
           <Text style={styles.value}>
             {product.physicalParameters?.width ?? "-"}
           </Text>
         </Text>
         <Text style={styles.label}>
-          Available Quantity:{" "}
+          {t('product.available_quantity')}:{" "}
           <Text style={styles.value}>{product.masterQuantity - singleQuantity}</Text>
         </Text>
         
@@ -297,12 +301,12 @@ export default function ProductDetails() {
                 </TouchableOpacity>
               </View>
               <Text style={{ fontSize: 13, color: "#888" }}>
-                Stock: {item.quantity}
+                {t('product.stock')}: {item.quantity}
               </Text>
               <Text
                 style={{ fontSize: 13, color: "#36c7f6", fontWeight: "bold" }}
               >
-                Total: {item.price?.convertedPriceList?.internal?.sign}{" "}
+                {t('product.total')}: {item.price?.convertedPriceList?.internal?.sign}{" "}
                 {(
                   (quantities[item.id] || 0) *
                   (item.price?.convertedPriceList?.internal?.price || 0)
@@ -342,11 +346,11 @@ export default function ProductDetails() {
                 </TouchableOpacity>
               </View>
               <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                Total Quantity:{" "}
+                {t('product.total_quantity')}:{" "}
                 <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
               </Text>
               <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6" }}>
-                Total Price: SAR {totalPrice.toFixed(2)}
+                {t('product.total_price')}: SAR {totalPrice.toFixed(2)}
               </Text>
               <TouchableOpacity
                 style={[
@@ -381,7 +385,7 @@ export default function ProductDetails() {
               >
                 
                 <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
-                  Add to Cart
+                  {t('product.add_to_cart')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -390,11 +394,11 @@ export default function ProductDetails() {
           {product.configuredItems?.length > 0 && (
             <>
               <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                Total Quantity:{" "}
+                {t('product.total_quantity')}:{" "}
                 <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
               </Text>
               <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6" }}>
-                Total Price: SAR {totalPrice.toFixed(2)}
+                {t('product.total_price')}: SAR {totalPrice.toFixed(2)}
               </Text>
             </>
           )}
@@ -437,7 +441,7 @@ export default function ProductDetails() {
             }}
           >
             <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-              Add to Cart
+              {t('product.add_to_cart')}
             </Text>
           </TouchableOpacity>
           }
@@ -477,11 +481,11 @@ export default function ProductDetails() {
               }}
             >
               <Text style={styles.vendorScore}>
-                Level: {vendor?.credit?.level ?? "-"}
+                {t('product.level')}: {vendor?.credit?.level ?? "-"}
               </Text>
               <Text style={styles.vendorScore}>
                 {" "}
-                | Score: {vendor?.credit?.score ?? "-"}
+                | {t('product.score')}: {vendor?.credit?.score ?? "-"}
               </Text>
             </View>
           </View>
@@ -513,7 +517,7 @@ export default function ProductDetails() {
           </TouchableOpacity>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Shop Logo:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.shop_logo')}:</Text>
           {featured.shopLogo ? (
             <Image
               source={{ uri: featured.shopLogo }}
@@ -529,7 +533,7 @@ export default function ProductDetails() {
           )}
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Shop URL:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.shop_url')}:</Text>
           {featured.shopUrl ? (
             <Text
               style={[
@@ -545,71 +549,71 @@ export default function ProductDetails() {
           )}
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Stars:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.stars')}:</Text>
           <Text style={styles.vendorInfoValue}>{featured.stars ?? "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Years:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.years')}:</Text>
           <Text style={styles.vendorInfoValue}>{featured.years ?? "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Sales (30d):</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.sales_30d')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {featured.salesVolume30d ?? "-"}
           </Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>DSR Score:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.dsr_score')}:</Text>
           <Text style={styles.vendorInfoValue}>{featured.dsrScore ?? "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>FW Score:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.fw_score')}:</Text>
           <Text style={styles.vendorInfoValue}>{featured.fwScore ?? "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Level Ratio:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.level_ratio')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {featured.levelRatio ?? "-"}
           </Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Grade Code:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.grade_code')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {featured.gradeCode ?? "-"}
           </Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>User ID:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.user_id')}:</Text>
           <Text style={styles.vendorInfoValue}>{featured.userId ?? "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Shop ID:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.shop_id')}:</Text>
           <Text style={styles.vendorInfoValue}>{featured.shopId ?? "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Email:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.email')}:</Text>
           <Text style={styles.vendorInfoValue}>{vendor?.email || "-"}</Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Location:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.location')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {vendor?.location?.state || "-"}
           </Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Delivery Score:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.delivery_score')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {vendor?.scores?.deliveryScore ?? "-"}
           </Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Item Score:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.item_score')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {vendor?.scores?.itemScore ?? "-"}
           </Text>
         </View>
         <View style={styles.vendorInfoRow}>
-          <Text style={styles.vendorInfoLabel}>Service Score:</Text>
+          <Text style={styles.vendorInfoLabel}>{t('product.service_score')}:</Text>
           <Text style={styles.vendorInfoValue}>
             {vendor?.scores?.serviceScore ?? "-"}
           </Text>
@@ -628,7 +632,7 @@ export default function ProductDetails() {
               activeTab === "specs" && styles.activeTabText,
             ]}
           >
-            Specifications
+            {t('product.specifications')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -641,7 +645,7 @@ export default function ProductDetails() {
               activeTab === "desc" && styles.activeTabText,
             ]}
           >
-            Description
+            {t('product.description')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -657,7 +661,7 @@ export default function ProductDetails() {
               activeTab === "reviews" && styles.activeTabText,
             ]}
           >
-            Reviews
+            {t('product.reviews')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -665,7 +669,7 @@ export default function ProductDetails() {
       {/* Tab Content */}
       {activeTab === "specs" && (
         <View style={styles.specsCard}>
-          <Text style={styles.sectionTitle}>General Information</Text>
+          <Text style={styles.sectionTitle}>{t('product.general_information')}</Text>
           <View style={styles.specsTable}>
             {generalInfo.map((item: any, idx: any) => (
               <View key={`${item.label}-${idx}`} style={styles.specsRow}>
@@ -678,7 +682,7 @@ export default function ProductDetails() {
       )}
       {activeTab === "desc" && (
         <View style={styles.specsCard}>
-          <Text style={styles.sectionTitle}>Product Description</Text>
+          <Text style={styles.sectionTitle}>{t('product.product_description')}</Text>
           <Text style={styles.desc}>
             {product?.title || "No description available."}
           </Text>
@@ -705,7 +709,7 @@ export default function ProductDetails() {
       )}
       {activeTab === "reviews" && (
         <View style={styles.specsCard}>
-          <Text style={styles.sectionTitle}>Customer Reviews</Text>
+          <Text style={styles.sectionTitle}>{t('product.customer_reviews')}</Text>
           {Array.isArray(reviews) && reviews?.length > 0 ? (
             reviews?.map((review: any, idx: any) => (
               <View key={`${review.userNick}-${review.createdDate}-${idx}`} style={styles.reviewCard}>
@@ -744,7 +748,7 @@ export default function ProductDetails() {
               </View>
             ))
           ) : (
-            <Text style={styles.desc}>No reviews available.</Text>
+            <Text style={styles.desc}>{t('product.no_reviews_available')}</Text>
           )}
         </View>
       )}
@@ -752,7 +756,7 @@ export default function ProductDetails() {
       {/* Products from the same vendor */}
       {vendorProducts.length > 0 && (
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Products from Same Vendor</Text>
+          <Text style={styles.sectionTitle}>{t('product.products_from_same_vendor')}</Text>
           <FlatList
             data={vendorProducts}
             keyExtractor={(item, index) => `${item.id}-${index}`}
@@ -782,7 +786,7 @@ export default function ProductDetails() {
       {/* Related Products */}
       {relatedProducts.length > 0 && (
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Related Products</Text>
+          <Text style={styles.sectionTitle}>{t('product.related_products')}</Text>
           <FlatList
             data={relatedProducts}
             keyExtractor={(item, index) => `${item.id}-${index}`}

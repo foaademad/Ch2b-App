@@ -6,11 +6,22 @@ import { logout } from '../../slice/authSlice';
 import { store } from '../../store';
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", // تأكد أنها عنوان السيرفر الصحيح
+  baseURL: "http://localhost:5000/api", 
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// دالة للحصول على اللغة الحالية
+const getCurrentLanguage = async (): Promise<string> => {
+  try {
+    const savedLanguage = await AsyncStorage.getItem('appLanguage');
+    return savedLanguage || 'ar'; // افتراضي عربي
+  } catch (error) {
+    console.error('Error loading language from AsyncStorage:', error);
+    return 'ar';
+  }
+};
 
 // Interceptor للطلبات
 api.interceptors.request.use(
@@ -23,8 +34,11 @@ api.interceptors.request.use(
         config.headers.Authorization = `Bearer ${authModel.result.token}`;
       }
 
+      // الحصول على اللغة الحالية
+      const language = await getCurrentLanguage();
+      config.headers["Accept-Language"] = language;
+      
       config.headers["X-Client-Type"] = "mobile";
-      config.headers["Accept-Language"] = "ar";
 
       return config;
     } catch (error) {

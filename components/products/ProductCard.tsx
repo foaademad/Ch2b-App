@@ -1,12 +1,14 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Heart } from 'lucide-react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
+import { useLanguage } from '../../src/context/LanguageContext';
 import { addToWishlistApi, getWishlist } from '../../src/store/api/wishlistApi';
 import { RootState } from '../../src/store/store';
 import { ProductDto } from '../../src/store/utility/interfaces/productInterface';
-import { Ionicons } from '@expo/vector-icons';
 
 interface ProductCardProps {
   product: ProductDto;
@@ -14,6 +16,8 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
+  const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const rating = Number(product.featuredValues?.find(value => value.name === 'rating')?.value) || 0;
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
@@ -53,8 +57,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>{product.title || product.name }</Text>
-        <Text style={styles.weight}>⚖ {product.physicalParameters?.weight ?? '-'} kg</Text>
+        <Text style={[styles.productName, { textAlign: isRTL ? 'right' : 'left' }]} numberOfLines={2}>{product.title || product.name }</Text>
+        <Text style={[styles.weight, { textAlign: isRTL ? 'right' : 'left' }]}>⚖ {product.physicalParameters?.weight ?? '-'} kg</Text>
         <View style={styles.ratingContainer}>
           {rating > 0 ? (
             <>
@@ -65,26 +69,26 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
               <Text style={styles.rating}> {`(${rating})`}</Text>
             </>
           ) : (
-            <Text style={styles.rating}>No ratings yet</Text>
+            <Text style={[styles.rating, { textAlign: isRTL ? 'right' : 'left' }]}>{t('product.no_ratings')}</Text>
           )}
         </View>
-        <Text style={styles.productPrice}>
+        <Text style={[styles.productPrice, { textAlign: isRTL ? 'right' : 'left' }]}>
           {product.price?.convertedPriceList?.internal?.sign} {product.price?.convertedPriceList?.internal?.price}
         </Text>
-        <Text style={styles.usdPrice}>
+        <Text style={[styles.usdPrice, { textAlign: isRTL ? 'right' : 'left' }]}>
           ${product.price?.convertedPriceList?.displayedMoneys?.[0]?.price ?? '-'} USD
         </Text>
-        <Text style={styles.quantity}>{product.masterQuantity} left</Text>
-        <View style={styles.vendorRow}>
+        <Text style={[styles.quantity, { textAlign: isRTL ? 'right' : 'left' }]}>{t('product.quantity_left', { quantity: product.masterQuantity })}</Text>
+        <View style={[styles.vendorRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           {/* <Text style={styles.vendor}>{product.vendorDisplayName.split(' ').slice(0, 7).join("...........") || product.vendorName.slice(0, 7).join("...........")}</Text> */}
-          <Text style={styles.vendor}>
+          <Text style={[styles.vendor, { textAlign: isRTL ? 'right' : 'left' }]}>
             {(product.vendorDisplayName || product.vendorName || '').slice(0, 13)}
             {((product.vendorDisplayName || product.vendorName || '').length > 13) ? '...' : ''}
           </Text>
           {product.isSellAllowed ? (
-            <Text style={styles.verified}>✔ Verified</Text>
+            <Text style={[styles.verified, { textAlign: isRTL ? 'right' : 'left' }]}>{t('product.verified')}</Text>
           ) : (
-            <Text style={[styles.verified, { color: 'gray' } ]}>Not Verified</Text>
+            <Text style={[styles.verified, { color: 'gray', textAlign: isRTL ? 'right' : 'left' }]}>{t('product.not_verified')}</Text>
           )}
         </View>
       </View>

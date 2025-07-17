@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLanguage } from '../context/LanguageContext';
 
 const LanguageToggle = () => {
-  const { language, changeLanguage } = useLanguage();
-  const [isRTL, setIsRTL] = useState(language === 'ar');
-
-  useEffect(() => {
-    setIsRTL(language === 'ar');
-  }, [language]);
-
+  const { language, changeLanguage, isRTL } = useLanguage();
   const targetLanguage = isRTL ? 'en' : 'ar';
   const languageText = targetLanguage === 'en' ? 'EN' : 'AR';
 
   return (
-    <View style={[styles.languageContainer, isRTL && { right: 'auto', left: 10 }]}>
+    <View style={[styles.languageContainer, isRTL && { right: 'auto', left: 10 }]}> 
       <TouchableOpacity
         onPress={() => changeLanguage(targetLanguage)}
         style={styles.languageButton}
@@ -27,27 +21,32 @@ const LanguageToggle = () => {
   );
 };
 
-export default LanguageToggle;
-
 const styles = StyleSheet.create({
   languageContainer: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 10,
-    paddingVertical: 25,
+    top: 50,
+    right: 20,
+    zIndex: 1000,
   },
   languageButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 8,
-    borderRadius: 15,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   languageText: {
-    marginLeft: 5,
-    color: '#333',
-    fontWeight: 'bold',
+    marginLeft: 6,
     fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
   },
 });
+
+export default LanguageToggle; 

@@ -12,14 +12,14 @@ const resources = {
 const loadLanguage = async () => {
   try {
     const savedLanguage = await AsyncStorage.getItem('appLanguage');
-    return savedLanguage || 'en';
+    return savedLanguage || 'ar'; // افتراضي عربي
   } catch (error) {
     console.error('Error loading language from AsyncStorage:', error);
-    return 'en';
+    return 'ar';
   }
 };
 
-// تهيئة i18n مع اللغة المحفوظة
+// تهيئة i18 مع اللغة المحفوظة
 const initializeI18n = async () => {
   const lng = await loadLanguage();
   i18n
@@ -27,13 +27,13 @@ const initializeI18n = async () => {
     .init({
       resources,
       lng,
-      fallbackLng: 'en',
+      fallbackLng: 'ar',
       interpolation: { escapeValue: false },
     });
   return lng;
 };
 
-// دالة لتغيير اللغة بدون ريفريش
+// دالة لتغيير اللغة وحفظها في AsyncStorage
 export const changeLanguage = async (lng: string) => {
   try {
     await i18n.changeLanguage(lng);
@@ -43,7 +43,16 @@ export const changeLanguage = async (lng: string) => {
   }
 };
 
-// تشغيل التهيئة
-initializeI18n();
+// دالة للحصول على اللغة الحالية
+export const getCurrentLanguage = async (): Promise<string> => {
+  try {
+    const savedLanguage = await AsyncStorage.getItem('appLanguage');
+    return savedLanguage || 'ar';
+  } catch (error) {
+    console.error('Error loading language from AsyncStorage:', error);
+    return 'ar';
+  }
+};
 
-export default i18n;
+// تصدير دالة التهيئة
+export default initializeI18n;

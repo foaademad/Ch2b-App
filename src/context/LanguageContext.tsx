@@ -1,35 +1,85 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from 'i18next';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import i18n from '../config/i18n';
+import { initReactI18next } from 'react-i18next';
+
+// استيراد ملفات الترجمة
+const resources = {
+  en: { translation: require('../../locales/en/translation.json') },
+  ar: { translation: require('../../locales/ar/translation.json') },
+};
 
 interface LanguageContextType {
   language: string;
   changeLanguage: (lng: string) => Promise<void>;
+  isRTL: boolean;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState(i18n.language);
+  const [language, setLanguage] = useState('ar'); // افتراضي عربي
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [key, setKey] = useState(0); // مفتاح لإعادة تحميل المكونات
 
+  // تهيئة i18n عند بدء التطبيق
   useEffect(() => {
-    // تحديث الحالة عند تغيير اللغة
-    const handleLanguageChange = (lng: string) => {
-      setLanguage(lng);
+    const initializeI18n = async () => {
+      try {
+        const savedLanguage = await AsyncStorage.getItem('appLanguage');
+        const currentLanguage = savedLanguage || 'ar';
+        
+        // تهيئة i18n إذا لم تكن مهيأة
+        if (!i18n.isInitialized) {
+          await i18n
+            .use(initReactI18next)
+            .init({
+              resources,
+              lng: currentLanguage,
+              fallbackLng: 'ar',
+              interpolation: { escapeValue: false },
+            });
+        } else {
+          await i18n.changeLanguage(currentLanguage);
+        }
+        
+        setLanguage(currentLanguage);
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error initializing i18n:', error);
+        setLanguage('ar');
+        setIsInitialized(true);
+      }
     };
-    i18n.on('languageChanged', handleLanguageChange);
-    return () => {
-      i18n.off('languageChanged', handleLanguageChange);
-    };
+
+    initializeI18n();
   }, []);
 
   const changeLanguage = async (lng: string) => {
-    await i18n.changeLanguage(lng);
-    // هنا يمكن إضافة أي منطق إضافي عند تغيير اللغة، مثل إرسال إشعار إلى الصفحات
+    try {
+      await i18n.changeLanguage(lng);
+      await AsyncStorage.setItem('appLanguage', lng);
+      setLanguage(lng);
+      
+      // إعادة تحميل المكونات بتغيير المفتاح
+      setKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Error changing language:', error);
+    }
   };
 
+  const isRTL = language === 'ar';
+
+  if (!isInitialized) {
+    // يمكن إضافة شاشة تحميل هنا
+    return null;
+  }
+
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage }}>
-      {children}
+    <LanguageContext.Provider value={{ language, changeLanguage, isRTL }}>
+      <React.Fragment key={key}>
+        {children}
+      </React.Fragment>
     </LanguageContext.Provider>
   );
 };
