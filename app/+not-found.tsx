@@ -1,12 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Link, Stack } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Shadows } from '../constants/Shadows';
+import { useLanguage } from '../src/context/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
 export default function NotFoundScreen() {
+  const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -43,7 +47,7 @@ export default function NotFoundScreen() {
   return (
     <>
       <Stack.Screen options={{ 
-        title: '404 - Page Not Found',
+        title: t('not_found.title'),
         headerShown: true,
         headerStyle: {
           backgroundColor: '#f8f9fa',
@@ -53,7 +57,7 @@ export default function NotFoundScreen() {
           fontSize: 18,
         },
       }} />
-      <View style={styles.container}>
+      <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         <View style={styles.content}>
           <Animated.View style={[
             styles.iconContainer,
@@ -65,14 +69,14 @@ export default function NotFoundScreen() {
           </Animated.View>
           
           <Animated.View style={[styles.textContainer, { opacity: fadeAnim }]}>
-            <Text style={styles.title}>Oops!</Text>
-            <Text style={styles.subtitle}>The page you're looking for seems to have wandered off...</Text>
+            <Text style={styles.title}>{t('not_found.oops')}</Text>
+            <Text style={styles.subtitle}>{t('not_found.message')}</Text>
             
             <TouchableOpacity style={styles.button}>
               <Link href="/" style={styles.link}>
                 <View style={styles.buttonContent}>
                   <Ionicons name="home-outline" size={20} color="#FFFFFF"  />
-                  <Text style={styles.buttonText}>Return Home</Text>
+                  <Text style={styles.buttonText}>{t('not_found.return_home')}</Text>
                 </View>
               </Link>
             </TouchableOpacity>

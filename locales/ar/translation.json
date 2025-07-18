@@ -367,9 +367,81 @@
     "eneral_information": "المعلومات العامة",
     "product_description": "وصف المنتج",
     "customer_reviews": "تقييمات العملاء",
-    "no_reviews_available": "لا توجد تقييمات متاحة."
+    "no_reviews_available": "لا توجد تقييمات متاحة.",
+    "no_description_available": "لا يوجد وصف متاح.",
+    "general_information": "معلومات عامة"
+  },
+  "search": {
+    "placeholder": "ابحث عن المنتجات...",
+    "no_results": "لا توجد منتجات",
+    "filters": "الفلاتر",
+    "price_range": "نطاق السعر",
+    "min": "الأدنى",
+    "max": "الأعلى",
+    "brands": "الماركات",
+    "categories": "الفئات",
+    "clear_all": "مسح الكل",
+    "apply_filters": "تطبيق الفلاتر",
+    "loading_more": "جاري تحميل المزيد من المنتجات...",
+    "load_more": "تحميل المزيد من المنتجات",
+    "try_search_text_or_image": "جرب البحث بالنص أو الصورة",
+    "invalid_image_file": "ملف الصورة غير صالح"
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "items": "منتجات",
+    "empty_cart": "لا توجد منتجات في السلة",
+    "shop_now": "تسوق الآن",
+    "total": "الإجمالي",
+    "proceed_to_checkout": "إتمام الشراء"
+  },
+  "categories": {
+    "title": "الفئات",
+    "loading": "جاري تحميل الفئات...",
+    "error_loading": "حدث خطأ أثناء تحميل الفئات",
+    "search_placeholder": "ابحث عن فئة...",
+    "found_categories": "تم العثور على {{count}} فئة",
+    "found_categories_plural": "تم العثور على {{count}} فئات",
+    "load_more": "تحميل المزيد من الفئات",
+    "no_matching_categories": "لا توجد فئات مطابقة",
+    "no_categories_available": "لا توجد فئات متاحة",
+    "try_different_search": "جرب البحث باسم مختلف",
+    "check_categories_exist": "تحقق من وجود الفئات"
+  },
+  "wishlist": {
+    "favorites": "المفضلة",
+    "favorite_items": "منتجات مفضلة",
+    "favorite_sellers": "البائعون المفضلون",
+    "reviews": "تقييمات",
+    "products": "منتجات",
+    "add_to_cart": "إضافة إلى السلة",
+    "already_in_cart": "هذه البطاقة موجودة بالفعل في السلة",
+    "empty_wishlist": "قائمة المفضلة فارغة",
+    "add_items_to_wishlist": "أضف منتجات إلى المفضلة لتظهر هنا",
+    "no_favorite_sellers": "لا يوجد بائعون مفضلون",
+    "add_sellers_to_favorites": "أضف بائعين إلى المفضلة لتظهر هنا"
+  },
+  "category_products": {
+    "loading": "جاري تحميل المنتجات...",
+    "loading_more": "جاري تحميل المزيد من المنتجات...",
+    "load_more": "تحميل المزيد من المنتجات",
+    "error_loading": "حدث خطأ أثناء تحميل المنتجات",
+    "no_category_selected": "لم يتم اختيار فئة",
+    "search_placeholder": "ابحث عن منتج...",
+    "no_products_found_search": "لا توجد منتجات مطابقة لبحثك",
+    "no_products_in_category": "لا توجد منتجات في هذه الفئة"
+  },
+  "not_found": {
+    "title": "404 - الصفحة غير موجودة",
+    "oops": "عذراً!",
+    "message": "يبدو أن الصفحة التي تبحث عنها غير موجودة...",
+    "return_home": "العودة للرئيسية"
   },
   "common": {
-    "back": "رجوع"
+    "loading": "جاري التحميل...",
+    "retry": "إعادة المحاولة",
+    "go_back": "العودة",
+    "unknown_error": "حدث خطأ غير معروف",
+    "back": "العودة"
   }
 }

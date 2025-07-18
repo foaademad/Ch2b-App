@@ -1,4 +1,5 @@
 
+import { useLanguage } from '@/src/context/LanguageContext';
 import { getWishlist, removeFromSallerWishlistApi, removeFromWishlistApi } from '@/src/store/api/wishlistApi';
 import { RootState } from '@/src/store/store';
 import { Heart, Store } from 'lucide-react-native';
@@ -9,8 +10,10 @@ import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 import { addToCart } from '../../src/store/api/cartApi';
+
 const WishlistScreen = () => {
   const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'sellers'
   const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
@@ -26,33 +29,7 @@ const WishlistScreen = () => {
     : [];
   
   console.log("favoriteItems extracted:", favoriteItems);
-  // Sample favorite sellers data (you should replace this with your actual data)
-  const favoriteSellers = [
-    {
-      id: '1',
-      name: 'Premium Store',
-      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c3RvcmV8ZW58MHx8MHx8fDA%3D',
-      rating: 4.8,
-      reviews: 245,
-      products: 156,
-    },
-    {
-      id: '2',
-      name: 'Fashion Hub',
-      image: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmFzaGlvbnxlbnwwfHwwfHx8MA%3D%3D',
-      rating: 4.6,
-      reviews: 189,
-      products: 98,
-    },
-    {
-      id: '3',
-      name: 'Tech Zone',
-      image: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18e2?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dGVjaHxlbnwwfHwwfHx8MA%3D%3D',
-      rating: 4.9,
-      reviews: 320,
-      products: 210,
-    },
-  ];
+
 
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
@@ -73,7 +50,7 @@ const WishlistScreen = () => {
             <Text style={styles.itemPrice}>${item.price.toFixed(2)}</Text>
             <View style={styles.ratingContainer}>
               <Text style={styles.rating}>★ {item.vendorRating}</Text>
-              <Text style={styles.reviews}>({item.vendorRating} {t('reviews')})</Text>
+              <Text style={styles.reviews}>({item.vendorRating} {t('wishlist.reviews')})</Text>
             </View>
             <View>  
             {/* أزرار الكمية */}
@@ -107,13 +84,13 @@ const WishlistScreen = () => {
                 } catch (error: any) {
                   Toast.show({
                     type: "error",
-                    text1: "This card is already in the cart"
+                    text1: t('wishlist.already_in_cart')
                   });
                   console.error(error);
                 }
               }}
             >
-              <Text style={styles.addToCartButtonText}>Add to cart</Text>
+              <Text style={styles.addToCartButtonText}>{t('wishlist.add_to_cart')}</Text>
             </TouchableOpacity>
             </View>
             </View>
@@ -137,9 +114,9 @@ const WishlistScreen = () => {
       {favoriteItems.length === 0 && (
         <View style={styles.emptyState}>
           <Heart size={48} color="#ccc" />
-          <Text style={styles.emptyStateText}>{t('Your wishlist is empty')}</Text>
+          <Text style={styles.emptyStateText}>{t('wishlist.empty_wishlist')}</Text>
           <Text style={styles.emptyStateSubtext}>
-            {t('Add items to your wishlist to see them here')}
+            {t('wishlist.add_items_to_wishlist')}
           </Text>
         </View>
       )}
@@ -157,9 +134,9 @@ const WishlistScreen = () => {
               <Text style={styles.sellerName}>{seller.name}</Text>
               <View style={styles.ratingContainer}>
                 <Text style={styles.rating}>★ {seller.deliveryScore}</Text>
-                <Text style={styles.reviews}>({seller.deliveryScore} {t('reviews')})</Text>
+                <Text style={styles.reviews}>({seller.deliveryScore} {t('wishlist.reviews')})</Text>
               </View>
-              <Text style={styles.productsCount}>{seller.deliveryScore} {t('products')}</Text> 
+              <Text style={styles.productsCount}>{seller.deliveryScore} {t('wishlist.products')}</Text> 
             </View>
             <TouchableOpacity 
               style={[styles.actionButton, styles.removeButton]}
@@ -177,9 +154,9 @@ const WishlistScreen = () => {
       {favoriteSallers.length === 0 && (
         <View style={styles.emptyState}>
           <Store size={48} color="#ccc" />
-          <Text style={styles.emptyStateText}>{t('No favorite sellers')}</Text>
+          <Text style={styles.emptyStateText}>{t('wishlist.no_favorite_sellers')}</Text>
           <Text style={styles.emptyStateSubtext}>
-            {t('Add sellers to your favorites to see them here')}
+            {t('wishlist.add_sellers_to_favorites')}
           </Text>
         </View>
       )}
@@ -187,9 +164,9 @@ const WishlistScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('Favorites')}</Text>
+        <Text style={styles.title}>{t('wishlist.favorites')}</Text>
       </View>
 
       {/* Tabs */}
@@ -200,7 +177,7 @@ const WishlistScreen = () => {
         >
           <View style={styles.tabContent}>
             <Text style={[styles.tabText, activeTab === 'items' && styles.activeTabText]}>
-              {t('Favorite Items')}
+              {t('wishlist.favorite_items')}
             </Text>
             <View style={[styles.countBadge, activeTab === 'items' && styles.activeCountBadge]}>
               <Text style={[styles.countText, activeTab === 'items' && styles.activeCountText]}>
@@ -215,7 +192,7 @@ const WishlistScreen = () => {
         >
           <View style={styles.tabContent}>
             <Text style={[styles.tabText, activeTab === 'sellers' && styles.activeTabText]}>
-              {t('Favorite Sellers')}
+              {t('wishlist.favorite_sellers')}
             </Text>
             <View style={[styles.countBadge, activeTab === 'sellers' && styles.activeCountBadge]}>
               <Text style={[styles.countText, activeTab === 'sellers' && styles.activeCountText]}>
@@ -392,10 +369,14 @@ const styles = StyleSheet.create({
   addToCartButton: {
     backgroundColor: '#36c7f6',
     borderRadius: 16,
-    padding: 4,
-    width: 100,
-    alignItems: 'center',
+    padding: 12,
+    width: 120,
+    height: 40,
+    display: 'flex',
+    flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
+    
     marginTop: 10,
     ...Shadows.small,
   },
@@ -403,6 +384,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+    height: '100%',
+
   },
   removeButton: {
    

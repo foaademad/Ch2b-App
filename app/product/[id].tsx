@@ -136,12 +136,12 @@ export default function ProductDetails() {
   return (
     <ScrollView style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       {/* Back Button */}
-      <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.header]}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={[styles.backButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
           onPress={() => router.back()}
         >
-          <Text style={styles.backArrow}>{isRTL ? '←' : '←'}</Text>
+          <Text style={styles.backArrow}>{isRTL ? '←' : '→'}</Text>
           <Text style={styles.backText}>{t('common.back')}</Text>
         </TouchableOpacity>
       </View>
@@ -669,7 +669,7 @@ export default function ProductDetails() {
       {/* Tab Content */}
       {activeTab === "specs" && (
         <View style={styles.specsCard}>
-          <Text style={styles.sectionTitle}>{t('product.general_information')}</Text>
+          <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('product.general_information')}</Text>
           <View style={styles.specsTable}>
             {generalInfo.map((item: any, idx: any) => (
               <View key={`${item.label}-${idx}`} style={styles.specsRow}>
@@ -684,7 +684,7 @@ export default function ProductDetails() {
         <View style={styles.specsCard}>
           <Text style={styles.sectionTitle}>{t('product.product_description')}</Text>
           <Text style={styles.desc}>
-            {product?.title || "No description available."}
+            {product?.title || t('product.no_description_available')}
           </Text>
           <ScrollView
             horizontal
@@ -960,6 +960,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
+
   },
   backButton: {
     flexDirection: "row",

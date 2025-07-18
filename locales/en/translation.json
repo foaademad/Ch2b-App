@@ -296,8 +296,77 @@
   "success": "Success",
     "search": {
       "placeholder": "Search products...",
-      "no_results": "No products found"
+      "no_results": "No products found",
+      "filters": "Filters",
+      "price_range": "Price Range",
+      "min": "Min",
+      "max": "Max",
+      "brands": "Brands",
+      "categories": "Categories",
+      "clear_all": "Clear All",
+      "apply_filters": "Apply Filters",
+      "loading_more": "Loading more products...",
+      "load_more": "Load More Products",
+      "try_search_text_or_image": "Try to search for a text or image",
+      "invalid_image_file": "Invalid image file"
     },
+  "cart": {
+    "title": "Shopping Cart",
+    "items": "items",
+    "empty_cart": "No products in your cart",
+    "shop_now": "Shop Now",
+    "total": "Total",
+    "proceed_to_checkout": "Proceed to Checkout"
+  },
+  "categories": {
+    "title": "Categories",
+    "loading": "Loading categories...",
+    "error_loading": "Error loading categories",
+    "search_placeholder": "Search for a category...",
+    "found_categories": "Found {{count}} category",
+    "found_categories_plural": "Found {{count}} categories",
+    "load_more": "Load More Categories",
+    "no_matching_categories": "No matching categories found",
+    "no_categories_available": "No categories available",
+    "try_different_search": "Try searching with a different name",
+    "check_categories_exist": "Check if categories exist"
+  },
+  "wishlist": {
+    "favorites": "Favorites",
+    "favorite_items": "Favorite Items",
+    "favorite_sellers": "Favorite Sellers",
+    "reviews": "reviews",
+    "products": "products",
+    "add_to_cart": "Add to cart",
+    "already_in_cart": "This card is already in the cart",
+    "empty_wishlist": "Your wishlist is empty",
+    "add_items_to_wishlist": "Add items to your wishlist to see them here",
+    "no_favorite_sellers": "No favorite sellers",
+    "add_sellers_to_favorites": "Add sellers to your favorites to see them here"
+  },
+  "category_products": {
+    "loading": "Loading products...",
+    "loading_more": "Loading more products...",
+    "load_more": "Load More Products",
+    "error_loading": "Error loading products",
+    "no_category_selected": "No category selected",
+    "search_placeholder": "Search for a product...",
+    "no_products_found_search": "No products found for your search",
+    "no_products_in_category": "No products in this category"
+  },
+  "not_found": {
+    "title": "404 - Page Not Found",
+    "oops": "Oops!",
+    "message": "The page you're looking for seems to have wandered off...",
+    "return_home": "Return Home"
+  },
+  "common": {
+    "loading": "Loading...",
+    "retry": "Retry",
+    "go_back": "Go Back",
+    "unknown_error": "Unknown error occurred",
+    "back": "Back"
+  },
   "product": {
     "no_ratings": "No ratings yet",
     "quantity_left": "{{quantity}} left",
@@ -355,9 +424,9 @@
     "eneral_information": "General Information",
     "product_description": "Product Description",
     "customer_reviews": "Customer Reviews",
-    "no_reviews_available": "No reviews available."
-  },
-  "common": {
-    "back": "Back"
+    "no_reviews_available": "No reviews available.",
+    "no_description_available": "No description available.",
+    "general_information": "General Information"
   }
+  
 }

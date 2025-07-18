@@ -35,7 +35,7 @@ interface FilterOptions {
 
 const SearchScreen = () => {
   const { t } = useTranslation();
-  const { language } = useLanguage();
+  const { language, isRTL } = useLanguage();
   const router = useRouter();
   const dispatch = useDispatch();
   const params = useLocalSearchParams();
@@ -354,8 +354,8 @@ const SearchScreen = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+      <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity onPress={() => {
           if (router.canGoBack()) {
             router.back();

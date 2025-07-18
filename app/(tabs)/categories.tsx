@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
+import { useLanguage } from '../../src/context/LanguageContext';
 import { getCategoriesApi } from '../../src/store/api/categoryApi';
 import { getallProductByCategoryId } from '../../src/store/api/productApi';
 import { RootState } from '../../src/store/store';
@@ -81,6 +83,8 @@ const CategoryItem: React.FC<CategoryItemProps> = ({ category, level, onPress, i
 };
 
 export default function CategoriesScreen() {
+  const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const dispatch = useDispatch();
   const router = useRouter();
   const { categories, loading, error } = useSelector((state: RootState) => state.category);
@@ -220,7 +224,7 @@ export default function CategoriesScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#36c7f6" />
-        <Text style={styles.loadingText}>Loading categories...</Text>
+        <Text style={styles.loadingText}>{t('categories.loading')}</Text>
       </View>
     );
   }
@@ -228,22 +232,22 @@ export default function CategoriesScreen() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error loading categories: {error}</Text>
+        <Text style={styles.errorText}>{t('categories.error_loading')}: {error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => dispatch(getCategoriesApi() as any)}
         >
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text style={styles.retryButtonText}>{t('common.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <View style={styles.header}>
         <Ionicons name="grid-outline" size={28} color="#36c7f6" style={{ position: 'absolute', left: 24, top: 32 }} />
-        <Text style={styles.headerTitle}>Categories</Text>
+        <Text style={styles.headerTitle}>{t('categories.title')}</Text>
         <TouchableOpacity
           style={styles.searchIconButton}
           onPress={toggleSearch}
@@ -280,7 +284,7 @@ export default function CategoriesScreen() {
           <TextInput
             ref={searchInputRef}
             style={styles.searchInput}
-            placeholder="Search for a category..."
+            placeholder={t('categories.search_placeholder')}
             placeholderTextColor="#aaa"
             value={search}
             onChangeText={setSearch}
@@ -301,7 +305,7 @@ export default function CategoriesScreen() {
           {search.length > 0 && (
             <View style={styles.searchResultsHeader}>
               <Text style={styles.searchResultsText}>
-                Found {filteredCategories.length} category{filteredCategories.length !== 1 ? 'ies' : ''}
+                {t('categories.found_categories', { count: filteredCategories.length })}
               </Text>
             </View>
           )}
@@ -323,7 +327,7 @@ export default function CategoriesScreen() {
                     {loadingMore ? (
                       <ActivityIndicator size="small" color="#fff" />
                     ) : (
-                      <Text style={{ color: '#fff', fontSize: 16, fontFamily: 'Poppins-Medium', fontWeight: 'bold' }}>Load More Categories</Text>
+                      <Text style={{ color: '#fff', fontSize: 16, fontFamily: 'Poppins-Medium', fontWeight: 'bold' }}>{t('categories.load_more')}</Text>
                     )}
                   </TouchableOpacity>
                 </View>
@@ -335,10 +339,10 @@ export default function CategoriesScreen() {
         <View style={styles.emptyContainer}>
           <Ionicons name="grid-outline" size={64} color="#36c7f6" style={{ marginBottom: 8 }} />
           <Text style={styles.emptyText}>
-            {search.length > 0 ? 'No matching categories found' : 'No categories available'}
+            {search.length > 0 ? t('categories.no_matching_categories') : t('categories.no_categories_available')}
           </Text>
           <Text style={styles.emptySubText}>
-            {search.length > 0 ? 'Try searching with a different name' : 'Check if categories exist'}
+            {search.length > 0 ? t('categories.try_different_search') : t('categories.check_categories_exist')}
           </Text>
         </View>
       )}

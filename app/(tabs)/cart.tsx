@@ -1,3 +1,4 @@
+import { useLanguage } from '@/src/context/LanguageContext';
 import { getCartItems, removeFromCart, updateCartItem } from '@/src/store/api/cartApi';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,7 @@ import { Shadows } from '../../constants/Shadows';
 
 const CartScreen = () => {
   const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const router = useRouter();
   const dispatch = useDispatch();
   const { items: cart, isLoading } = useSelector((state: RootState) => state.cart);
@@ -53,25 +55,25 @@ const CartScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('Shopping Cart')}</Text>
-        <Text style={styles.itemCount}>{cart.length} {t('items')}</Text>
+        <Text style={styles.title}>{t('cart.title')}</Text>
+        <Text style={styles.itemCount}>{cart.length} {t('cart.items')}</Text>
       </View>
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <Text>Loading...</Text>
+          <Text>{t('common.loading')}</Text>
         </View>
       ) : cart.length === 0 ? (
         <View style={styles.emptyCartContainer}>
           <ShoppingCart size={70} color="#ccc" style={styles.emptyCartIcon} />
-          <Text style={styles.emptyCartText}>No products in your cart</Text>
+          <Text style={styles.emptyCartText}>{t('cart.empty_cart')}</Text>
           <TouchableOpacity 
             style={styles.shopNowButton}
             onPress={() => router.push('/(tabs)')}
           >
-            <Text style={styles.shopNowButtonText}>Shop Now</Text>
+            <Text style={styles.shopNowButtonText}>{t('cart.shop_now')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -124,7 +126,7 @@ const CartScreen = () => {
 
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
-          <Text style={styles.totalLabel}>{t('Total')}</Text>
+          <Text style={styles.totalLabel}>{t('cart.total')}</Text>
           <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
         </View>
         <TouchableOpacity 
@@ -132,7 +134,7 @@ const CartScreen = () => {
           onPress={handleCheckout}
           disabled={cart.length === 0}
         >
-          <Text style={styles.checkoutButtonText}>{t('Proceed to Checkout')}</Text>
+          <Text style={styles.checkoutButtonText}>{t('cart.proceed_to_checkout')}</Text>
         </TouchableOpacity>
       </View>
     </View>

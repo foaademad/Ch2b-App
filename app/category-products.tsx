@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Animated, Dimensions, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductCard from '../components/products/ProductCard';
 import { Shadows } from '../constants/Shadows';
+import { useLanguage } from '../src/context/LanguageContext';
 import { getallProductByCategoryId } from '../src/store/api/productApi';
 import { RootState } from '../src/store/store';
 import { ProductDto } from '../src/store/utility/interfaces/productInterface';
@@ -24,6 +26,8 @@ const calculateNumColumns = () => {
 };
 
 export default function CategoryProductsScreen() {
+  const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const dispatch = useDispatch();
   const router = useRouter();
   const { currentCategory, loading, loadingMore, error } = useSelector((state: RootState) => state.product);
@@ -124,11 +128,11 @@ export default function CategoryProductsScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <ActivityIndicator size="small" color="#fff" />
               <Text style={{ color: '#fff', fontSize: 14, fontFamily: 'Poppins-Regular', marginLeft: 8 }}>
-                Loading more products...
+                {t('category_products.loading_more')}
               </Text>
             </View>
           ) : (
-            <Text style={styles.loadMoreText}>Load More Products</Text>
+            <Text style={styles.loadMoreText}>{t('category_products.load_more')}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -139,7 +143,7 @@ export default function CategoryProductsScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#36c7f6" />
-        <Text style={styles.loadingText}>Loading products...</Text>
+        <Text style={styles.loadingText}>{t('category_products.loading')}</Text>
       </View>
     );
   }
@@ -148,7 +152,7 @@ export default function CategoryProductsScreen() {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>
-          Error loading products: {typeof error === 'string' ? error : 'Unknown error occurred'}
+          {t('category_products.error_loading')}: {typeof error === 'string' ? error : t('common.unknown_error')}
         </Text>
         <TouchableOpacity
           style={styles.retryButton}
@@ -161,7 +165,7 @@ export default function CategoryProductsScreen() {
             }
           }}
         >
-          <Text style={styles.retryButtonText}>Retry</Text>
+          <Text style={styles.retryButtonText}>{t('common.retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -170,20 +174,20 @@ export default function CategoryProductsScreen() {
   if (!currentCategory) {
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>No category selected</Text>
+        <Text style={styles.errorText}>{t('category_products.no_category_selected')}</Text>
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => router.back()}
         >
-          <Text style={styles.retryButtonText}>Go Back</Text>
+          <Text style={styles.retryButtonText}>{t('common.go_back')}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
+    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+      <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -229,7 +233,7 @@ export default function CategoryProductsScreen() {
           <TextInput
             ref={searchInputRef}
             style={styles.searchInput}
-            placeholder="Search for a product..."
+            placeholder={t('category_products.search_placeholder')}
             placeholderTextColor="#aaa"
             value={search}
             onChangeText={setSearch}
@@ -261,7 +265,7 @@ export default function CategoryProductsScreen() {
         <View style={styles.emptyContainer}>
           <Ionicons name="bag-outline" size={64} color="#666" />
           <Text style={styles.emptyText}>
-            {search.length > 0 ? 'No products found for your search' : 'No products in this category'}
+            {search.length > 0 ? t('category_products.no_products_found_search') : t('category_products.no_products_in_category')}
           </Text>
         </View>
       )}
