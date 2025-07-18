@@ -31,6 +31,7 @@ const CategoryItem = ({
   onPress: (id: string) => void;
 }) => {
   const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
 
   // دالة لتقصير الاسم
   const getShortName = (name: string) => {
@@ -43,13 +44,15 @@ const CategoryItem = ({
       style={{
         paddingHorizontal: 16,
         paddingVertical: 12,
-        marginRight: 8,
+        marginRight: isRTL ? 0 : 8,
+        marginLeft: isRTL ? 8 : 0,
         borderBottomWidth: isSelected ? 2 : 0,
         borderBottomColor: "#36c7f6",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
         width: 120, // 🔧 نحدد العرض ليتوافق مع ITEM_WIDTH
+        minWidth: 100, // إضافة عرض أدنى
       }}
     >
       <Text
@@ -58,9 +61,10 @@ const CategoryItem = ({
           fontFamily: "Poppins-Medium",
           color: isSelected ? "#36c7f6" : "#666",
           textAlign: "center",
+          textAlignVertical: "center",
         }}
       >
-        {getShortName(t(item.nameEn))}
+        {getShortName(language === 'ar' ? item.nameAr || item.nameEn : item.nameEn)}
       </Text>
     </TouchableOpacity>
   );
@@ -77,6 +81,7 @@ const ModalCategoryItem = ({
   isSelected: boolean;
 }) => {
   const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
 
   return (
     <TouchableOpacity
@@ -97,9 +102,10 @@ const ModalCategoryItem = ({
           fontSize: 16,
           fontFamily: "Poppins-Medium",
           color: isSelected ? "#eee" : "#333",
+          textAlign: isRTL ? 'right' : 'left',
         }}
       >
-        {t(item.nameEn)}
+        {language === 'ar' ? item.nameAr || item.nameEn : item.nameEn}
       </Text>
     </TouchableOpacity>
   );
@@ -109,7 +115,7 @@ const ITEM_WIDTH = 130; // ✅ العرض المناسب لكل عنصر
 
 const Categories = () => {
   const { t } = useTranslation();
-  const { language } = useLanguage();
+  const { language, isRTL } = useLanguage();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { categories, loading } = useSelector((state: RootState) => state.category);
@@ -120,7 +126,7 @@ const Categories = () => {
     .filter((cat) => cat.parentId === null)
     .flatMap((cat) => cat.children || []);
 
-  const allCategory = { categoryId: 'all', id: 'all', nameEn: 'All' } as CategoryDto;
+  const allCategory = { categoryId: 'all', id: 'all', nameEn: 'All', nameAr: 'الكل' } as CategoryDto;
   const categoriesWithAll = [allCategory, ...subCategories];
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -144,6 +150,12 @@ const Categories = () => {
     // إذا كانت الفئة "الكل" لا تذهب لأي تفاصيل
     if (categoryId === "all") return;
 
+    // إذا كانت فئة تجريبية، لا ترسل طلب API
+    if (categoryId.startsWith('demo')) {
+      console.log('Demo category selected:', selected?.nameEn);
+      return;
+    }
+
     setPendingCategory(categoryId);
     dispatch(
       getallProductByCategoryId(
@@ -156,18 +168,30 @@ const Categories = () => {
       ) as any
     );
 
-    // تحريك الشريط الأفقي للفئة المختارة
+    // تحريك الشريط الأفقي للفئة المختارة - فوري بدون تأخير
     const index = categoriesWithAll.findIndex((cat) => (cat.categoryId || cat.id) === categoryId);
-    setTimeout(() => {
-      if (flatListRef.current && index >= 0) {
-        flatListRef.current.scrollToIndex({
-          index,
+    if (flatListRef.current && index >= 0) {
+      const offset = index * ITEM_WIDTH;
+      flatListRef.current.scrollToOffset({
+        offset: offset,
+        animated: true,
+      });
+    }
+  };
+
+  // راقب التغيير في selectedCategory لتحديث موقع الشريط
+  useEffect(() => {
+    if (selectedCategory && flatListRef.current) {
+      const index = categoriesWithAll.findIndex((cat) => (cat.categoryId || cat.id) === selectedCategory);
+      if (index >= 0) {
+        const offset = index * ITEM_WIDTH;
+        flatListRef.current.scrollToOffset({
+          offset: offset,
           animated: true,
-          viewPosition: 0.5,
         });
       }
-    }, 300);
-  };
+    }
+  }, [selectedCategory, categoriesWithAll.length]);
 
   // راقب التغيير في currentCategory
   useEffect(() => {
@@ -190,39 +214,41 @@ const Categories = () => {
   );
 
   return (
-    <View>
+    <View style={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       {/* ✅ الشريط الأفقي للفئات + See All */}
       <View
         style={{
-          flexDirection: language === "ar" ? "row-reverse" : "row",
+          flexDirection: isRTL ? "row" : "row",
           justifyContent: "space-between",
           alignItems: "center",
           paddingHorizontal: 16,
+          minHeight: 60, // إضافة ارتفاع أدنى لضمان العرض
         }}
       >
         <View
           style={{
-            flexDirection: language === "ar" ? "row-reverse" : "row",
+            flexDirection: isRTL ? "row-reverse" : "row",
             flex: 1,
+            minHeight: 50, // إضافة ارتفاع أدنى للـ FlatList
           }}
         >
           <FlatList
             ref={flatListRef}
-            data={categoriesWithAll}
+            key={isRTL ? 'rtl' : 'ltr'} // إضافة key لتحديث FlatList عند تغيير الاتجاه
+            data={isRTL ? [...categoriesWithAll].reverse() : categoriesWithAll}
             keyExtractor={(item, index) => item.categoryId || item.id || `category-${index}`}
             renderItem={renderCategoryItem}
             horizontal
             showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16} // تحسين أداء التمرير
+            decelerationRate="fast" // تسريع إيقاف التمرير
+            snapToInterval={ITEM_WIDTH} // التصاق أفضل بالعناصر
             contentContainerStyle={{
-              flexDirection: language === "ar" ? "row-reverse" : "row",
+              flexDirection: isRTL ? "row-reverse" : "row",
               alignItems: "center",
-              justifyContent: "center",
+              justifyContent: "flex-start", // تغيير من center إلى flex-start
+              paddingHorizontal: 8, // إضافة padding إضافي
             }}
-            getItemLayout={(_, index) => ({
-              length: ITEM_WIDTH,
-              offset: ITEM_WIDTH * index,
-              index,
-            })}
             onScrollToIndexFailed={({ index, averageItemLength }) => {
               flatListRef.current?.scrollToOffset({
                 offset: averageItemLength * index,
@@ -234,8 +260,9 @@ const Categories = () => {
         <TouchableOpacity
           onPress={toggleModal}
           style={{
-            flexDirection: language === "ar" ? "row-reverse" : "row",
+            flexDirection: isRTL ? "row-reverse" : "row",
             alignItems: "center",
+            paddingHorizontal: 8, // إضافة padding
           }}
         >
           <Text
@@ -243,11 +270,11 @@ const Categories = () => {
               fontSize: 14,
               color: "#666",
               fontFamily: "Poppins-Medium",
-              marginRight: language === "ar" ? 2 : 0,
-              marginLeft: language === "ar" ? 0 : 2,
+              marginRight: isRTL ? 2 : 0,
+              marginLeft: isRTL ? 0 : 2,
             }}
           >
-            {t("See All")}
+            {t("categories.see_all")}
           </Text>
           <ChevronDown size={16} color="#666" />
         </TouchableOpacity>
@@ -290,7 +317,7 @@ const Categories = () => {
           >
             <View
               style={{
-                flexDirection: "row",
+                flexDirection: isRTL ? "row-reverse" : "row",
                 justifyContent: "space-between",
                 alignItems: "center",
                 marginBottom: 16,
@@ -301,9 +328,10 @@ const Categories = () => {
                   fontSize: 18,
                   fontFamily: "Poppins-SemiBold",
                   color: "#333",
+                  textAlign: isRTL ? 'right' : 'left',
                 }}
               >
-                {t("Categories")}
+                {t("categories.title")}
               </Text>
               <TouchableOpacity onPress={toggleModal}>
                 <X size={20} color="#666" />

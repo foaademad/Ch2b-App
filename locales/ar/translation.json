@@ -400,6 +400,7 @@
     "loading": "جاري تحميل الفئات...",
     "error_loading": "حدث خطأ أثناء تحميل الفئات",
     "search_placeholder": "ابحث عن فئة...",
+    "see_all": "عرض الكل",
     "found_categories": "تم العثور على {{count}} فئة",
     "found_categories_plural": "تم العثور على {{count}} فئات",
     "load_more": "تحميل المزيد من الفئات",
@@ -443,5 +444,11 @@
     "go_back": "العودة",
     "unknown_error": "حدث خطأ غير معروف",
     "back": "العودة"
+  },
+  "home": {
+    "newArrivals": "وصل حديثاً",
+    "bestSellers": "الأكثر مبيعاً",
+    "dailyDeals": "عروض اليوم",
+    "loadMore": "تحميل المزيد"
   }
 }

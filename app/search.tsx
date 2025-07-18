@@ -5,10 +5,10 @@ import { ArrowLeft, Camera, Filter, Search, X } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-    ActivityIndicator,
-    Alert,
-    FlatList, Image, Modal, ScrollView,
-    StyleSheet, Text, TextInput, TouchableOpacity, View
+  ActivityIndicator,
+  Alert,
+  FlatList, Image, Modal, ScrollView,
+  StyleSheet, Text, TextInput, TouchableOpacity, View
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductCard from '../components/products/ProductCard';
@@ -68,8 +68,8 @@ const SearchScreen = () => {
   const [hasSearched, setHasSearched] = useState(false);
 
   // Extract available brands and categories
-  const availableBrands = Array.from(new Set(searchTextResults.map(product => product.brandName).filter(Boolean)));
-  const availableCategories = Array.from(new Set(searchTextResults.map(product => product.categoryId?.toString()).filter(Boolean)));
+  const availableBrands = Array.from(new Set(searchTextResults.map((product: ProductDto) => product.brandName).filter(Boolean)));
+  const availableCategories = Array.from(new Set(searchTextResults.map((product: ProductDto) => product.categoryId?.toString()).filter(Boolean)));
 
   const searchResults = imageFile ? imageSearchResults : searchTextResults;
 
@@ -232,7 +232,7 @@ const SearchScreen = () => {
               </Text>
             </View>
           ) : (
-            <Text style={styles.loadMoreText}>{t('Load More Products')}</Text>
+            <Text style={styles.loadMoreText}>{t('search.load_more')}</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -306,7 +306,7 @@ const SearchScreen = () => {
 
           {availableCategories.length > 0 && (
             <View style={styles.filterSection}>
-              <Text style={styles.filterSectionTitle}>{t('Categories')}</Text>
+              <Text style={styles.filterSectionTitle}>{t('search.categories')}</Text>
               <View style={styles.chipContainer}>
                 {availableCategories.map((category) => (
                   <TouchableOpacity
@@ -332,13 +332,13 @@ const SearchScreen = () => {
 
         <View style={styles.modalFooter}>
           <TouchableOpacity style={styles.clearButton} onPress={clearAllFilters}>
-            <Text style={styles.clearButtonText}>{t('Clear All')}</Text>
+            <Text style={styles.clearButtonText}>{t('search.clear_all')}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.applyButton} 
             onPress={() => setShowFilterModal(false)}
           >
-            <Text style={styles.applyButtonText}>{t('Apply Filters')}</Text>
+            <Text style={styles.applyButtonText}>{t('search.apply_filters')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -348,8 +348,8 @@ const SearchScreen = () => {
   const renderEmptyComponent = () => (
 
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>{t('No products found')}</Text>
-      <Text style={styles.emptySubText}>{t('Try to search for a text or image')}</Text>
+      <Text style={styles.emptyText}>{t('search.no_results')}</Text>
+      <Text style={styles.emptySubText}>{t('search.try_search_text_or_image')}</Text>
     </View>
   );
 
@@ -375,8 +375,8 @@ const SearchScreen = () => {
         <View style={styles.searchBar}>
           <Search size={20} color="#666" style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
-            placeholder={t("searchProducts")}
+            style={[styles.searchInput, { textAlign: isRTL ? 'right' : 'left' }]}
+            placeholder={t('search.placeholder')}
             placeholderTextColor="#aaa"
             value={searchText}
             onChangeText={setSearchText}

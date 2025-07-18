@@ -1,11 +1,12 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import ProductCard from '../../../components/products/ProductCard';
 import { getProducts } from '../../../src/store/api/productApi';
 import { AppDispatch, RootState } from '../../../src/store/store';
 import { ProductDto } from '../../../src/store/utility/interfaces/productInterface';
-import ProductCard from '../../../components/products/ProductCard';
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +16,7 @@ export default function NewArrivals() {
   const { productsNew, loading } = useSelector((state: RootState) => state.product);
   const [visibleProducts, setVisibleProducts] = useState<ProductDto[]>([]);
   const [page, setPage] = useState(1);
+  const { t } = useTranslation();
 
   useEffect(() => {
     dispatch(getProducts());
@@ -39,7 +41,7 @@ export default function NewArrivals() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>New Arrivals</Text>
+      <Text style={styles.title}>{t('home.newArrivals')}</Text>
       {loading && visibleProducts.length === 0 ? (
         <View style={{ justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
           <ActivityIndicator size="large" color="#36c7f6" />

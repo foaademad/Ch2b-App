@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ProductCard from '../../../components/products/ProductCard';
 import api from '../../../src/store/utility/api/api';
@@ -32,6 +33,7 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   // جلب المنتجات للصفحات الحالية لكل كاتيجوري
   const fetchProducts = async (pages: { [catId: string]: number }, append = false) => {
@@ -97,7 +99,7 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.headerTitle}>Daily Deals</Text>
+      <Text style={styles.headerTitle}>{t('home.dailyDeals')}</Text>
       {loading && (
         <View style={styles.loadingRow}>
           <ActivityIndicator size="large" color="#36c7f6" />
@@ -122,7 +124,7 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
           {loadingMore ? (
             <ActivityIndicator size="small" color="#fff" />
           ) : (
-            <Text style={styles.loadMoreText}>Load More</Text>
+            <Text style={styles.loadMoreText}>{t('home.loadMore')}</Text>
           )}
         </TouchableOpacity>
       )}

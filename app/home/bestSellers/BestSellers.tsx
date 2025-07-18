@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductCard from '../../../components/products/ProductCard';
@@ -15,6 +16,7 @@ const BestSellers = () => {
   const { productsBest, loading } = useSelector((state: RootState) => state.product);
   const [visibleProducts, setVisibleProducts] = useState<ProductDto[]>([]);
   const [page, setPage] = useState(1);
+  const { t } = useTranslation();
 
   useEffect(() => {
     dispatch(getProducts());
@@ -39,7 +41,7 @@ const BestSellers = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Best Sellers</Text>
+      <Text style={styles.title}>{t('home.bestSellers')}</Text>
       {loading && visibleProducts.length === 0 ? (
         <View style={{ justifyContent: 'center', alignItems: 'center', minHeight: 120 }}>
           <ActivityIndicator size="large" color="#36c7f6" />

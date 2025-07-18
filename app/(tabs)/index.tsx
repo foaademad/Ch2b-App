@@ -17,7 +17,8 @@ import DailyDeals from '../home/dailyDeals/DailyDeals';
 import NewArrivals from '../home/newArrivals/NewArrivals';
 
 function AnimatedSearchBar() {
-  const { t } = useTranslation();
+ const { t } = useTranslation();
+  const { language, isRTL } = useLanguage();
   const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
   const widthAnim = useRef(new Animated.Value(0.85)).current;
@@ -64,13 +65,13 @@ function AnimatedSearchBar() {
         ]}
       >
         <TouchableOpacity 
-          style={searchStyles.searchTouchable}
+          style={[searchStyles.searchTouchable, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
           onPress={handleSearchPress}
           activeOpacity={0.8}
         >
           <TextInput
-            style={searchStyles.searchText}
-            placeholder={t("searchProducts")}
+            style={[searchStyles.searchText, { textAlign: isRTL ? 'right' : 'left' }]}
+            placeholder={t('search.placeholder')}
             onFocus={handleFocus}
             onBlur={handleBlur}
             placeholderTextColor="#aaa"
@@ -108,6 +109,7 @@ const searchStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
+    gap: 10,
   },
   searchText: {
     flex: 1,
