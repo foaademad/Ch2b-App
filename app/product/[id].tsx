@@ -3,15 +3,15 @@ import { Heart } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Video from "react-native-video";
@@ -402,7 +402,8 @@ export default function ProductDetails() {
               </Text>
             </>
           )}
-          {product.configuredItems?.length > 0 && <TouchableOpacity
+          {product.configuredItems?.length > 0 &&
+           <TouchableOpacity
             style={[
               styles.addToCartBtn,
               { backgroundColor: totalQuantity > 0 ? "#36c7f6" : "#ccc" },

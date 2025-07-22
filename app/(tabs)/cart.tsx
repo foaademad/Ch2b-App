@@ -16,17 +16,14 @@ const CartScreen = () => {
   const dispatch = useDispatch();
   const { items: cart, isLoading } = useSelector((state: RootState) => state.cart);
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
+  const [cartRequested, setCartRequested] = React.useState(false);
 
   useEffect(() => {
-    // تحميل البيانات فقط إذا لم تكن محملة بالفعل وكان المستخدم موجود
-    if (userId && cart.length === 0 && !isLoading) {
-      try {
-        dispatch(getCartItems() as any);
-      } catch (error) {
-        console.log("error loading cart items:", error);
-      }
+    if (userId && cart.length === 0 && !isLoading && !cartRequested) {
+      setCartRequested(true);
+      dispatch(getCartItems() as any);
     }
-  }, [dispatch, userId, cart.length, isLoading]);
+  }, [dispatch, userId, cart.length, isLoading, cartRequested]);
 
   const total = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
