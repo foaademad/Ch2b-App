@@ -1,54 +1,28 @@
-// البيانات المحلية في النموذج
-export interface CreateProblemRequest {
-  name: string;
-  email: string;
-  phone?: string;
-  category: string;
-  description: string;
-  image?: string; // base64 string if image is provided
+export interface ImageDto {
+  id?: string;
+  fileName?: string;
+  fileType?: string;
+  url?: string;
+  fileSize?: string;
+  publicId?: string;
 }
 
-// البيانات المرسلة للـ API (بأسماء الحقول الصحيحة)
-export interface CreateProblemApiData {
-  Name: string;
-  Email: string;
-  PhoneNumber?: string;
-  Category: string;
-  Description: string;
-  Image?: string;
-}
-
-// بيانات المشكلة المُنشأة من الخادم
-export interface ProblemResult {
-  id: number;
+export interface ProblemInterface {
+  id?: number;
   name: string;
   description: string;
-  type: number; // 0 = مستخدم عادي
+  type: number; // integer(int32) حسب الـ API
   phoneNumber: string;
   email: string;
-  image: string | null;
-  imageId: string | null;
+  image?: string; // string(binary) - optional
+  imageId?: string; // string(Guid) - optional
+  imageDto?: ImageDto; // كائن الصورة - optional
 }
 
-// استجابة الخادم الكاملة
-export interface CreateProblemApiResponse {
-  message: string;
-  isSuccess: boolean;
-  statusCode: number;
-  result: ProblemResult;
+export enum ProblemType {
+  TechSupport = 0,
+  Account = 1,
+  Other = 2,
+  Suggestion = 3,
+  Bug = 4,
 }
-
-// استجابة محلية مبسطة
-export interface CreateProblemResponse {
-  success: boolean;
-  message: string;
-  problemId?: number;
-  result?: ProblemResult;
-}
-
-export interface SupportState {
-  loading: boolean;
-  error: string | null;
-  success: boolean;
-  lastSubmittedProblem?: CreateProblemResponse;
-} 

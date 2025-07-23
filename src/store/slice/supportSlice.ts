@@ -1,59 +1,44 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CreateProblemResponse, SupportState } from '../utility/interfaces/supportInterface';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ProblemInterface } from "../utility/interfaces/supportInterface";
 
-const initialState: SupportState = {
-  loading: false,
+interface IProblemState {
+  isLoading: boolean;
+  error: string | null;
+  problem: ProblemInterface |null;
+}
+
+const initialState: IProblemState = {
+  isLoading: false,
   error: null,
-  success: false,
-  lastSubmittedProblem: undefined
+  problem: null,
 };
 
-const supportSlice = createSlice({
-  name: 'support',
+const ProblemSlice = createSlice({
+  name: "problem",
   initialState,
   reducers: {
-    // تعيين حالة التحميل
     setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
+      state.isLoading = action.payload;
     },
-    // تعيين رسالة خطأ
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
-      state.loading = false;
-      state.success = false;
     },
-    // تعيين حالة النجاح
-    setSuccess: (state, action: PayloadAction<CreateProblemResponse>) => {
-      state.loading = false;
-      state.error = null;
-      state.success = true;
-      state.lastSubmittedProblem = action.payload;
+    setProblem: (state, action: PayloadAction<ProblemInterface | null>) => {
+      state.problem = action.payload;
     },
-    // إعادة تعيين حالة الدعم
-    resetSupportState: (state) => {
-      state.loading = false;
-      state.error = null;
-      state.success = false;
-      state.lastSubmittedProblem = undefined;
+    clearProblem: (state) => {
+      state.problem = null;
     },
-    // مسح رسالة الخطأ
-    clearError: (state) => {
-      state.error = null;
-    },
-    // مسح حالة النجاح
-    clearSuccess: (state) => {
-      state.success = false;
-    }
-  }
+    
+   
+  },
 });
 
 export const { 
-  setLoading,
-  setError,
-  setSuccess,
-  resetSupportState, 
-  clearError, 
-  clearSuccess 
-} = supportSlice.actions;
+  setLoading, 
+  setError, 
+  setProblem,
+  clearProblem,
+} = ProblemSlice.actions;
 
-export default supportSlice.reducer; 
+export default ProblemSlice.reducer;

@@ -6,7 +6,7 @@ import commitionReducer from './slice/commitionScimaSlice';
 import imageSearchReducer from './slice/imageSearchSlice';
 import productReducer from './slice/productSlice';
 import profileReducer from './slice/profileSlice';
-import supportReducer from './slice/supportSlice';
+import problemReducer from './slice/supportSlice';
 import wishlistReducer from './slice/wishlistSlice';
 
 export const store = configureStore({
@@ -19,7 +19,7 @@ export const store = configureStore({
     imageSearch: imageSearchReducer,
     profile: profileReducer,
     commition: commitionReducer,
-    support: supportReducer,
+    problem: problemReducer,
   },
 });
 

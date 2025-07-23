@@ -485,6 +485,12 @@
     },
     "error": "Error",
     "success": "Success",
+    "success_message": "Your message has been sent successfully! We will contact you soon.",
+    "permission_denied": "Permission Denied",
+    "permission_message": "Please allow access to your photo library to upload images",
+    "is_required": "is required",
+    "invalid_email": "Please enter a valid email address",
+    "validation_error": "Validation Error",
     "fill_required_fields": "Please fill in all required fields",
     "message_sent": "Your message has been sent successfully!",
     "support_will_contact": "Technical support will contact you as soon as possible.",
@@ -494,6 +500,31 @@
     "server_error": "Server error. Please try again later.",
     "image_upload": "Image Upload",
     "image_upload_desc": "Image upload feature will be available soon"
+  },
+  "help": {
+    "report": {
+      "form": {
+        "name": "Full Name",
+        "placename": "Enter your full name",
+        "email": "Email Address",
+        "placeemail": "Enter your email address",
+        "number": "Phone Number",
+        "comment": "Message",
+        "placecomment": "Describe your issue in detail",
+        "type": {
+          "title": "Problem Type",
+          "subtitle1": "Select problem type",
+          "subtitle2": "Order Status",
+          "subtitle3": "Payment Issue",
+          "subtitle4": "Shipping Issue",
+          "subtitle5": "Return Request",
+          "subtitle6": "Website Issue",
+          "subtitle7": "Product Issue",
+          "subtitle8": "Other"
+        }
+      },
+      "submit": "Send Message"
+    }
   },
   "common": {
     "ok": "OK"

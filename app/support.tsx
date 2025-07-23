@@ -1,131 +1,134 @@
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Mail, Phone, Upload } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import { Formik } from 'formik';
+import { ArrowLeft, Mail, Phone, Upload, X } from 'lucide-react-native';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActivityIndicator,
+  Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { useDispatch, useSelector } from 'react-redux';
+import * as Yup from 'yup';
 import { useLanguage } from '../src/context/LanguageContext';
-import { createProblem } from '../src/store/api/supportApi';
-import { clearError, clearSuccess } from '../src/store/slice/supportSlice';
-import { RootState } from '../src/store/store';
+
+// Validation Schema using Yup
+const validationSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(2, 'Name must be at least 2 characters')
+    .required('Name is required'),
+  email: Yup.string()
+    .email('Invalid email format')
+    .required('Email is required'),
+  subject: Yup.string()
+    .required('Problem type is required'),
+  message: Yup.string()
+    .min(10, 'Message must be at least 10 characters')
+    .required('Message is required'),
+  orderNumber: Yup.string()
+    .required('Phone number is required'),
+});
+
+interface FormValues {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  orderNumber: string;
+}
 
 export default function SupportScreen() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
   const router = useRouter();
-  const dispatch = useDispatch();
-  
-  // Redux state
-  const { loading, error, success, lastSubmittedProblem } = useSelector((state: RootState) => state.support);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    category: 'Other',
-    description: '',
-  });
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState<{
+    uri: string;
+    fileName?: string;
+    mimeType?: string;
+    fileSize?: number;
+  } | null>(null);
+
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   const problemCategories = [
-    { value: 'shipping', label: t('support.categories.shipping') },
-    { value: 'payment', label: t('support.categories.payment') },
-    { value: 'product', label: t('support.categories.product') },
-    { value: 'account', label: t('support.categories.account') },
-    { value: 'technical', label: t('support.categories.technical') },
-    { value: 'other', label: t('support.categories.other') },
+    { value: '', label: t('help.report.form.type.subtitle1') },
+    { value: 'order-status', label: t('help.report.form.type.subtitle2') },
+    { value: 'payment-issue', label: t('help.report.form.type.subtitle3') },
+    { value: 'shipping-issue', label: t('help.report.form.type.subtitle4') },
+    { value: 'return-request', label: t('help.report.form.type.subtitle5') },
+    { value: 'website-issue', label: t('help.report.form.type.subtitle6') },
+    { value: 'product-issue', label: t('help.report.form.type.subtitle7') },
+    { value: 'other', label: t('help.report.form.type.subtitle8') },
   ];
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const initialValues: FormValues = {
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+    orderNumber: '',
   };
 
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.email || !formData.description) {
-      Toast.show({
-        type: 'error',
-        text1: t('support.error'),
-        text2: t('support.fill_required_fields'),
-        position: 'top',
-      });
+  const handleSubmit = (values: FormValues, { resetForm }: any) => {
+    // Static form submission - just show success message
+    Alert.alert(
+      t('support.success'),
+      t('support.success_message'),
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            resetForm();
+            setSelectedImage(null);
+            setTimeout(() => {
+              router.back();
+            }, 1000);
+          }
+        }
+      ]
+    );
+
+    // Show toast message
+    Toast.show({
+      type: 'success',
+      text1: t('support.success'),
+      text2: t('support.success_message'),
+      position: 'top',
+      visibilityTime: 3000,
+    });
+  };
+
+  const selectImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('support.permission_denied'), t('support.permission_message'));
       return;
     }
 
-    console.log('Submitting support form with data:', formData);
-
-    // إرسال البيانات للـ API
-    const result = await dispatch(createProblem(formData) as any);
-    
-    console.log('Support form submission result:', result);
-    
-    if (result.success) {
-      // إعادة تعيين النموذج
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        category: 'Other',
-        description: '',
-      });
-      setSelectedImage(null);
-      
-      console.log('Form reset after successful submission');
-    }
-  };
-
-  // متابعة تغييرات الحالة
-  useEffect(() => {
-    if (success && lastSubmittedProblem) {
-      const { message, problemId, result } = lastSubmittedProblem;
-      
-      Toast.show({
-        type: 'success',
-        text1: t('support.success'),
-        text2: `${message}\n${t('support.problem_id', { id: problemId })}`,
-        position: 'top',
-        visibilityTime: 5000, // وقت أطول لقراءة المعلومات
-      });
-      
-      dispatch(clearSuccess());
-      
-      // العودة للصفحة السابقة بعد 3 ثوان
-      setTimeout(() => {
-        router.back();
-      }, 3000);
-    }
-  }, [success, lastSubmittedProblem]);
-
-  useEffect(() => {
-    if (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('support.error'),
-        text2: error,
-        position: 'top',
-        visibilityTime: 4000,
-      });
-      
-      dispatch(clearError());
-    }
-  }, [error]);
-
-  const selectImage = () => {
-    // هنا يمكن إضافة منطق اختيار الصورة
-    Toast.show({
-      type: 'info',
-      text1: t('support.image_upload'),
-      text2: t('support.image_upload_desc'),
-      position: 'top',
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.7,
     });
+
+    if (!result.canceled && result.assets[0]) {
+      const asset = result.assets[0];
+      setSelectedImage({
+        uri: asset.uri,
+        fileName: asset.fileName || 'uploaded_image.jpg',
+        mimeType: asset.mimeType || 'image/jpeg',
+        fileSize: asset.fileSize || 0,
+      });
+    }
   };
 
   return (
@@ -138,119 +141,183 @@ export default function SupportScreen() {
         <Text style={styles.headerTitle}>{t('support.title')}</Text>
       </View>
 
-      <ScrollView style={styles.content}>
-        {/* Contact Information */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('support.contact_info')}</Text>
-          
-          <View style={styles.contactItem}>
-            <View style={styles.contactIcon}>
-              <Phone size={20} color="#36c7f6" />
-            </View>
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactTitle}>{t('support.phone_support')}</Text>
-              <Text style={styles.contactSubtitle}>+1 (555) 123-4567</Text>
-              <Text style={styles.contactTime}>Monday - Friday, 9am - 5pm EST</Text>
-            </View>
-          </View>
+      <TouchableWithoutFeedback onPress={() => setShowCategoryPicker(false)}>
+        <ScrollView style={styles.content}>
+          {/* Contact Information */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('support.contact_info')}</Text>
 
-          <View style={styles.contactItem}>
-            <View style={styles.contactIcon}>
-              <Mail size={20} color="#36c7f6" />
+            <View style={styles.contactItem}>
+              <View style={styles.contactIcon}>
+                <Phone size={20} color="#36c7f6" />
+              </View>
+              <View style={styles.contactDetails}>
+                <Text style={styles.contactTitle}>{t('support.phone_support')}</Text>
+                <Text style={styles.contactSubtitle}>+1 (555) 123-4567</Text>
+                <Text style={styles.contactTime}>Monday - Friday, 9am - 5pm EST</Text>
+              </View>
             </View>
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactTitle}>{t('support.email_support')}</Text>
-              <Text style={styles.contactSubtitle}>support@importease.com</Text>
-              <Text style={styles.contactTime}>{t('support.response_time')}</Text>
-            </View>
-          </View>
 
-          
-        </View>
-
-        {/* Send Message Form */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('support.send_message')}</Text>
-          
-          <View style={styles.formRow}>
-            <View style={styles.halfWidth}>
-              <Text style={styles.label}>{t('support.name')}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={t('support.name_placeholder')}
-                value={formData.name}
-                onChangeText={(text) => handleInputChange('name', text)}
-                editable={!loading}
-              />
-            </View>
-            <View style={styles.halfWidth}>
-              <Text style={styles.label}>{t('support.email')}</Text>
-              <TextInput
-                style={styles.input}
-                placeholder={t('support.email_placeholder')}
-                value={formData.email}
-                onChangeText={(text) => handleInputChange('email', text)}
-                keyboardType="email-address"
-                editable={!loading}
-              />
+            <View style={styles.contactItem}>
+              <View style={styles.contactIcon}>
+                <Mail size={20} color="#36c7f6" />
+              </View>
+              <View style={styles.contactDetails}>
+                <Text style={styles.contactTitle}>{t('support.email_support')}</Text>
+                <Text style={styles.contactSubtitle}>support@importease.com</Text>
+                <Text style={styles.contactTime}>{t('support.response_time')}</Text>
+              </View>
             </View>
           </View>
 
-          <Text style={styles.label}>{t('support.phone')}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder={t('support.phone_placeholder')}
-            value={formData.phone}
-            onChangeText={(text) => handleInputChange('phone', text)}
-            keyboardType="phone-pad"
-            editable={!loading}
-          />
+          {/* Send Message Form with Formik */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>{t('support.send_message')}</Text>
 
-          <Text style={styles.label}>{t('support.problem_category')}</Text>
-          <View style={styles.picker}>
-            <Text style={styles.pickerText}>
-              {problemCategories.find(cat => cat.value === formData.category.toLowerCase())?.label || t('support.categories.other')}
-            </Text>
+            <Formik
+              initialValues={initialValues}
+              validationSchema={validationSchema}
+              onSubmit={handleSubmit}
+            >
+              {({ values, errors, touched, handleChange, handleBlur, handleSubmit, setFieldValue, isSubmitting }) => (
+                <>
+                  <View style={styles.formRow}>
+                    <View style={styles.halfWidth}>
+                      <Text style={styles.label}>{t('help.report.form.name')}</Text>
+                      <TextInput
+                        style={[styles.input, touched.name && errors.name ? styles.inputError : null]}
+                        placeholder={t('help.report.form.placename')}
+                        value={values.name}
+                        onChangeText={handleChange('name')}
+                        onBlur={handleBlur('name')}
+                      />
+                      {touched.name && errors.name && (
+                        <Text style={styles.errorText}>{errors.name}</Text>
+                      )}
+                    </View>
+                    <View style={styles.halfWidth}>
+                      <Text style={styles.label}>{t('help.report.form.email')}</Text>
+                      <TextInput
+                        style={[styles.input, touched.email && errors.email ? styles.inputError : null]}
+                        placeholder={t('help.report.form.placeemail')}
+                        value={values.email}
+                        onChangeText={handleChange('email')}
+                        onBlur={handleBlur('email')}
+                        keyboardType="email-address"
+                      />
+                      {touched.email && errors.email && (
+                        <Text style={styles.errorText}>{errors.email}</Text>
+                      )}
+                    </View>
+                  </View>
+
+                  <Text style={styles.label}>{t('help.report.form.number')}</Text>
+                  <TextInput
+                    style={[styles.input, touched.orderNumber && errors.orderNumber ? styles.inputError : null]}
+                    placeholder="e.g. +1234567890"
+                    value={values.orderNumber}
+                    onChangeText={handleChange('orderNumber')}
+                    onBlur={handleBlur('orderNumber')}
+                  />
+                  {touched.orderNumber && errors.orderNumber && (
+                    <Text style={styles.errorText}>{errors.orderNumber}</Text>
+                  )}
+
+                  <Text style={styles.label}>{t('help.report.form.type.title')}</Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.picker, 
+                      showCategoryPicker && styles.pickerActive,
+                      touched.subject && errors.subject ? styles.inputError : null
+                    ]}
+                    onPress={() => setShowCategoryPicker(!showCategoryPicker)}
+                  >
+                    <Text style={styles.pickerText}>
+                      {problemCategories.find(cat => cat.value === values.subject)?.label || t('help.report.form.type.subtitle1')}
+                    </Text>
+                  </TouchableOpacity>
+                  {touched.subject && errors.subject && (
+                    <Text style={styles.errorText}>{errors.subject}</Text>
+                  )}
+
+                  {showCategoryPicker && (
+                    <View style={styles.categoryDropdown}>
+                      {problemCategories.map((category) => (
+                        <TouchableOpacity
+                          key={category.value}
+                          style={[
+                            styles.categoryOption,
+                            values.subject === category.value && styles.selectedOption
+                          ]}
+                          onPress={() => {
+                            setFieldValue('subject', category.value);
+                            setShowCategoryPicker(false);
+                          }}
+                        >
+                          <Text style={[
+                            styles.categoryOptionText,
+                            values.subject === category.value && styles.selectedOptionText
+                          ]}>
+                            {category.label}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+
+                  <Text style={styles.label}>{t('help.report.form.comment')}</Text>
+                  <TextInput
+                    style={[
+                      styles.input, 
+                      styles.textArea,
+                      touched.message && errors.message ? styles.inputError : null
+                    ]}
+                    placeholder={t('help.report.form.placecomment')}
+                    value={values.message}
+                    onChangeText={handleChange('message')}
+                    onBlur={handleBlur('message')}
+                    multiline
+                    numberOfLines={6}
+                    textAlignVertical="top"
+                  />
+                  {touched.message && errors.message && (
+                    <Text style={styles.errorText}>{errors.message}</Text>
+                  )}
+
+                  <Text style={styles.label}>{t('support.image_optional')}</Text>
+                  <TouchableOpacity
+                    style={styles.imageUpload}
+                    onPress={selectImage}
+                  >
+                    {selectedImage ? (
+                      <View style={styles.selectedImageContainer}>
+                        <Image source={{ uri: selectedImage.uri }} style={styles.selectedImage} />
+                        <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.removeImageButton}>
+                          <X size={20} color="#fff" />
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <>
+                        <Upload size={20} color="#666" />
+                        <Text style={styles.imageUploadText}>{t('support.choose_file')}</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                  <Text style={styles.imageHint}>{t('support.image_help')}</Text>
+
+                  <TouchableOpacity
+                    style={[styles.submitButton, isSubmitting && styles.disabledButton]}
+                    onPress={() => handleSubmit()}
+                    disabled={isSubmitting}
+                  >
+                    <Text style={styles.submitButtonText}>{t('help.report.submit')}</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </Formik>
           </View>
-
-          <Text style={styles.label}>{t('support.image_optional')}</Text>
-          <TouchableOpacity 
-            style={[styles.imageUpload, loading && styles.disabledButton]} 
-            onPress={selectImage}
-            disabled={loading}
-          >
-            <Upload size={20} color="#666" />
-            <Text style={styles.imageUploadText}>{t('support.choose_file')}</Text>
-          </TouchableOpacity>
-          <Text style={styles.imageHint}>{t('support.image_help')}</Text>
-
-          <Text style={styles.label}>{t('support.description')}</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder={t('support.description_placeholder')}
-            value={formData.description}
-            onChangeText={(text) => handleInputChange('description', text)}
-            multiline
-            numberOfLines={6}
-            textAlignVertical="top"
-            editable={!loading}
-          />
-
-          <TouchableOpacity 
-            style={[styles.submitButton, loading && styles.disabledButton]} 
-            onPress={handleSubmit}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <Text style={styles.submitButtonText}>{t('support.send_message')}</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-
-       
-      </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </View>
   );
 }
@@ -345,6 +412,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
   },
+  inputError: {
+    borderColor: '#ff4444',
+    borderWidth: 2,
+  },
+  errorText: {
+    color: '#ff4444',
+    fontSize: 12,
+    marginTop: 4,
+    marginLeft: 4,
+  },
   textArea: {
     height: 120,
   },
@@ -358,6 +435,34 @@ const styles = StyleSheet.create({
   pickerText: {
     fontSize: 16,
     color: '#333',
+  },
+  pickerActive: {
+    borderColor: '#36c7f6',
+    borderWidth: 2,
+  },
+  categoryDropdown: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginTop: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    maxHeight: 150,
+    overflow: 'hidden',
+  },
+  categoryOption: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  categoryOptionText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedOption: {
+    backgroundColor: '#f0f8ff',
+  },
+  selectedOptionText: {
+    fontWeight: 'bold',
+    color: '#36c7f6',
   },
   imageUpload: {
     flexDirection: 'row',
@@ -393,17 +498,28 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.7,
   },
-  socialLinks: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 20,
-  },
-  socialButton: {
+  selectedImageContainer: {
+    position: 'relative',
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: '#f0f0f0',
+    overflow: 'hidden',
+  },
+  selectedImage: {
+    width: '100%',
+    height: '100%',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    width: 20,
+    height: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
   },
-}); 
+});
