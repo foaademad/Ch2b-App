@@ -2,19 +2,19 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { getWishlist, removeFromSallerWishlistApi, removeFromWishlistApi } from '@/src/store/api/wishlistApi';
 import { RootState } from '@/src/store/store';
+import { useRouter } from 'expo-router';
 import { Heart, Store } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
-import { addToCart } from '../../src/store/api/cartApi';
 
 const WishlistScreen = () => {
   const { t } = useTranslation();
   const { language, isRTL } = useLanguage();
   const dispatch = useDispatch();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'sellers'
   const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
   console.log("wishlist from Redux:", wishlist);
@@ -31,19 +31,16 @@ const WishlistScreen = () => {
   console.log("favoriteItems extracted:", favoriteItems);
 
 
-  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
-  const changeQuantity = (id: string, delta: number) => {
-    setQuantities(prev => ({
-      ...prev,
-      [id]: Math.max(1, (prev[id] || 1) + delta)
-    }));
-  };
 
   const renderFavoriteItems = () => (
     <ScrollView style={styles.content}>
       {favoriteItems.map((item) => (
-        <View key={item.id} style={styles.wishlistItem}>
+        <TouchableOpacity 
+          key={item.id} 
+          style={styles.wishlistItem}
+          onPress={() => router.push(`/product/${item.productId || item.id}`)}
+        >
           <Image source={{ uri: item.image }} style={styles.itemImage} />
           <View style={styles.itemDetails}>
             <Text style={styles.itemName}>{item.title}</Text>
@@ -52,63 +49,19 @@ const WishlistScreen = () => {
               <Text style={styles.rating}>★ {item.vendorRating}</Text>
               <Text style={styles.reviews}>({item.vendorRating} {t('wishlist.reviews')})</Text>
             </View>
-            <View>  
-            {/* أزرار الكمية */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
-              <TouchableOpacity onPress={() => changeQuantity(item.id.toString(), -1)} style={styles.qtyButton}>
-                <Text style={styles.qtyButtonText}>-</Text>
-              </TouchableOpacity>
-              <Text style={{ marginHorizontal: 10 }}>{quantities[item.id] || 1}</Text>
-              <TouchableOpacity onPress={() => changeQuantity(item.id.toString(), 1)} style={styles.qtyButton}>
-                <Text style={styles.qtyButtonText}>+</Text>
-              </TouchableOpacity>
-              
-            </View>
-            <View>
-            <TouchableOpacity 
-              style={[styles.addToCartButton]}
-              onPress={async () => {
-                const quantity = quantities[item.id] || 1;
-                const cartItem = {
-                  productId: (item.productId || item.id).toString(),
-                  name: item.name,
-                  title: item.title,
-                  image: (item.image || "").slice(0, 1000),
-                  LinkUrl: (item.image || "").slice(0, 1000),
-                  Quntity: quantity,
-                  price: item.price,
-                  totalPrice: (item.price || 0) * quantity,
-                };
-                try {
-                  await dispatch(addToCart(userId || "", cartItem) as any);
-                } catch (error: any) {
-                  Toast.show({
-                    type: "error",
-                    text1: t('wishlist.already_in_cart')
-                  });
-                  console.error(error);
-                }
-              }}
-            >
-              <Text style={styles.addToCartButtonText}>{t('wishlist.add_to_cart')}</Text>
-            </TouchableOpacity>
-            </View>
-            </View>
           </View>
-          <View style={styles.actionButtons}>
-           
-            <TouchableOpacity 
-              style={[styles.actionButton, styles.removeButton]}
-              onPress={async () => {
-                console.log("Remove from wishlist:", item.id);
-                await dispatch(removeFromWishlistApi(item.id.toString()) as any);
-                dispatch(getWishlist() as any);
-              }}
-            >
-              <Heart size={20} color="#ff3b30" fill="#ff3b30" />
-            </TouchableOpacity>
-          </View>
-        </View>
+          <TouchableOpacity 
+            style={[styles.actionButton, styles.removeButton]}
+            onPress={async (e) => {
+              e.stopPropagation(); // منع تشغيل navigation عند الضغط على زر الحذف
+              console.log("Remove from wishlist:", item.id);
+              await dispatch(removeFromWishlistApi(item.id.toString()) as any);
+              dispatch(getWishlist() as any);
+            }}
+          >
+            <Heart size={20} color="#ff3b30" fill="#ff3b30" />
+          </TouchableOpacity>
+        </TouchableOpacity>
       ))}
 
       {favoriteItems.length === 0 && (
@@ -352,12 +305,7 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
-  actionButtons: {
-    justifyContent: 'space-between',
-    paddingLeft: 12,
-    
-    
-  },
+
   actionButton: {
     width: 40,
     height: 40,
@@ -366,38 +314,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
-  addToCartButton: {
-    backgroundColor: '#36c7f6',
-    borderRadius: 16,
-    padding: 12,
-    width: 120,
-    height: 40,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    
-    marginTop: 10,
-    ...Shadows.small,
-  },
-  addToCartButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    textAlign: 'center',
-    height: '100%',
 
-  },
   removeButton: {
-   
+    position: 'absolute',
+    top: 8,
+    right: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     borderRadius: 16,
     padding: 4,
-
     ...Shadows.small,
   },
   emptyState: {
@@ -418,20 +342,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
   },
-  qtyButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#e6f7ff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 2,
-  },
-  qtyButtonText: {
-    fontSize: 20,
-    color: '#36c7f6',
-    fontWeight: 'bold',
-  },
+
 });
 
 export default WishlistScreen; 

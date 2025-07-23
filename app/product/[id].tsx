@@ -312,6 +312,8 @@ export default function ProductDetails() {
                   (item.price?.convertedPriceList?.internal?.price || 0)
                 ).toFixed(2)}
               </Text>
+              
+              
             </View>
           ))}
         </View>
@@ -319,6 +321,86 @@ export default function ProductDetails() {
 
         {/* Cart Summary and Add to Cart Button */}
         <View style={styles.cartSummary}>
+          {/* Add to Cart Button for configured items */}
+          {product.configuredItems?.length > 0 && (
+            <>
+              <Text style={{ fontSize: 16, fontWeight: "bold", marginBottom: 10 }}>
+                {t('product.total_quantity')}:{" "}
+                <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
+              </Text>
+              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6", marginBottom: 15 }}>
+                {t('product.total_price')}: SAR {totalPrice.toFixed(2)}
+              </Text>
+              <TouchableOpacity
+                style={[
+                  styles.addToCartBtn,
+                  { backgroundColor: totalQuantity > 0 ? "#36c7f6" : "#ccc" },
+                ]}
+                disabled={totalQuantity === 0}
+                onPress={async () => {
+                  if (userId && totalQuantity > 0) {
+                    let addedItems = 0;
+                    for (const item of product.configuredItems || []) {
+                      const qty = quantities[item.id] || 0;
+                      if (qty > 0) {
+                        // Create unique productId for each configured item
+                        const configuratorString = item.configurators?.map(c => `${c.pid}:${c.vid}`).join("-") || "";
+                        const uniqueProductId = `${product.id}-${configuratorString}`;
+                        
+                        const cartItem = {
+                          productId: uniqueProductId,
+                          title: `${product.title} (${item.configurators?.map(c => `${c.pid}: ${c.vid}`).join(", ")})`,
+                          image: product.mainPictureUrl?.slice(0, 1000),
+                          linkUrl: product.mainPictureUrl?.slice(0, 1000),
+                          quntity: qty,
+                          price: item.price?.convertedPriceList?.internal?.price,
+                          totalPrice: qty * (item.price?.convertedPriceList?.internal?.price || 0),
+                          physicalParameters: JSON.stringify({
+                            weight: product.physicalParameters?.weight || 0,
+                            height: product.physicalParameters?.height || 0,
+                            width: product.physicalParameters?.width || 0
+                          }),
+                          physicalParametersJson: {
+                            weight: product.physicalParameters?.weight || 0,
+                            height: product.physicalParameters?.height || 0,
+                            width: product.physicalParameters?.width || 0
+                          },
+                          // Store configurators info and original product ID for easier navigation
+                          configuratorsInfo: JSON.stringify(item.configurators),
+                          originalProductId: product.id // Store original ID for navigation
+                        };
+                        console.log('Adding configured item to cart:', cartItem);
+                        try {
+                          await dispatch(addToCart(userId, cartItem));
+                          addedItems++;
+                        } catch (error: any) {
+                          console.error('Error adding item to cart:', error);
+                        }
+                      }
+                    }
+                    if (addedItems > 0) {
+                      Toast.show({
+                        type: "success",
+                        text1: t('product.added_to_cart_successfully')
+                      });
+                      // Reset all quantities after adding to cart
+                      setQuantities({});
+                    } else {
+                      Toast.show({
+                        type: "error",
+                        text1: "Failed to add items to cart"
+                      });
+                    }
+                  }
+                }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
+                  {t('product.add_to_cart')}
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+
           {/* If there are no configuredItems, add a card for the product itself */}
           {(!product.configuredItems || product.configuredItems.length === 0) && (
             <View style={styles.configCard}>
@@ -362,21 +444,37 @@ export default function ProductDetails() {
                   if (userId && singleQuantity > 0) {
                     const cartItem = {
                       productId: product.id,
-                      name: product.name,
                       title: product.title,
                       image: product.mainPictureUrl?.slice(0, 1000),
-                      LinkUrl: product.mainPictureUrl?.slice(0, 1000),
-                      Quntity: singleQuantity,
+                      linkUrl: product.mainPictureUrl?.slice(0, 1000),
+                      quntity: singleQuantity,
                       price: product.price?.convertedPriceList?.internal?.price,
                       totalPrice: (product.price?.convertedPriceList?.internal?.price || 0) * singleQuantity,
+                      physicalParameters: JSON.stringify({
+                        weight: product.physicalParameters?.weight || 0,
+                        height: product.physicalParameters?.height || 0,
+                        width: product.physicalParameters?.width || 0
+                      }),
+                      physicalParametersJson: {
+                        weight: product.physicalParameters?.weight || 0,
+                        height: product.physicalParameters?.height || 0,
+                        width: product.physicalParameters?.width || 0
+                      },
+                      originalProductId: product.id // Store original ID for navigation
                     };
                     console.log('cartItem:', cartItem);
                     try {
                       await dispatch(addToCart(userId, cartItem));
+                      Toast.show({
+                        type: "success",
+                        text1: t('product.added_to_cart_successfully')
+                      });
+                      // Reset quantity after adding to cart
+                      setSingleQuantity(0);
                     } catch (error: any) {
                       Toast.show({
                         type: "error",
-                        text1: "This card is already in the cart"
+                        text1: "This item is already in the cart"
                       });
                       console.error(error);
                     }
@@ -391,61 +489,7 @@ export default function ProductDetails() {
             </View>
           )}
 
-          {product.configuredItems?.length > 0 && (
-            <>
-              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                {t('product.total_quantity')}:{" "}
-                <Text style={{ color: "#36c7f6" }}>{totalQuantity}</Text>
-              </Text>
-              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#36c7f6" }}>
-                {t('product.total_price')}: SAR {totalPrice.toFixed(2)}
-              </Text>
-            </>
-          )}
-          {product.configuredItems?.length > 0 &&
-           <TouchableOpacity
-            style={[
-              styles.addToCartBtn,
-              { backgroundColor: totalQuantity > 0 ? "#36c7f6" : "#ccc" },
-            ]}
-            disabled={totalQuantity === 0}
-            onPress={async () => {
-              
-                if (userId && totalQuantity > 0) {
-                  product.configuredItems?.forEach(async (item) => {
-                    const qty = quantities[item.id] || 0;
-                    if (qty > 0) {
-                      const cartItem = {
-                        productId: product.id,
-                        name: product.name,
-                        title: `${product.title} (${item.configurators?.map(c => `${c.pid}: ${c.vid}`).join(", ")})`,
-                        image: product.mainPictureUrl?.slice(0, 1000),
-                        LinkUrl: product.mainPictureUrl?.slice(0, 1000),
-                        Quntity: qty,
-                        price: item.price?.convertedPriceList?.internal?.price,
-                        totalPrice: qty * (item.price?.convertedPriceList?.internal?.price || 0),
-                      };
-                      console.log('cartItem:', cartItem);
-                      try {
-                        await dispatch(addToCart(userId, cartItem));
-                      } catch (error: any) {
-                        Toast.show({
-                          type: "error",
-                          text1: "This card is already in the cart"
-                        });
-                        
-                      }
-                    }
-                  });
-                }
-              
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 16 }}>
-              {t('product.add_to_cart')}
-            </Text>
-          </TouchableOpacity>
-          }
+
         </View>
 
 

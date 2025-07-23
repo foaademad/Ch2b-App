@@ -1,5 +1,6 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { getCartItems, removeFromCart, updateCartItem } from '@/src/store/api/cartApi';
+import { setCartItems } from '@/src/store/slice/cartSlice';
 import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react-native';
@@ -27,16 +28,55 @@ const CartScreen = () => {
 
   const total = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
-  const handleQuantityChange = (itemId: number, change: number) => {
-    const item = cart.find(i => i.id === itemId);
+  const handleQuantityChange = (itemIndex: number, change: number) => {
+    const item = cart[itemIndex];
     if (item && userId) {
       const newQuantity = Math.max(1, (item.quntity || 1) + change);
-      dispatch(updateCartItem(userId, itemId.toString(), newQuantity, item) as any);
+      
+      // If item has an id from backend, update via API
+      if (item.id) {
+        dispatch(updateCartItem(userId, item.id.toString(), newQuantity, item) as any);
+      } else {
+        // For newly added items without backend id, update local state only
+        const updatedItem = { 
+          ...item, 
+          quntity: newQuantity,
+          totalPrice: (item.price || 0) * newQuantity
+        };
+        
+        // Update local cart state
+        const updatedCart = [...cart];
+        updatedCart[itemIndex] = updatedItem;
+        dispatch(setCartItems(updatedCart));
+      }
     }
   };
 
-  const handleProductPress = (productId: string) => {
-    router.push(`/product/${productId}`);
+  const handleProductPress = (productId: string, originalProductId?: string) => {
+    // Use originalProductId if available, otherwise extract from productId
+    let targetProductId = originalProductId || productId;
+    
+    // If no originalProductId provided, try to extract it from productId
+    if (!originalProductId) {
+
+      const colonIndex = productId.indexOf(':');
+      if (colonIndex !== -1) {
+
+        const substring = productId.substring(0, colonIndex);
+        const lastDashIndex = substring.lastIndexOf('-');
+        if (lastDashIndex !== -1) {
+          targetProductId = productId.substring(0, lastDashIndex);
+        }
+      }
+    }
+    
+    // Ensure we have a valid product ID before navigation
+    if (targetProductId && targetProductId.trim() !== '') {
+      console.log(`Navigating from cart to product: ${targetProductId}`);
+      router.push(`/product/${targetProductId}`);
+    } else {
+      console.error(`Invalid product ID: ${targetProductId} from ${productId}`);
+    }
   };
 
   const handleCheckout = () => {
@@ -45,9 +85,17 @@ const CartScreen = () => {
     }
   };
 
-  const handleRemoveFromCart = (id: number) => {
-    if (userId) {
-      dispatch(removeFromCart(userId, id.toString()) as any);
+  const handleRemoveFromCart = (itemIndex: number) => {
+    const item = cart[itemIndex];
+    if (userId && item) {
+      if (item.id) {
+        // If item has backend id, remove via API
+        dispatch(removeFromCart(userId, item.id.toString()) as any);
+      } else {
+        // For newly added items without backend id, remove from local state only
+        const updatedCart = cart.filter((_, idx) => idx !== itemIndex);
+        dispatch(setCartItems(updatedCart));
+      }
     }
   };
 
@@ -79,18 +127,57 @@ const CartScreen = () => {
             <TouchableOpacity 
               key={`cart-item-${item.productId}-${index}`} 
               style={styles.cartItem}
-              onPress={() => handleProductPress(item.productId || '')}
+              onPress={() => handleProductPress(item.productId || '', (item as any).originalProductId)}
             >
               <Image source={{ uri: item.image }} style={styles.itemImage} />
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.title}</Text>
                 <Text style={styles.itemPrice}>${(item.totalPrice || 0).toFixed(2)}</Text>
+                
+                {/* Configurators */}
+                {(item as any).configuratorsInfo && (
+                  <View style={styles.configuratorsContainer}>
+                    <Text style={styles.configuratorsTitle}>{t('product.configuration')}:</Text>
+                    {JSON.parse((item as any).configuratorsInfo).map((config: any, idx: number) => (
+                      <Text key={idx} style={styles.configuratorText}>
+                        {config.pid}: {config.vid}
+                      </Text>
+                    ))}
+                  </View>
+                )}  
+
+                {/* Physical Parameters */}
+                {item.physicalParametersJson && (
+                  ((item.physicalParametersJson.weight || 0) > 0 || 
+                   (item.physicalParametersJson.height || 0) > 0 || 
+                   (item.physicalParametersJson.width || 0) > 0)
+                ) && (
+                  <View style={styles.physicalParamsContainer}>
+                    <Text style={styles.physicalParamsTitle}>{t('product.physical_parameters')}:</Text>
+                    {item.physicalParametersJson.weight && item.physicalParametersJson.weight > 0 && (
+                      <Text style={styles.physicalParamText}>
+                        {t('product.weight')}: {item.physicalParametersJson.weight}
+                      </Text>
+                    )}
+                    {item.physicalParametersJson.height && item.physicalParametersJson.height > 0 && (
+                      <Text style={styles.physicalParamText}>
+                        {t('product.height')}: {item.physicalParametersJson.height}
+                      </Text>
+                    )}
+                    {item.physicalParametersJson.width && item.physicalParametersJson.width > 0 && (
+                      <Text style={styles.physicalParamText}>
+                        {t('product.width')}: {item.physicalParametersJson.width}
+                      </Text>
+                    )}
+                  </View>
+                )}
+                
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity 
                     style={styles.quantityButton}
                     onPress={(e) => {
                       e.stopPropagation();
-                      handleQuantityChange(item.id || 0, -1);
+                      handleQuantityChange(index, -1);
                     }}
                   >
                     <Minus size={16} color="#666" />
@@ -100,7 +187,7 @@ const CartScreen = () => {
                     style={styles.quantityButton}
                     onPress={(e) => {
                       e.stopPropagation();
-                      handleQuantityChange(item.id || 0, 1);
+                      handleQuantityChange(index, 1);
                     }}
                   >
                     <Plus size={16} color="#666" />
@@ -111,7 +198,7 @@ const CartScreen = () => {
                 style={styles.removeButton}
                 onPress={(e) => {
                   e.stopPropagation();
-                    handleRemoveFromCart(item.id || 0 );
+                  handleRemoveFromCart(index);
                 }}
               >
                 <Trash2 size={20} color="#ff3b30" />
@@ -281,5 +368,40 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  physicalParamsContainer: {
+    backgroundColor: '#f8fafd',
+    borderRadius: 8,
+    padding: 8,
+    marginVertical: 6,
+  },
+  physicalParamsTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  physicalParamText: {
+    fontSize: 11,
+    color: '#666',
+    marginBottom: 2,
+  },
+  configuratorsContainer: {
+    backgroundColor: '#e8f4fd',
+    borderRadius: 8,
+    padding: 8,
+    marginVertical: 6,
+  },
+  configuratorsTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#36c7f6',
+    marginBottom: 4,
+  },
+  configuratorText: {
+    fontSize: 11,
+    color: '#333',
+    marginBottom: 2,
+    fontWeight: '600',
   },
 });

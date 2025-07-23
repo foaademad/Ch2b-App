@@ -369,7 +369,10 @@
     "customer_reviews": "تقييمات العملاء",
     "no_reviews_available": "لا توجد تقييمات متاحة.",
     "no_description_available": "لا يوجد وصف متاح.",
-    "general_information": "معلومات عامة"
+    "general_information": "معلومات عامة",
+    "added_to_cart_successfully": "تم إضافة المنتج إلى السلة بنجاح",
+    "physical_parameters": "المعايير الفيزيائية",
+    "configuration": "التكوين"
   },
   "search": {
     "placeholder": "ابحث عن المنتجات...",
