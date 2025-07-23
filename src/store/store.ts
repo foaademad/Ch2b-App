@@ -2,10 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slice/authSlice';
 import cartReducer from './slice/cartSlice';
 import categoryReducer from './slice/categorySlice';
+import commitionReducer from './slice/commitionScimaSlice';
 import imageSearchReducer from './slice/imageSearchSlice';
 import productReducer from './slice/productSlice';
-import wishlistReducer from './slice/wishlistSlice';
 import profileReducer from './slice/profileSlice';
+import supportReducer from './slice/supportSlice';
+import wishlistReducer from './slice/wishlistSlice';
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -15,6 +18,8 @@ export const store = configureStore({
     wishlist: wishlistReducer,
     imageSearch: imageSearchReducer,
     profile: profileReducer,
+    commition: commitionReducer,
+    support: supportReducer,
   },
 });
 

@@ -1,155 +1,259 @@
-import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter } from 'expo-router';
-import { ChevronDown, ChevronLeft, ChevronUp, Mail, MessageSquare, Phone } from 'lucide-react-native';
-import React, { useState } from 'react';
+import { ArrowLeft, Mail, Phone, Upload } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import Toast from 'react-native-toast-message';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLanguage } from '../src/context/LanguageContext';
+import { createProblem } from '../src/store/api/supportApi';
+import { clearError, clearSuccess } from '../src/store/slice/supportSlice';
+import { RootState } from '../src/store/store';
 
-const HelpSupportScreen = () => {
+export default function SupportScreen() {
   const { t } = useTranslation();
+  const { isRTL } = useLanguage();
   const router = useRouter();
-  const { language } = useLanguage();
-  const isRTL = language === 'ar';
+  const dispatch = useDispatch();
+  
+  // Redux state
+  const { loading, error, success, lastSubmittedProblem } = useSelector((state: RootState) => state.support);
 
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    category: 'Other',
+    description: '',
+  });
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const faqItems = [
-    {
-      question: t('profile.help_support.faq_question_1'),
-      answer: t('profile.help_support.faq_answer_1'),
-    },
-    {
-      question: t('profile.help_support.faq_question_2'),
-      answer: t('profile.help_support.faq_answer_2'),
-    },
-    {
-      question: t('profile.help_support.faq_question_3'),
-      answer: t('profile.help_support.faq_answer_3'),
-    },
+  const problemCategories = [
+    { value: 'shipping', label: t('support.categories.shipping') },
+    { value: 'payment', label: t('support.categories.payment') },
+    { value: 'product', label: t('support.categories.product') },
+    { value: 'account', label: t('support.categories.account') },
+    { value: 'technical', label: t('support.categories.technical') },
+    { value: 'other', label: t('support.categories.other') },
   ];
 
-  const contactOptions = [
-    {
-      title: t('profile.help_support.email'),
-      description: t('profile.help_support.email_description'),
-      icon: <Mail size={24} color="#36c7f6" />,
-      action: () => {/* Handle email action */},
-    },
-    {
-      title: t('profile.help_support.phone'),
-      description: t('profile.help_support.phone_description'),
-      icon: <Phone size={24} color="#36c7f6" />,
-      action: () => {/* Handle phone action */},
-    },
-    {
-      title: t('profile.help_support.chat'),
-      description: t('profile.help_support.chat_description'),
-      icon: <MessageSquare size={24} color="#36c7f6" />,
-      action: () => {/* Handle chat action */},
-    },
-  ];
-
-  const toggleFaq = (index: number) => {
-    setExpandedFaq(expandedFaq === index ? null : index);
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmitTicket = () => {
-    // Handle ticket submission
-    console.log('Submitting ticket:', { subject, message });
+  const handleSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.description) {
+      Toast.show({
+        type: 'error',
+        text1: t('support.error'),
+        text2: t('support.fill_required_fields'),
+        position: 'top',
+      });
+      return;
+    }
+
+    console.log('Submitting support form with data:', formData);
+
+    // إرسال البيانات للـ API
+    const result = await dispatch(createProblem(formData) as any);
+    
+    console.log('Support form submission result:', result);
+    
+    if (result.success) {
+      // إعادة تعيين النموذج
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        category: 'Other',
+        description: '',
+      });
+      setSelectedImage(null);
+      
+      console.log('Form reset after successful submission');
+    }
+  };
+
+  // متابعة تغييرات الحالة
+  useEffect(() => {
+    if (success && lastSubmittedProblem) {
+      const { message, problemId, result } = lastSubmittedProblem;
+      
+      Toast.show({
+        type: 'success',
+        text1: t('support.success'),
+        text2: `${message}\n${t('support.problem_id', { id: problemId })}`,
+        position: 'top',
+        visibilityTime: 5000, // وقت أطول لقراءة المعلومات
+      });
+      
+      dispatch(clearSuccess());
+      
+      // العودة للصفحة السابقة بعد 3 ثوان
+      setTimeout(() => {
+        router.back();
+      }, 3000);
+    }
+  }, [success, lastSubmittedProblem]);
+
+  useEffect(() => {
+    if (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('support.error'),
+        text2: error,
+        position: 'top',
+        visibilityTime: 4000,
+      });
+      
+      dispatch(clearError());
+    }
+  }, [error]);
+
+  const selectImage = () => {
+    // هنا يمكن إضافة منطق اختيار الصورة
+    Toast.show({
+      type: 'info',
+      text1: t('support.image_upload'),
+      text2: t('support.image_upload_desc'),
+      position: 'top',
+    });
   };
 
   return (
-    <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <View style={styles.container}>
       {/* Header */}
-      <View style={[styles.header, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={24} color="#333" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
+      <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowLeft size={24} color="#000" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{t('profile.help_support.title')}</Text>
+        <Text style={styles.headerTitle}>{t('support.title')}</Text>
       </View>
 
-      {/* Content */}
       <ScrollView style={styles.content}>
-        {/* FAQ Section */}
+        {/* Contact Information */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.help_support.faq')}</Text>
-          {faqItems.map((item, index) => (
-            <TouchableOpacity
-              key={`faq-${item.question}-${index}`}
-              style={styles.faqItem}
-              onPress={() => toggleFaq(index)}
-            >
-              <View style={styles.faqHeader}>
-                <Text style={styles.faqQuestion}>{item.question}</Text>
-                {expandedFaq === index ? (
-                  <ChevronUp size={20} color="#666" />
-                ) : (
-                  <ChevronDown size={20} color="#666" />
-                )}
-              </View>
-              {expandedFaq === index && (
-                <Text style={styles.faqAnswer}>{item.answer}</Text>
-              )}
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Contact Options */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.help_support.contact')}</Text>
-          {contactOptions.map((option, index) => (
-            <TouchableOpacity
-              key={`contact-${option.title}-${index}`}
-              style={styles.contactItem}
-              onPress={option.action}
-            >
-              <View style={styles.contactIcon}>{option.icon}</View>
-              <View style={styles.contactContent}>
-                <Text style={styles.contactTitle}>{option.title}</Text>
-                <Text style={styles.contactDescription}>{option.description}</Text>
-              </View>
-              <ChevronLeft size={20} color="#666" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Submit Ticket */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t('profile.help_support.submit_ticket')}</Text>
-          <View style={styles.ticketForm}>
-            <Text style={styles.inputLabel}>{t('profile.help_support.subject')}</Text>
-            <TextInput
-              style={styles.input}
-              value={subject}
-              onChangeText={setSubject}
-              placeholder={t('profile.help_support.subject_placeholder')}
-            />
-            <Text style={styles.inputLabel}>{t('profile.help_support.message')}</Text>
-            <TextInput
-              style={[styles.input, styles.messageInput]}
-              value={message}
-              onChangeText={setMessage}
-              placeholder={t('profile.help_support.message_placeholder')}
-              multiline
-              numberOfLines={4}
-            />
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmitTicket}
-            >
-              <Text style={styles.submitButtonText}>{t('profile.help_support.send')}</Text>
-            </TouchableOpacity>
+          <Text style={styles.sectionTitle}>{t('support.contact_info')}</Text>
+          
+          <View style={styles.contactItem}>
+            <View style={styles.contactIcon}>
+              <Phone size={20} color="#36c7f6" />
+            </View>
+            <View style={styles.contactDetails}>
+              <Text style={styles.contactTitle}>{t('support.phone_support')}</Text>
+              <Text style={styles.contactSubtitle}>+1 (555) 123-4567</Text>
+              <Text style={styles.contactTime}>Monday - Friday, 9am - 5pm EST</Text>
+            </View>
           </View>
+
+          <View style={styles.contactItem}>
+            <View style={styles.contactIcon}>
+              <Mail size={20} color="#36c7f6" />
+            </View>
+            <View style={styles.contactDetails}>
+              <Text style={styles.contactTitle}>{t('support.email_support')}</Text>
+              <Text style={styles.contactSubtitle}>support@importease.com</Text>
+              <Text style={styles.contactTime}>{t('support.response_time')}</Text>
+            </View>
+          </View>
+
+          
         </View>
+
+        {/* Send Message Form */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('support.send_message')}</Text>
+          
+          <View style={styles.formRow}>
+            <View style={styles.halfWidth}>
+              <Text style={styles.label}>{t('support.name')}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder={t('support.name_placeholder')}
+                value={formData.name}
+                onChangeText={(text) => handleInputChange('name', text)}
+                editable={!loading}
+              />
+            </View>
+            <View style={styles.halfWidth}>
+              <Text style={styles.label}>{t('support.email')}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder={t('support.email_placeholder')}
+                value={formData.email}
+                onChangeText={(text) => handleInputChange('email', text)}
+                keyboardType="email-address"
+                editable={!loading}
+              />
+            </View>
+          </View>
+
+          <Text style={styles.label}>{t('support.phone')}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder={t('support.phone_placeholder')}
+            value={formData.phone}
+            onChangeText={(text) => handleInputChange('phone', text)}
+            keyboardType="phone-pad"
+            editable={!loading}
+          />
+
+          <Text style={styles.label}>{t('support.problem_category')}</Text>
+          <View style={styles.picker}>
+            <Text style={styles.pickerText}>
+              {problemCategories.find(cat => cat.value === formData.category.toLowerCase())?.label || t('support.categories.other')}
+            </Text>
+          </View>
+
+          <Text style={styles.label}>{t('support.image_optional')}</Text>
+          <TouchableOpacity 
+            style={[styles.imageUpload, loading && styles.disabledButton]} 
+            onPress={selectImage}
+            disabled={loading}
+          >
+            <Upload size={20} color="#666" />
+            <Text style={styles.imageUploadText}>{t('support.choose_file')}</Text>
+          </TouchableOpacity>
+          <Text style={styles.imageHint}>{t('support.image_help')}</Text>
+
+          <Text style={styles.label}>{t('support.description')}</Text>
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder={t('support.description_placeholder')}
+            value={formData.description}
+            onChangeText={(text) => handleInputChange('description', text)}
+            multiline
+            numberOfLines={6}
+            textAlignVertical="top"
+            editable={!loading}
+          />
+
+          <TouchableOpacity 
+            style={[styles.submitButton, loading && styles.disabledButton]} 
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.submitButtonText}>{t('support.send_message')}</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+       
       </ScrollView>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -163,23 +267,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    paddingTop: 45,
+    paddingTop: 50,
   },
   backButton: {
-    padding: 8,
+    marginRight: 16,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginLeft: 16,
   },
   content: {
     flex: 1,
   },
   section: {
     backgroundColor: '#fff',
-    marginTop: 16,
+    margin: 16,
+    borderRadius: 12,
     padding: 16,
   },
   sectionTitle: {
@@ -188,45 +292,20 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 16,
   },
-  faqItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    paddingVertical: 12,
-  },
-  faqHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  faqQuestion: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    flex: 1,
-  },
-  faqAnswer: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
-    lineHeight: 20,
-  },
   contactItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    marginBottom: 20,
   },
   contactIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#e6f7ff',
-    alignItems: 'center',
+    backgroundColor: '#f0f8ff',
     justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 12,
   },
-  contactContent: {
+  contactDetails: {
     flex: 1,
   },
   contactTitle: {
@@ -234,43 +313,97 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
-  contactDescription: {
+  contactSubtitle: {
     fontSize: 14,
+    color: '#36c7f6',
+    marginTop: 2,
+  },
+  contactTime: {
+    fontSize: 12,
     color: '#666',
-    marginTop: 4,
+    marginTop: 2,
   },
-  ticketForm: {
-    marginTop: 8,
+  formRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
-  inputLabel: {
+  halfWidth: {
+    flex: 1,
+  },
+  label: {
     fontSize: 14,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
+    marginTop: 12,
+    marginBottom: 6,
   },
   input: {
-    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#ddd',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: '#333',
-    marginBottom: 16,
+    backgroundColor: '#fff',
   },
-  messageInput: {
-    height: 100,
-    textAlignVertical: 'top',
+  textArea: {
+    height: 120,
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
+  pickerText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  imageUpload: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#f9f9f9',
+    gap: 8,
+  },
+  imageUploadText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  imageHint: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
   },
   submitButton: {
     backgroundColor: '#36c7f6',
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
+    marginTop: 20,
   },
   submitButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: 'bold',
   },
-});
-
-export default HelpSupportScreen; 
+  disabledButton: {
+    opacity: 0.7,
+  },
+  socialLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 20,
+  },
+  socialButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+}); 

@@ -1,18 +1,22 @@
 import { useRouter } from 'expo-router';
-import { ArrowLeft, CreditCard, MapPin, Package } from 'lucide-react-native';
-import React, { useState } from 'react';
+import { ArrowLeft, Package } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Toast from 'react-native-toast-message';
-import { useSelector } from 'react-redux';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { getCommition } from '../src/store/api/commitionScimaApi';
 import { RootState } from '../src/store/store';
 
 export default function CheckoutScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const dispatch = useDispatch();
   
   // استخدام Redux مباشرة بدلاً من ShopContext
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const { commition, loading: commitionLoading } = useSelector((state: RootState) => state.commition);
+  const userType = useSelector((state: RootState) => (state.auth.authModel?.result as any)?.userType) || 0;
+  
   const cart = cartItems.map(item => ({
     id: item.id || 0,
     name: item.title || '',
@@ -27,6 +31,7 @@ export default function CheckoutScreen() {
   const removeFromCart = (id: number) => console.log("Remove from cart:", id);
   const addToOrderHistory = (order: any) => console.log("Add to order history:", order);
   const clearCart = () => console.log("Clear cart");
+  
   const [shippingInfo, setShippingInfo] = useState({
     fullName: '',
     address: '',
@@ -42,95 +47,57 @@ export default function CheckoutScreen() {
     cvv: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [shippingType, setShippingType] = useState('express'); // 'express' or 'support'
+
+  useEffect(() => {
+    dispatch(getCommition() as any);
+  }, [dispatch]);
+
+  // حساب العمولة بناءً على نظام العمولة الجديد
+  const calculateCommission = () => {
+    if (!commition || commitionLoading) return 0;
+    
+    // إذا تم اختيار "Contact Support for Shipping"، اجعل العمولة 0
+    if (shippingType === 'support') {
+      console.log("Commission set to 0 due to Contact Support shipping");
+      return 0;
+    }
+    
+    const totalQuantity = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    
+    console.log("Commission calculation:", {
+      userType,
+      commitionUserType: commition.userType,
+      totalQuantity,
+      lowerLimit: commition.lowerLimit,
+      upperLimit: commition.upperLimit,
+      commissionRate: commition.commissionRate,
+      isActive: commition.isActive,
+      subtotal,
+      shippingType
+    });
+    
+    // التحقق من userType وحدود الكمية
+    if (commition.userType === userType && 
+        totalQuantity >= commition.lowerLimit && 
+        totalQuantity <= commition.upperLimit &&
+        commition.isActive) {
+      const calculatedCommission = subtotal * commition.commissionRate;
+      console.log("Commission applied:", calculatedCommission);
+      return calculatedCommission;
+    }
+    
+    console.log("Commission not applied - conditions not met");
+    return 0;
+  };
 
   const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
   const shipping = 10;
-  const tax = total * 0.1; // 10% tax
-  const finalTotal = total + shipping + tax;
+  const commission = calculateCommission();
+  const finalTotal = total + shipping + commission;
 
-  const handlePlaceOrder = async () => {
-    try {
-      // 1. Validate inputs
-      if (!shippingInfo.fullName || !shippingInfo.address || !shippingInfo.city || 
-          !shippingInfo.state || !shippingInfo.zipCode || !shippingInfo.phone) {
-        Toast.show({
-          type: 'error',
-          text1: t('Error'),
-          text2: t('Please fill in all shipping information'),
-          position: 'top',
-        });
-        return;
-      }
-
-      if (paymentMethod === 'credit' && (!cardInfo.cardNumber || !cardInfo.expiryDate || !cardInfo.cvv)) {
-        Toast.show({
-          type: 'error',
-          text1: t('Error'),
-          text2: t('Please fill in all card details'),
-          position: 'top',
-        });
-        return;
-      }
-
-      // 2. Show loading state
-      setIsLoading(true);
-
-      // 3. Process payment
-      let paymentSuccess = false;
-      if (paymentMethod === 'credit') {
-        // Simulate credit card processing
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        paymentSuccess = true; // In real app, this would be the result from payment gateway
-      } else {
-        // PayPal would handle its own flow
-        paymentSuccess = true;
-      }
-
-      if (!paymentSuccess) {
-        throw new Error('Payment failed');
-      }
-
-      // 4. Create order
-      const order: any = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        items: cart,
-        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-        status: 'Processing',
-        shippingInfo,
-        paymentMethod: paymentMethod as 'credit' | 'paypal',
-        paymentStatus: 'Paid'
-      };
-
-      // 5. Add to order history
-      addToOrderHistory(order);
-
-      // 6. Clear cart
-      clearCart();
-
-      // 7. Show success message
-      Toast.show({
-        type: 'success',
-        text1: t('Success'),
-        text2: t('Your order has been placed successfully!'),
-        position: 'top',
-        onPress: () => {
-        },
-      });
-      router.replace('/orders' as any);
-
-    } catch (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('Error'),
-        text2: t('There was a problem processing your order. Please try again.'),
-        position: 'top',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -141,109 +108,51 @@ export default function CheckoutScreen() {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* Shipping Information */}
+        
+        {/* Shipping Type */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MapPin size={20} color="#2196F3" />
-            <Text style={styles.sectionTitle}>{t('Shipping Information')}</Text>
+            <Package size={20} color="#2196F3" />
+            <Text style={styles.sectionTitle}>{t('Shipping Type')}</Text>
           </View>
-          <View style={styles.form}>
-            <TextInput
-              style={styles.input}
-              placeholder={t('Full Name')}
-              value={shippingInfo.fullName}
-              onChangeText={(text) => setShippingInfo(prev => ({ ...prev, fullName: text }))}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder={t('Address')}
-              value={shippingInfo.address}
-              onChangeText={(text) => setShippingInfo(prev => ({ ...prev, address: text }))}
-            />
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder={t('City')}
-                value={shippingInfo.city}
-                onChangeText={(text) => setShippingInfo(prev => ({ ...prev, city: text }))}
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder={t('State')}
-                value={shippingInfo.state}
-                onChangeText={(text) => setShippingInfo(prev => ({ ...prev, state: text }))}
-              />
-            </View>
-            <View style={styles.row}>
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder={t('ZIP Code')}
-                value={shippingInfo.zipCode}
-                onChangeText={(text) => setShippingInfo(prev => ({ ...prev, zipCode: text }))}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={[styles.input, styles.halfInput]}
-                placeholder={t('Phone')}
-                value={shippingInfo.phone}
-                onChangeText={(text) => setShippingInfo(prev => ({ ...prev, phone: text }))}
-                keyboardType="phone-pad"
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* Payment Method */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <CreditCard size={20} color="#2196F3" />
-            <Text style={styles.sectionTitle}>{t('Payment Method')}</Text>
-          </View>
-          <View style={styles.paymentOptions}>
+          
+          <View style={styles.shippingOptions}>
             <TouchableOpacity
-              style={[styles.paymentOption, paymentMethod === 'credit' && styles.selectedPayment]}
-              onPress={() => setPaymentMethod('credit')}
+              style={[
+                styles.shippingOption,
+                shippingType === 'express' && styles.selectedShipping
+              ]}
+              onPress={() => setShippingType('express')}
             >
-              <CreditCard size={20} color={paymentMethod === 'credit' ? '#fff' : '#666'} />
-              <Text style={[styles.paymentText, paymentMethod === 'credit' && styles.selectedPaymentText]}>
-                {t('Credit Card')}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.paymentOption, paymentMethod === 'paypal' && styles.selectedPayment]}
-              onPress={() => setPaymentMethod('paypal')}
-            >
-              <Text style={[styles.paymentText, paymentMethod === 'paypal' && styles.selectedPaymentText]}>
-                PayPal
-              </Text>
-            </TouchableOpacity>
-          </View>
-          {paymentMethod === 'credit' && (
-            <View style={styles.form}>
-              <TextInput
-                style={styles.input}
-                placeholder={t('Card Number')}
-                value={cardInfo.cardNumber}
-                onChangeText={(text) => setCardInfo(prev => ({ ...prev, cardNumber: text }))}
-                keyboardType="numeric"
-              />
-              <View style={styles.row}>
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder={t('MM/YY')}
-                  value={cardInfo.expiryDate}
-                  onChangeText={(text) => setCardInfo(prev => ({ ...prev, expiryDate: text }))}
-                />
-                <TextInput
-                  style={[styles.input, styles.halfInput]}
-                  placeholder={t('CVV')}
-                  value={cardInfo.cvv}
-                  onChangeText={(text) => setCardInfo(prev => ({ ...prev, cvv: text }))}
-                  keyboardType="numeric"
-                />
+              <View style={styles.radioButton}>
+                {shippingType === 'express' && <View style={styles.radioInner} />}
               </View>
-            </View>
-          )}
+              <Text style={[
+                styles.shippingText,
+                shippingType === 'express' && styles.selectedShippingText
+              ]}>
+                {t('Express Air Shipping')}
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.shippingOption,
+                shippingType === 'support' && styles.selectedShipping
+              ]}
+              onPress={() => setShippingType('support')}
+            >
+              <View style={styles.radioButton}>
+                {shippingType === 'support' && <View style={styles.radioInner} />}
+              </View>
+              <Text style={[
+                styles.shippingText,
+                shippingType === 'support' && styles.selectedShippingText
+              ]}>
+                {t('Contact Support for Shipping')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Order Summary */}
@@ -274,8 +183,17 @@ export default function CheckoutScreen() {
               <Text style={styles.summaryValue}>${shipping.toFixed(2)}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('Tax')}</Text>
-              <Text style={styles.summaryValue}>${tax.toFixed(2)}</Text>
+              <Text style={styles.summaryLabel}>
+                {t('Commission')}
+                {commition && commition.commissionRate > 0 && (
+                  <Text style={{ fontSize: 12, color: '#666' }}>
+                    {` (${(commition.commissionRate * 100).toFixed(1)}%)`}
+                  </Text>
+                )}
+              </Text>
+              <Text style={styles.summaryValue}>
+                ${commission.toFixed(2)}
+              </Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>{t('Total')}</Text>
@@ -284,21 +202,13 @@ export default function CheckoutScreen() {
           </View>
         </View>
       </ScrollView>
-
-      {/* Place Order Button */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.placeOrderButton, isLoading && styles.placeOrderButtonDisabled]} 
-          onPress={handlePlaceOrder}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.placeOrderText}>{t('Place Order')}</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <View style={styles.footer}>
+            <TouchableOpacity style={styles.placeOrderButton}>
+              <Text style={styles.placeOrderText}>{t('Place Order')}</Text>
+            </TouchableOpacity>
+            
+          </View>
+     
     </View>
   );
 }
@@ -375,8 +285,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   selectedPayment: {
-    backgroundColor: '#2196F3',
-    borderColor: '#2196F3',
+      backgroundColor: 'rgba(54,199,246,1.00)',
+    borderColor: 'rgba(54,199,246,1.00)',
   },
   paymentText: {
     fontSize: 16,
@@ -410,7 +320,7 @@ const styles = StyleSheet.create({
   orderItemPrice: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#2196F3',
+    color: 'rgba(54,199,246,1.00)',
   },
   orderSummary: {
     marginTop: 16,
@@ -444,7 +354,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#2196F3',
+    color: 'rgba(54,199,246,1.00)',
   },
   footer: {
     backgroundColor: '#fff',
@@ -453,9 +363,9 @@ const styles = StyleSheet.create({
     borderTopColor: '#eee',
   },
   placeOrderButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: 'rgba(54,199,246,1.00)',
     borderRadius: 8,
-    padding: 16,
+    padding: 10,
     alignItems: 'center',
   },
   placeOrderText: {
@@ -465,5 +375,45 @@ const styles = StyleSheet.create({
   },
   placeOrderButtonDisabled: {
     opacity: 0.7,
+  },
+  shippingOptions: {
+    gap: 12,
+  },
+  shippingOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  selectedShipping: {
+    borderColor: '#36c7f6',
+    backgroundColor: '#f8fbff',
+  },
+  radioButton: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#36c7f6',
+  },
+  shippingText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  selectedShippingText: {
+    color: '#36c7f6',
+    fontWeight: '600',
   },
 }); 

@@ -24,6 +24,7 @@ interface IAuthModel {
     refreshToken?: string;
     refreshTokenExpiresOn?: string;
   } | null;
+  userType: number | null;
 }
 
 interface AuthState {
@@ -46,7 +47,7 @@ const authSlice = createSlice({
       state.authModel = action.payload;
       state.loading = false;
       state.error = null;
-
+        
       // حفظ في AsyncStorage
       AsyncStorage.setItem("authModelAdmin", JSON.stringify(action.payload)).catch(console.error);
       

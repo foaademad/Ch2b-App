@@ -30,6 +30,14 @@ export interface IAuthModel {
   user: {
     
   } | null;
+  result?: {
+    isAuthenticated: boolean;
+    userId: string;
+    token: string;
+    refreshToken?: string;
+    refreshTokenExpiresOn?: string;
+    userType: number; // 0=user, 1=marketer, 2=admin
+  };
 }
 
 export interface IAuthState {

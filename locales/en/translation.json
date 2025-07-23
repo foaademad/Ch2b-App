@@ -279,12 +279,13 @@
 
     "my_account": "My Account",
     "my_orders": "My Orders",
-   
+    
     "shipping_addresses": "Shipping Addresses",
    
     "logout": "Logout",
    
-    "cards": "Cards",
+    "cards": "Payment Cards",
+    "contact_admin": "Contact Admin",
     "change_language": "Change Lang"
   },
   "permission_required": "Permission Required",
@@ -439,6 +440,62 @@
     "bestSellers": "Best Sellers",
     "dailyDeals": "Daily Deals",
     "loadMore": "Load More"
+  },
+  "Total": "Total",
+  "Tax": "Tax",
+  "Commission": "Commission",
+  "Subtotal": "Subtotal",
+  "Shipping": "Shipping",
+  "Place Order": "Place Order",
+  "Shipping Type": "Shipping Type",
+  "Express Air Shipping": "Express Air Shipping",
+  "Contact Support for Shipping": "Contact Support for Shipping",
+  "Order Summary": "Order Summary",
+  "Checkout": "Checkout",
+  "support": {
+    "title": "Contact Support",
+    "contact_info": "Contact Information",
+    "phone_support": "Phone Support",
+    "email_support": "Email Support",
+    "live_chat": "Live Chat",
+    "response_time": "We aim to respond within 24 hours",
+    "website_available": "Available on our website",
+    "always_available": "7 days a week, 24 hours a day",
+    "send_message": "Send Us a Message",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "problem_category": "Problem Category",
+    "image_optional": "Image (Optional)",
+    "description": "Description",
+    "name_placeholder": "Your full name",
+    "email_placeholder": "Your email address",
+    "phone_placeholder": "Your phone number",
+    "description_placeholder": "How can we help you?",
+    "choose_file": "Choose file",
+    "image_help": "You can attach an image to help us understand your issue better",
+    "connect_with_us": "Connect With Us",
+    "categories": {
+      "shipping": "Shipping",
+      "payment": "Payment",
+      "product": "Product",
+      "account": "Account",
+      "technical": "Technical",
+      "other": "Other"
+    },
+    "error": "Error",
+    "success": "Success",
+    "fill_required_fields": "Please fill in all required fields",
+    "message_sent": "Your message has been sent successfully!",
+    "support_will_contact": "Technical support will contact you as soon as possible.",
+    "problem_id": "Problem ID: #{{id}}",
+    "message_sending": "Sending message...",
+    "network_error": "Network error. Please check your connection and try again.",
+    "server_error": "Server error. Please try again later.",
+    "image_upload": "Image Upload",
+    "image_upload_desc": "Image upload feature will be available soon"
+  },
+  "common": {
+    "ok": "OK"
   }
-  
 }

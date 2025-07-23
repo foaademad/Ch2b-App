@@ -11,17 +11,18 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
-  ArrowRight,
-  Bell,
-  CreditCard,
-  Globe,
-  Heart,
-  HelpCircle,
-  LogOut,
-  MapPin,
-  Package,
-  Settings,
-  Shield
+    ArrowRight,
+    Bell,
+    CreditCard,
+    Globe,
+    Heart,
+    HelpCircle,
+    LogOut,
+    MapPin,
+    MessageSquare,
+    Package,
+    Settings,
+    Shield
 } from 'lucide-react-native';
 
 const ProfileScreen = () => {
@@ -88,6 +89,11 @@ const ProfileScreen = () => {
       title: t('profile.cards'),
       icon: <CreditCard size={24} color="#36c7f6" />,
       onPress: () => router.push('/payment-methods' as any),
+    },
+    {
+      title: t('profile.contact_admin'),
+      icon: <MessageSquare size={24} color="#36c7f6" />,
+      onPress: () => router.push('/support' as any),
     }
   ];
 
