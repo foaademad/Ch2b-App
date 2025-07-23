@@ -13,13 +13,17 @@ export const createProblem = (data: ProblemInterface) => {
             formData.append("phoneNumber", data.phoneNumber);
             formData.append("description", data.description);
             formData.append("type", data.type.toString());
+            console.log(data.type);
+
             if (data.image) {
                 formData.append("image", data.image);
             }
-            if (data.imageDto) {
-                formData.append("imageDto", JSON.stringify(data.imageDto));
-            }
-            const response = await api.post("/Problem/create-problem", formData);
+           
+            const response = await api.post("/Problem/create-problem", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
             console.log('API Response:', response.data);
             dispatch(setProblem(response.data.result));
             return response.data;

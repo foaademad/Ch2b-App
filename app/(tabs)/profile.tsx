@@ -11,6 +11,7 @@ import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { useDispatch, useSelector } from 'react-redux';
 
 import {
+  ArrowLeft,
     ArrowRight,
     Bell,
     CreditCard,
@@ -85,11 +86,7 @@ const ProfileScreen = () => {
       icon: <MapPin size={24} color="#36c7f6" />,
       onPress: () => router.push('/addresses' as any),
     },
-    {
-      title: t('profile.cards'),
-      icon: <CreditCard size={24} color="#36c7f6" />,
-      onPress: () => router.push('/payment-methods' as any),
-    },
+    
     {
       title: t('profile.contact_admin'),
       icon: <MessageSquare size={24} color="#36c7f6" />,
@@ -185,7 +182,11 @@ const ProfileScreen = () => {
                   <Text style={styles.badgeText}>{item.badge}</Text>
                 </View>
               )}
-              <ArrowRight size={20} color="#666" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
+              {isRTL ? (
+                <ArrowLeft size={20} color="#666" />
+              ) : (
+                <ArrowRight size={20} color="#666" />
+              )}
             </View>
           </TouchableOpacity>
         ))}

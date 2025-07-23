@@ -1,11 +1,10 @@
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { Formik } from 'formik';
-import { ArrowLeft, Mail, Phone, Upload, X } from 'lucide-react-native';
-  import React, { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, Mail, Phone, Upload, X } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -16,13 +15,12 @@ import {
   View
 } from 'react-native';
 import Toast from 'react-native-toast-message';
+import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { useLanguage } from '../src/context/LanguageContext';
 import { createProblem } from '../src/store/api/supportApi';
-import { clearProblem } from '../src/store/slice/supportSlice';
 import { RootState } from '../src/store/store';
 import { ProblemInterface } from '../src/store/utility/interfaces/supportInterface';
-import { useDispatch, useSelector } from 'react-redux';
 
 
 
@@ -35,7 +33,8 @@ const validationSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email format')
     .required('Email is required'),
-  subject: Yup.string()
+  subject: Yup.number()
+    .typeError('Problem type is required')
     .required('Problem type is required'),
   message: Yup.string()
     .min(10, 'Message must be at least 10 characters')
@@ -47,7 +46,7 @@ const validationSchema = Yup.object().shape({
 interface FormValues {
   name: string;
   email: string;
-  subject: string;
+  subject: number;
   message: string;
   orderNumber: string;
 }
@@ -90,23 +89,21 @@ export default function SupportScreen() {
   
 
   const problemCategories = [
-    { value: '', label: t('help.report.form.type.subtitle1') },
-    { value: 'order-status', label: t('help.report.form.type.subtitle2') },
-    { value: 'payment-issue', label: t('help.report.form.type.subtitle3') },
-    { value: 'shipping-issue', label: t('help.report.form.type.subtitle4') },
-    { value: 'return-request', label: t('help.report.form.type.subtitle5') },
-    { value: 'website-issue', label: t('help.report.form.type.subtitle6') },
-    { value: 'product-issue', label: t('help.report.form.type.subtitle7') },
-    { value: 'other', label: t('help.report.form.type.subtitle8') },
+    { value: 0, label: t('support.problem_type.tech_support') },
+    { value: 1, label: t('support.problem_type.account') },
+    { value: 2, label: t('support.problem_type.other') },
+    { value: 3, label: t('support.problem_type.suggestion') },
+    { value: 4, label: t('support.problem_type.bug') },
   ];
 
   const initialValues: FormValues = {
     name: '',
     email: '',
-    subject: '',
+    subject: 0,
     message: '',
     orderNumber: '',
   };
+
 
   const handleSubmit = (values: FormValues, { resetForm }: any) => {
     const problemData: ProblemInterface = {
@@ -114,7 +111,7 @@ export default function SupportScreen() {
       email: values.email,
       phoneNumber: values.orderNumber,
       description: values.message,
-      type: parseInt(values.subject),
+      type: values.subject,
     };
 
     if (selectedImage) {
@@ -178,7 +175,11 @@ export default function SupportScreen() {
       {/* Header */}
       <View style={[styles.header, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#000" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
+          {isRTL ? (
+            <ArrowLeft size={24} color="#000" />
+          ) : (
+            <ArrowRight size={24} color="#000" />
+          )}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('support.title')}</Text>
       </View>
@@ -275,7 +276,7 @@ export default function SupportScreen() {
                     onPress={() => setShowCategoryPicker(!showCategoryPicker)}
                   >
                     <Text style={styles.pickerText}>
-                      {problemCategories.find(cat => cat.value === values.subject)?.label || t('help.report.form.type.subtitle1')}
+                      {problemCategories.find(cat => cat.value === values.subject)?.label || t('support.problem_type.tech_support')}
                     </Text>
                   </TouchableOpacity>
                   {touched.subject && errors.subject && (

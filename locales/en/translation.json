@@ -499,7 +499,14 @@
     "network_error": "Network error. Please check your connection and try again.",
     "server_error": "Server error. Please try again later.",
     "image_upload": "Image Upload",
-    "image_upload_desc": "Image upload feature will be available soon"
+    "image_upload_desc": "Image upload feature will be available soon",
+    "problem_type": {
+      "tech_support": "Technical Support",
+      "account": "Account",
+      "other": "Other",
+      "suggestion": "Suggestion",
+      "bug": "Bug"
+    }
   },
   "help": {
     "report": {

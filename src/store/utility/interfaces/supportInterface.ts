@@ -11,7 +11,7 @@ export interface ProblemInterface {
   id?: number;
   name: string;
   description: string;
-  type: number; // integer(int32) حسب الـ API
+  type: ProblemType; // integer(int32) حسب الـ API
   phoneNumber: string;
   email: string;
   image?: string; // string(binary) - optional
