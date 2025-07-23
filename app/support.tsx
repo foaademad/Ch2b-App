@@ -1,8 +1,8 @@
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { ArrowLeft, Mail, Phone, Upload, X } from 'lucide-react-native';
-import React, { useState } from 'react';
+  import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
@@ -18,6 +18,14 @@ import {
 import Toast from 'react-native-toast-message';
 import * as Yup from 'yup';
 import { useLanguage } from '../src/context/LanguageContext';
+import { createProblem } from '../src/store/api/supportApi';
+import { clearProblem } from '../src/store/slice/supportSlice';
+import { RootState } from '../src/store/store';
+import { ProblemInterface } from '../src/store/utility/interfaces/supportInterface';
+import { useDispatch, useSelector } from 'react-redux';
+
+
+
 
 // Validation Schema using Yup
 const validationSchema = Yup.object().shape({
@@ -47,8 +55,7 @@ interface FormValues {
 export default function SupportScreen() {
   const { t } = useTranslation();
   const { isRTL } = useLanguage();
-  const router = useRouter();
-
+  const dispatch = useDispatch();
   const [selectedImage, setSelectedImage] = useState<{
     uri: string;
     fileName?: string;
@@ -57,6 +64,30 @@ export default function SupportScreen() {
   } | null>(null);
 
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const { isLoading, error, problem } = useSelector((state: RootState) => state.problem);
+  useEffect(() => {
+    if (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('support.error'),
+        text2: error,
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+  }, [error, dispatch, t]);
+  useEffect(() => {
+    if (problem) {
+      Toast.show({
+        type: 'success',
+        text1: t('support.success'),
+        text2: t('support.success_message'),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+    }
+  }, [problem, dispatch, t]);
+  
 
   const problemCategories = [
     { value: '', label: t('help.report.form.type.subtitle1') },
@@ -78,23 +109,28 @@ export default function SupportScreen() {
   };
 
   const handleSubmit = (values: FormValues, { resetForm }: any) => {
-    // Static form submission - just show success message
-    Alert.alert(
-      t('support.success'),
-      t('support.success_message'),
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            resetForm();
-            setSelectedImage(null);
-            setTimeout(() => {
-              router.back();
-            }, 1000);
-          }
-        }
-      ]
-    );
+    const problemData: ProblemInterface = {
+      name: values.name,
+      email: values.email,
+      phoneNumber: values.orderNumber,
+      description: values.message,
+      type: parseInt(values.subject),
+    };
+
+    if (selectedImage) {
+      problemData.image = selectedImage.uri;
+      problemData.imageDto = {
+        fileName: selectedImage.fileName || 'uploaded_image.jpg',
+        fileType: selectedImage.mimeType || 'image/jpeg',
+        fileSize: selectedImage.fileSize?.toString() || '0',
+      };
+    }
+    dispatch(createProblem(problemData) as any);
+    resetForm();
+    setSelectedImage(null);
+    setTimeout(() => {
+      router.back();
+    }, 1000);
 
     // Show toast message
     Toast.show({
@@ -109,7 +145,13 @@ export default function SupportScreen() {
   const selectImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(t('support.permission_denied'), t('support.permission_message'));
+      Toast.show({
+        type: 'error',
+        text1: t('support.permission_denied'),
+        text2: t('support.permission_message'),
+        position: 'top',
+        visibilityTime: 3000,
+      });
       return;
     }
 
