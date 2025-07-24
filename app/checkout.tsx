@@ -1,9 +1,11 @@
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Package } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Package } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { useLanguage } from '../src/context/LanguageContext';
+import { fetchAddresses } from '../src/store/api/addressApi';
 import { getCommition } from '../src/store/api/commitionScimaApi';
 import { RootState } from '../src/store/store';
 
@@ -11,10 +13,13 @@ export default function CheckoutScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { isRTL } = useLanguage();
   
   // استخدام Redux مباشرة بدلاً من ShopContext
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const { commition, loading: commitionLoading } = useSelector((state: RootState) => state.commition);
+  const { addresses, loading: addressesLoading } = useSelector((state: RootState) => state.address);
+  const { authModel } = useSelector((state: RootState) => state.auth);
   const userType = useSelector((state: RootState) => (state.auth.authModel?.result as any)?.userType) || 0;
   
   const cart = cartItems.map(item => ({
@@ -48,10 +53,15 @@ export default function CheckoutScreen() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [shippingType, setShippingType] = useState('express'); // 'express' or 'support'
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
 
   useEffect(() => {
     dispatch(getCommition() as any);
-  }, [dispatch]);
+    // جلب عناوين المستخدم
+    if (authModel?.result?.userId) {
+      dispatch(fetchAddresses(authModel.result.userId) as any);
+    }
+  }, [dispatch, authModel]);
 
   // حساب العمولة بناءً على نظام العمولة الجديد
   const calculateCommission = () => {
@@ -97,6 +107,34 @@ export default function CheckoutScreen() {
   const commission = calculateCommission();
   const finalTotal = total + shipping + commission;
 
+  // التحقق من إمكانية إتمام الطلب
+  const canPlaceOrder = selectedAddressId !== null && addresses.length > 0;
+
+  const handlePlaceOrder = () => {
+    if (!canPlaceOrder) {
+      return;
+    }
+    
+    const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+    console.log('Placing order with address:', selectedAddress);
+    // هنا سيتم إضافة منطق إتمام الطلب
+  };
+
+  if (addressesLoading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <ArrowLeft size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{t('Checkout')}</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>{t('common.loading')}</Text>
+        </View>
+      </View>
+    );
+  }
   
   return (
     <View style={styles.container}>
@@ -109,6 +147,61 @@ export default function CheckoutScreen() {
 
       <ScrollView style={styles.content}>
         
+        {/* Delivery Address */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <MapPin size={20} color="#2196F3" />
+            <Text style={styles.sectionTitle}>{t('Delivery Address')}</Text>
+          </View>
+          
+          {addressesLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>{t('common.loading')}</Text>
+            </View>
+          ) : addresses.length === 0 ? (
+            <View style={styles.noAddressesContainer}>
+              <Text style={styles.noAddressesText}>{t('No delivery addresses found. Please add an address from your profile.')}</Text>
+            </View>
+          ) : (
+            <View style={styles.addressesContainer}>
+              {addresses.map((address) => (
+                <TouchableOpacity
+                  key={address.id}
+                  style={[
+                    styles.addressOption,
+                    selectedAddressId === address.id && styles.selectedAddress
+                  ]}
+                  onPress={() => setSelectedAddressId(address.id)}
+                >
+                  <View style={styles.radioButton}>
+                    {selectedAddressId === address.id && <View style={styles.radioInner} />}
+                  </View>
+                  <View style={styles.addressDetails}>
+                    <Text style={[
+                      styles.addressText,
+                      selectedAddressId === address.id && styles.selectedAddressText
+                    ]}>
+                      {address.address}
+                    </Text>
+                    <Text style={[
+                      styles.addressSubText,
+                      selectedAddressId === address.id && styles.selectedAddressSubText
+                    ]}>
+                      {address.city}, {address.state}
+                    </Text>
+                    <Text style={[
+                      styles.addressSubText,
+                      selectedAddressId === address.id && styles.selectedAddressSubText
+                    ]}>
+                      {address.street}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
         {/* Shipping Type */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -203,10 +296,26 @@ export default function CheckoutScreen() {
         </View>
       </ScrollView>
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.placeOrderButton}>
+            {!canPlaceOrder && addresses.length > 0 && (
+              <Text style={styles.warningText}>
+                {t('Please select a delivery address to continue')}
+              </Text>
+            )}
+            {addresses.length === 0 && (
+              <Text style={styles.warningText}>
+                {t('No delivery addresses available. Please add an address from your profile first.')}
+              </Text>
+            )}
+            <TouchableOpacity 
+              style={[
+                styles.placeOrderButton,
+                !canPlaceOrder && styles.placeOrderButtonDisabled
+              ]}
+              onPress={handlePlaceOrder}
+              disabled={!canPlaceOrder}
+            >
               <Text style={styles.placeOrderText}>{t('Place Order')}</Text>
             </TouchableOpacity>
-            
           </View>
      
     </View>
@@ -415,5 +524,68 @@ const styles = StyleSheet.create({
   selectedShippingText: {
     color: '#36c7f6',
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#666',
+  },
+  noAddressesContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  noAddressesText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+  addressesContainer: {
+    gap: 12,
+  },
+  addressOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  selectedAddress: {
+    borderColor: '#36c7f6',
+    backgroundColor: '#f8fbff',
+  },
+  addressDetails: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  addressText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  selectedAddressText: {
+    color: '#36c7f6',
+    fontWeight: '600',
+  },
+  addressSubText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  selectedAddressSubText: {
+    color: '#36c7f6',
+  },
+  warningText: {
+    color: '#f0ad4e', // Warning color
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 15,
   },
 }); 

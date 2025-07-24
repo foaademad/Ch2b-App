@@ -160,26 +160,15 @@
       "out_of_stock": "Out of Stock"
     },
     "addresses": {
-      "title": "Shipping Addresses",
+      "title": "My Addresses",
       "add_new": "Add New Address",
-      "edit": "Edit Address",
-      "delete": "Delete Address",
-      "set_default": "Set as Default",
-      "default": "Default",
-      "name": "Full Name",
-      "phone": "Phone Number",
+      "save": "Save Address",
+      "delete_success": "Address deleted successfully",
+      "add_success": "Address added successfully",
+      "no_addresses": "No addresses found. Add your first address.",
       "address": "Address",
       "city": "City",
-      "state": "State",
-      "country": "Country",
-      "postal_code": "Postal Code",
-      "save": "Save Address",
-      "no_addresses": "No addresses found",
-      "fill_all_fields": "Please fill in all fields",
-      "add_success": "Address added successfully",
-      "edit_success": "Address updated successfully",
-      "delete_success": "Address deleted successfully",
-      "set_default_success": "Default address updated successfully"
+      "state": "State/Province"
     },
     "payment_methods": {
       "title": "Payment Methods",
@@ -452,6 +441,10 @@
   "Contact Support for Shipping": "Contact Support for Shipping",
   "Order Summary": "Order Summary",
   "Checkout": "Checkout",
+  "Delivery Address": "Delivery Address",
+  "Please select a delivery address to continue": "Please select a delivery address to continue",
+  "No delivery addresses found. Please add an address from your profile.": "No delivery addresses found. Please add an address from your profile.",
+  "No delivery addresses available. Please add an address from your profile first.": "No delivery addresses available. Please add an address from your profile first.",
   "support": {
     "title": "Contact Support",
     "contact_info": "Contact Information",
