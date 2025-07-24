@@ -40,6 +40,10 @@ const validationSchema = Yup.object().shape({
     .min(10, 'Message must be at least 10 characters')
     .required('Message is required'),
   orderNumber: Yup.string()
+    .test('phone-format', 'Phone number must start with country code (e.g., +966, +967)', function(value) {
+      if (!value) return false;
+      return /^\+966|^\+967/.test(value);
+    })
     .required('Phone number is required'),
 });
 

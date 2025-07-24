@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import addressReducer from './slice/addressSlice';
 import authReducer from './slice/authSlice';
 import cartReducer from './slice/cartSlice';
 import categoryReducer from './slice/categorySlice';
@@ -20,6 +21,7 @@ export const store = configureStore({
     profile: profileReducer,
     commition: commitionReducer,
     problem: problemReducer,
+    address: addressReducer,
   },
 });
 

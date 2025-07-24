@@ -535,5 +535,51 @@
   },
   "common": {
     "ok": "OK"
+  },
+  "countries": {
+    "saudi_arabia": "Saudi Arabia",
+    "yemen": "Yemen"
+  },
+  "cities": {
+    "riyadh": "Riyadh Region",
+    "makkah": "Makkah Region",
+    "eastern_province": "Eastern Province",
+    "asir": "Asir Region",
+    "jazan": "Jazan Region",
+    "najran": "Najran Region",
+    "al_bahah": "Al Bahah Region",
+    "al_jouf": "Al Jouf Region",
+    "northern_borders": "Northern Borders Region",
+    "qassim": "Qassim Region",
+    "hail": "Hail Region",
+    "tabuk": "Tabuk Region",
+    "madinah": "Madinah Region",
+    "sanaa": "Sana'a",
+    "aden": "Aden",
+    "taiz": "Taiz",
+    "al_hudaydah": "Al Hudaydah",
+    "ibb": "Ibb",
+    "dhamar": "Dhamar",
+    "al_mahwit": "Al Mahwit",
+    "amran": "Amran",
+    "sanaa_governorate": "Sana'a (Governorate)",
+    "sadah": "Sa'dah",
+    "al_jawf": "Al Jawf",
+    "marib": "Marib",
+    "al_bayda": "Al Bayda",
+    "abyan": "Abyan",
+    "lahij": "Lahij",
+    "al_dhalee": "Al Dhale'e",
+    "shabwah": "Shabwah",
+    "hadramout": "Hadramout",
+    "al_mahrah": "Al Mahrah",
+    "socotra": "Socotra"
+  },
+  "validation": {
+    "country_required": "Country is required",
+    "state_required": "State/Province is required",
+    "address_required": "Address is required",
+    "city_required": "City is required",
+    "street_address_required": "Street address is required"
   }
 }

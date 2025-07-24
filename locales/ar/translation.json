@@ -549,5 +549,51 @@
     "bestSellers": "الأكثر مبيعاً",
     "dailyDeals": "عروض اليوم",
     "loadMore": "تحميل المزيد"
+  },
+  "countries": {
+    "saudi_arabia": "المملكة العربية السعودية",
+    "yemen": "اليمن"
+  },
+  "cities": {
+    "riyadh": "منطقة الرياض",
+    "makkah": "منطقة مكة المكرمة",
+    "eastern_province": "المنطقة الشرقية",
+    "asir": "منطقة عسير",
+    "jazan": "منطقة جازان",
+    "najran": "منطقة نجران",
+    "al_bahah": "منطقة الباحة",
+    "al_jouf": "منطقة الجوف",
+    "northern_borders": "منطقة الحدود الشمالية",
+    "qassim": "منطقة القصيم",
+    "hail": "منطقة حائل",
+    "tabuk": "منطقة تبوك",
+    "madinah": "منطقة المدينة المنورة",
+    "sanaa": "صنعاء",
+    "aden": "عدن",
+    "taiz": "تعز",
+    "al_hudaydah": "الحديدة",
+    "ibb": "إب",
+    "dhamar": "ذمار",
+    "al_mahwit": "المحويت",
+    "amran": "عمران",
+    "sanaa_governorate": "صنعاء (محافظة)",
+    "sadah": "صعدة",
+    "al_jawf": "الجوف",
+    "marib": "مأرب",
+    "al_bayda": "البيضاء",
+    "abyan": "أبين",
+    "lahij": "لحج",
+    "al_dhalee": "الضالع",
+    "shabwah": "شبوة",
+    "hadramout": "حضرموت",
+    "al_mahrah": "المهرة",
+    "socotra": "سقطرى"
+  },
+  "validation": {
+    "country_required": "الدولة مطلوبة",
+    "state_required": "المنطقة/المحافظة مطلوبة",
+    "address_required": "العنوان مطلوب",
+    "city_required": "المدينة مطلوبة",
+    "street_address_required": "عنوان الشارع مطلوب"
   }
 }
