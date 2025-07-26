@@ -45,17 +45,17 @@ const SettingsScreen = () => {
     {
       title: t('profile.settings.about'),
       icon: <Info size={24} color="#36c7f6" />,
-      onPress: () => {/* Handle about action */},
+      onPress: () => router.push('/about' as any),
     },
     {
       title: t('profile.settings.terms'),
       icon: <FileText size={24} color="#36c7f6" />,
-      onPress: () => {/* Handle terms action */},
+      onPress: () => router.push('/terms' as any),
     },
     {
       title: t('profile.settings.privacy_policy'),
       icon: <Shield size={24} color="#36c7f6" />,
-      onPress: () => {/* Handle privacy policy action */},
+      onPress: () => router.push('/privacy-policy' as any),
     },
   ];
 
