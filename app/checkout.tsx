@@ -10,6 +10,7 @@ import { useLanguage } from '../src/context/LanguageContext';
 import { fetchAddresses } from '../src/store/api/addressApi';
 import { getCommition } from '../src/store/api/commitionScimaApi';
 import { checkCouponCode } from '../src/store/api/couponApi';
+import { addOrder } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import type { AppliedCoupon } from '../src/store/utility/interfaces/couponInterface';
 
@@ -25,6 +26,7 @@ export default function CheckoutScreen() {
   const { shippingTax, loading: shippingTaxLoading } = useSelector((state: RootState) => state.shippingTax);
   const { addresses, loading: addressesLoading } = useSelector((state: RootState) => state.address);
   const { authModel } = useSelector((state: RootState) => state.auth);
+  const { loading: orderLoading, error: orderError, success: orderSuccess } = useSelector((state: RootState) => state.order);
   const userType = useSelector((state: RootState) => (state.auth.authModel?.result as any)?.userType) || 0;
   
   const cart = cartItems.map(item => ({
@@ -242,14 +244,114 @@ export default function CheckoutScreen() {
   // التحقق من إمكانية إتمام الطلب
   const canPlaceOrder = selectedAddressId !== null && addresses.length > 0;
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!canPlaceOrder) {
       return;
     }
     
-    const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
-    console.log('Placing order with address:', selectedAddress);
-    // هنا سيتم إضافة منطق إتمام الطلب
+    setIsLoading(true);
+    
+    try {
+      const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+      
+      if (!selectedAddress) {
+        Toast.show({
+          type: 'error',
+          text1: 'خطأ',
+          text2: t('profile.coupons.order_error'),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        return;
+      }
+
+      // تحضير بيانات الطلب
+      const orderItems = cartItems
+        .filter(item => item.id && item.id.toString().trim() !== '') // فلترة العناصر التي لها ID صحيح
+        .map(item => ({
+          productId: item.id!.toString(),
+          totalPrice: item.totalPrice || 0,
+          quntity: item.quntity || 1,
+          linkItemUrl: item.image || '',
+          cartItemId: Number(item.id),
+        }));
+
+      // التحقق من وجود عناصر صالحة
+      if (orderItems.length === 0) {
+        Toast.show({
+          type: 'error',
+          text1: 'خطأ',
+          text2: 'لا توجد منتجات صالحة في السلة',
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        return;
+      }
+
+      // تحضير بيانات الكوبون إذا كان مطبق
+      const couponeCode = appliedCoupon ? {
+        code: appliedCoupon.code,
+        discount: appliedCoupon.discount,
+        createAt: new Date().toISOString(),
+        endData: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        description: appliedCoupon.description,
+        minimumPrice: appliedCoupon.minimumPrice,
+        maximumPrice: appliedCoupon.maximumPrice,
+        isActived: true,
+      } : undefined;
+
+      const orderData = {
+        totalPrice: finalTotal,
+        totalPriceSAR: finalTotal, // يمكن تعديلها حسب العملة
+        shippingPrice: shipping,
+        tax: commission,
+        totalTaxWithOutMarkerDiscount: total + shipping + commission,
+        userId: authModel?.result?.userId || '',
+        orderItems,
+        couponeCode,
+        shippingLocationId: selectedAddressId,
+      };
+
+      console.log('Sending order data:', orderData);
+
+      const result = await dispatch(addOrder(orderData) as any);
+      
+      if (result.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'نجح',
+          text2: t('profile.coupons.order_success'),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+        
+        // إعادة توجيه المستخدم إلى صفحة الطلبات أو الرئيسية
+        setTimeout(() => {
+          router.push('/orders' as any);
+        }, 2000);
+        
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'خطأ',
+          text2: (result.message as string) || t('profile.coupons.order_error'),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error placing order:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'خطأ',
+        text2: t('profile.coupons.order_error'),
+        position: 'top',
+        visibilityTime: 4000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (addressesLoading) {

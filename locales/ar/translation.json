@@ -323,7 +323,27 @@
       "minimum_amount": "مطلوب حد أدنى للشراء",
       "discount_applied": "تم تطبيق الخصم بنجاح",
       "coupon_removed": "تم إزالة الكوبون بنجاح",
-      "error_applying": "خطأ في تطبيق الكوبون"
+      "error_applying": "خطأ في تطبيق الكوبون",
+      "order_success": "تم إرسال الطلب بنجاح",
+      "order_error": "خطأ في إرسال الطلب",
+      "order_processing": "جاري معالجة طلبك...",
+      "loading_orders": "جاري تحميل الطلبات...",
+      "error_loading_orders": "خطأ في تحميل الطلبات",
+      "no_orders_found": "لا توجد طلبات",
+      "order_number": "رقم الطلب #",
+      "order_date": "تاريخ الطلب",
+      "order_status": "الحالة",
+      "order_total": "المجموع",
+      "order_items": "عناصر",
+      "order_details": "تفاصيل الطلب",
+      "order_tracking": "تتبع الطلب",
+      "order_cancel": "إلغاء الطلب",
+      "order_retry": "إعادة المحاولة",
+      "order_status_pending": "في الانتظار",
+      "order_status_processing": "قيد المعالجة",
+      "order_status_shipped": "تم الشحن",
+      "order_status_delivered": "تم التوصيل",
+      "order_status_cancelled": "ملغي"
     }
   },
   "permission_required": "الإذن مطلوب",
@@ -430,11 +450,7 @@
   "Please select a delivery address to continue": "يرجى اختيار عنوان التوصيل للمتابعة",
   "No delivery addresses found. Please add an address from your profile.": "لم يتم العثور على عناوين توصيل. يرجى إضافة عنوان من ملفك الشخصي.",
   "No delivery addresses available. Please add an address from your profile first.": "لا توجد عناوين توصيل متاحة. يرجى إضافة عنوان من ملفك الشخصي أولاً.",
-  "Place Order": "إتمام الطلب",
-  "Subtotal": "المجموع الفرعي",
-  "Shipping": "الشحن",
-  "Commission": "العمولة",
-  "Total": "المجموع الكلي",
+  
   "support": {
     "title": "تواصل مع الدعم",
     "contact_info": "معلومات التواصل",
@@ -516,9 +532,7 @@
       "submit": "إرسال الرسالة"
     }
   },
-  "common": {
-    "ok": "موافق"
-  },
+  
   "cart": {
     "title": "سلة التسوق",
     "items": "منتجات",
@@ -575,7 +589,8 @@
     "retry": "إعادة المحاولة",
     "go_back": "العودة",
     "unknown_error": "حدث خطأ غير معروف",
-    "back": "العودة"
+    "back": "العودة",
+    "ok": "موافق"
   },
   "home": {
     "newArrivals": "وصل حديثاً",

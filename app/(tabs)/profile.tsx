@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
+import { getAllOrdersToUser } from '@/src/store/api/orderApi';
 import {
   ArrowLeft,
   ArrowRight,
@@ -40,7 +41,11 @@ const ProfileScreen = () => {
     if (!profile) {
       dispatch(getProfile());
     }
-  }, [language]);
+    // جلب طلبات المستخدم
+    if (profile?.user?.id) {
+      dispatch(getAllOrdersToUser(profile.user.id) as any);
+    }
+  }, [language, profile]);
 
   const handleLogout = useCallback(async () => {
     await logoutApi(dispatch);
@@ -53,13 +58,15 @@ const ProfileScreen = () => {
   const wishlistCount = wishlistItems.length > 0 && wishlistItems[0]?.favoriteItems 
     ? wishlistItems[0].favoriteItems.length 
     : 0;
-  const orderHistory = []; // سيتم تنفيذها لاحقاً
+  
+  // جلب عدد الطلبات من Redux state
+  const { orders } = useSelector((state: RootState) => state.order);
+  const ordersCount = orders.length;
 
   // معلومات البروفايل من API أو ثابتة إذا لم تتوفر
   const profileImage = 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D';
   const userName = profile?.user?.fullName || 'John Doe';
   const userEmail = profile?.user?.email || 'john.doe@example.com';
-  const ordersCount = profile?.orders?.length ?? 12;
 
   const cardsCount = cartItems.length; // API لا يوفر عدد البطاقات
 
@@ -73,7 +80,7 @@ const ProfileScreen = () => {
       title: t('profile.orders.title'),
       icon: <Package size={24} color="#36c7f6" />,
       onPress: () => router.push('/orders' as any),
-      badge: orderHistory.length.toString(),
+      badge: ordersCount.toString(),
     },
     {
       title: t('profile.wishlist.title'),
@@ -100,16 +107,7 @@ const ProfileScreen = () => {
   ];
 
   const settingsItems = [
-    {
-      title: t('profile.notifications.title'),
-      icon: <Bell size={24} color="#666" />,
-      onPress: () => router.push('/notifications' as any),
-    },
-    {
-      title: t('profile.privacy_security.title'),
-      icon: <Shield size={24} color="#666" />,
-      onPress: () => router.push('/privacy' as any),
-    },
+ 
     {
       title: t('profile.help_support.title'),
       icon: <HelpCircle size={24} color="#666" />,
@@ -137,12 +135,6 @@ const ProfileScreen = () => {
           </View>
         </View>
         <View style={styles.headerButtons}>
-          <TouchableOpacity 
-            style={styles.editProfileButton}
-            onPress={() => router.push('/edit-profile' as any)}
-          >
-            <Text style={styles.editProfileText}>{t('profile.edit_profile.title')}</Text>
-          </TouchableOpacity>
           <TouchableOpacity 
             style={styles.languageButton}
             onPress={toggleLanguage}
@@ -271,20 +263,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     gap: 12,
   },
-  editProfileButton: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  editProfileText: {
-    color: '#36c7f6',
-    fontSize: 16,
-    fontWeight: '600',
-  },
   languageButton: {
-    flex: 1,
     padding: 12,
     backgroundColor: '#f0f0f0',
     borderRadius: 8,

@@ -6,6 +6,7 @@ import categoryReducer from './slice/categorySlice';
 import commitionReducer from './slice/commitionScimaSlice';
 import couponReducer from './slice/couponSlice';
 import imageSearchReducer from './slice/imageSearchSlice';
+import orderReducer from './slice/orderSlice';
 import productReducer from './slice/productSlice';
 import profileReducer from './slice/profileSlice';
 import shippingTaxReducer from './slice/shippingTaxSlice';
@@ -19,6 +20,7 @@ export const store = configureStore({
     category: categoryReducer,
     cart: cartReducer,
     coupon: couponReducer,
+    order: orderReducer,
     wishlist: wishlistReducer,
     imageSearch: imageSearchReducer,
     profile: profileReducer,

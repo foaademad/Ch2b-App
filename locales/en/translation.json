@@ -297,7 +297,27 @@
       "minimum_amount": "Minimum purchase amount required",
       "discount_applied": "Discount applied successfully",
       "coupon_removed": "Coupon removed successfully",
-      "error_applying": "Error applying coupon"
+      "error_applying": "Error applying coupon",
+      "order_success": "Order placed successfully",
+      "order_error": "Error placing order",
+      "order_processing": "Processing your order...",
+      "loading_orders": "Loading orders...",
+      "error_loading_orders": "Error loading orders",
+      "no_orders_found": "No orders found",
+      "order_number": "Order #",
+      "order_date": "Order Date",
+      "order_status": "Status",
+      "order_total": "Total",
+      "order_items": "items",
+      "order_details": "Order Details",
+      "order_tracking": "Track Order",
+      "order_cancel": "Cancel Order",
+      "order_retry": "Retry",
+      "order_status_pending": "Pending",
+      "order_status_processing": "Processing",
+      "order_status_shipped": "Shipped",
+      "order_status_delivered": "Delivered",
+      "order_status_cancelled": "Cancelled"
     }
   },
   "permission_required": "Permission Required",
@@ -379,7 +399,8 @@
     "retry": "Retry",
     "go_back": "Go Back",
     "unknown_error": "Unknown error occurred",
-    "back": "Back"
+    "back": "Back",
+    "ok": "OK"
   },
   "product": {
     "no_ratings": "No ratings yet",
@@ -549,9 +570,7 @@
       "submit": "Send Message"
     }
   },
-  "common": {
-    "ok": "OK"
-  },
+ 
   "countries": {
     "saudi_arabia": "Saudi Arabia",
     "yemen": "Yemen"
