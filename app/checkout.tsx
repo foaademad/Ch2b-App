@@ -1,3 +1,4 @@
+import { getShippingTax } from '@/src/store/api/shippingTaxApi';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, MapPin, Package } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ export default function CheckoutScreen() {
   // استخدام Redux مباشرة بدلاً من ShopContext
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const { commition, loading: commitionLoading } = useSelector((state: RootState) => state.commition);
+  const { shippingTax, loading: shippingTaxLoading } = useSelector((state: RootState) => state.shippingTax);
   const { addresses, loading: addressesLoading } = useSelector((state: RootState) => state.address);
   const { authModel } = useSelector((state: RootState) => state.auth);
   const userType = useSelector((state: RootState) => (state.auth.authModel?.result as any)?.userType) || 0;
@@ -57,6 +59,7 @@ export default function CheckoutScreen() {
 
   useEffect(() => {
     dispatch(getCommition() as any);
+    dispatch(getShippingTax() as any);
     // جلب عناوين المستخدم
     if (authModel?.result?.userId) {
       dispatch(fetchAddresses(authModel.result.userId) as any);
@@ -102,8 +105,53 @@ export default function CheckoutScreen() {
     return 0;
   };
 
+  // حساب الشحن بناءً على نظام الشحن الجديد
+  const calculateShipping = () => {
+    if (!shippingTax || shippingTaxLoading) return 10; // قيمة افتراضية
+    
+    // إذا تم اختيار "Contact Support for Shipping"، اجعل الشحن 0
+    if (shippingType === 'support') {
+      console.log("Shipping set to 0 due to Contact Support shipping");
+      return 0;
+    }
+    
+    const totalQuantity = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
+    
+    console.log("Shipping calculation:", {
+      userType,
+      shippingTaxUserType: shippingTax.userType, // 0 = بالوزن، 1 = بالحجم
+      totalQuantity,
+      lowerLimit: shippingTax.lowerLimit,
+      upperLimit: shippingTax.upperLimit,
+      shippingPrice: shippingTax.shippingPrice,
+      isActive: shippingTax.isActive,
+      shippingType,
+      subtotal
+    });
+    
+    // التحقق من حدود الكمية وحالة النشاط
+    // ملاحظة: userType في shippingTax يمثل نوع الشحن (0 = بالوزن، 1 = بالحجم)
+    // يمكن استخدامه لاحقاً لتطبيق قواعد مختلفة حسب نوع الشحن
+    if (totalQuantity >= shippingTax.lowerLimit && 
+        totalQuantity <= shippingTax.upperLimit &&
+        shippingTax.isActive) {
+      // حساب الشحن كـ نسبة مئوية من سعر المنتج
+      const calculatedShipping = subtotal * (shippingTax.shippingPrice / 100);
+      console.log("Shipping applied as percentage:", {
+        percentage: shippingTax.shippingPrice,
+        subtotal,
+        calculatedShipping
+      });
+      return calculatedShipping;
+    }
+    
+    console.log("Default shipping applied - conditions not met");
+    return 10; // قيمة افتراضية
+  };
+
   const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
-  const shipping = 10;
+  const shipping = calculateShipping();
   const commission = calculateCommission();
   const finalTotal = total + shipping + commission;
 
@@ -272,7 +320,14 @@ export default function CheckoutScreen() {
               <Text style={styles.summaryValue}>${total.toFixed(2)}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>{t('Shipping')}</Text>
+              <Text style={styles.summaryLabel}>
+                {t('Shipping')}
+                {shippingTax && shippingTax.shippingPrice > 0 && (
+                  <Text style={{ fontSize: 12, color: '#666' }}>
+                    {` (${shippingTax.shippingPrice.toFixed(1)}% - ${shippingTax.userType === 0 ? 'By Weight' : 'By Volume'})`}
+                  </Text>
+                )}
+              </Text>
               <Text style={styles.summaryValue}>${shipping.toFixed(2)}</Text>
             </View>
             <View style={styles.summaryRow}>

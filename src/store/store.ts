@@ -7,6 +7,7 @@ import commitionReducer from './slice/commitionScimaSlice';
 import imageSearchReducer from './slice/imageSearchSlice';
 import productReducer from './slice/productSlice';
 import profileReducer from './slice/profileSlice';
+import shippingTaxReducer from './slice/shippingTaxSlice';
 import problemReducer from './slice/supportSlice';
 import wishlistReducer from './slice/wishlistSlice';
 
@@ -22,6 +23,7 @@ export const store = configureStore({
     commition: commitionReducer,
     problem: problemReducer,
     address: addressReducer,
+    shippingTax: shippingTaxReducer,
   },
 });
 
