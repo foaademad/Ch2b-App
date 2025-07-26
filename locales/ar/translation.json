@@ -293,6 +293,7 @@
     
     "my_account": "حسابي",
     "my_orders": "طلباتي",
+   
     "shipping_addresses": "عناوين الشحن",
    
     "logout": "تسجيل الخروج",
@@ -300,7 +301,30 @@
     
     "cards": "البطاقات",
     "contact_admin": "تواصل مع الإدارة",
-    "change_language": "تغيير اللغة"
+    "change_language": "تغيير اللغة",
+    "coupons": {
+      "title": "كوبونات الخصم",
+      "available": "الكوبونات المتاحة",
+      "expired": "الكوبونات المنتهية",
+      "no_coupons": "لا توجد كوبونات متاحة",
+      "discount": "الخصم",
+      "expires_on": "ينتهي في",
+      "minimum_purchase": "الحد الأدنى للشراء",
+      "copy_code": "نسخ الكود",
+      "code_copied": "تم نسخ الكود إلى الحافظة",
+      "valid_until": "صالح حتى",
+      "terms": "الشروط والأحكام",
+      "promo_code": "كوبون الخصم",
+      "enter_code": "أدخل الكود",
+      "apply": "تطبيق",
+      "applied": "مطبق",
+      "remove": "إزالة",
+      "invalid_code": "كود الكوبون غير صحيح",
+      "minimum_amount": "مطلوب حد أدنى للشراء",
+      "discount_applied": "تم تطبيق الخصم بنجاح",
+      "coupon_removed": "تم إزالة الكوبون بنجاح",
+      "error_applying": "خطأ في تطبيق الكوبون"
+    }
   },
   "permission_required": "الإذن مطلوب",
   "gallery_permission_message": "يرجى السماح بالوصول إلى مكتبة الصور لتغيير صورة الملف الشخصي",

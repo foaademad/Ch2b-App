@@ -275,7 +275,30 @@
    
     "cards": "Payment Cards",
     "contact_admin": "Contact Admin",
-    "change_language": "Change Lang"
+    "change_language": "Change Lang",
+    "coupons": {
+      "title": "Discount Coupons",
+      "available": "Available Coupons",
+      "expired": "Expired Coupons",
+      "no_coupons": "No coupons available",
+      "discount": "Discount",
+      "expires_on": "Expires on",
+      "minimum_purchase": "Minimum purchase",
+      "copy_code": "Copy Code",
+      "code_copied": "Code copied to clipboard",
+      "valid_until": "Valid until",
+      "terms": "Terms & Conditions",
+      "promo_code": "Promo Code",
+      "enter_code": "Enter code",
+      "apply": "Apply",
+      "applied": "Applied",
+      "remove": "Remove",
+      "invalid_code": "Invalid coupon code",
+      "minimum_amount": "Minimum purchase amount required",
+      "discount_applied": "Discount applied successfully",
+      "coupon_removed": "Coupon removed successfully",
+      "error_applying": "Error applying coupon"
+    }
   },
   "permission_required": "Permission Required",
   "gallery_permission_message": "Please allow access to your photo library to change your profile picture",

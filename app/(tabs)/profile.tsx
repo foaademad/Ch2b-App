@@ -12,18 +12,18 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import {
   ArrowLeft,
-    ArrowRight,
-    Bell,
-    CreditCard,
-    Globe,
-    Heart,
-    HelpCircle,
-    LogOut,
-    MapPin,
-    MessageSquare,
-    Package,
-    Settings,
-    Shield
+  ArrowRight,
+  Bell,
+  Globe,
+  Heart,
+  HelpCircle,
+  LogOut,
+  MapPin,
+  MessageSquare,
+  Package,
+  Settings,
+  Shield,
+  Tag
 } from 'lucide-react-native';
 
 const ProfileScreen = () => {
@@ -80,6 +80,11 @@ const ProfileScreen = () => {
       icon: <Heart size={24} color="#36c7f6" />,
       onPress: () => router.push('/whishList' as any),
       badge: wishlistCount.toString(),
+    },
+    {
+      title: t('profile.coupons.title'),
+      icon: <Tag size={24} color="#36c7f6" />,
+      onPress: () => router.push('/coupons' as any),
     },
     {
       title: t('profile.addresses.title'),

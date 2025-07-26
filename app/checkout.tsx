@@ -1,14 +1,17 @@
 import { getShippingTax } from '@/src/store/api/shippingTaxApi';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Package } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Package, Tag, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLanguage } from '../src/context/LanguageContext';
 import { fetchAddresses } from '../src/store/api/addressApi';
 import { getCommition } from '../src/store/api/commitionScimaApi';
+import { checkCouponCode } from '../src/store/api/couponApi';
 import { RootState } from '../src/store/store';
+import type { AppliedCoupon } from '../src/store/utility/interfaces/couponInterface';
 
 export default function CheckoutScreen() {
   const { t } = useTranslation();
@@ -56,6 +59,9 @@ export default function CheckoutScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [shippingType, setShippingType] = useState('express'); // 'express' or 'support'
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   useEffect(() => {
     dispatch(getCommition() as any);
@@ -153,7 +159,85 @@ export default function CheckoutScreen() {
   const total = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
   const shipping = calculateShipping();
   const commission = calculateCommission();
-  const finalTotal = total + shipping + commission;
+  
+  // حساب خصم الكوبون
+  const couponDiscount = appliedCoupon ? (total * appliedCoupon.discount / 100) : 0;
+  const finalTotal = total + shipping + commission - couponDiscount;
+
+  // تطبيق الكوبون
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      Toast.show({
+        type: 'error',
+        text1: 'خطأ',
+        text2: t('profile.coupons.enter_code'),
+        position: 'top',
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
+    setIsApplyingCoupon(true);
+    try {
+      const result = await dispatch(checkCouponCode(couponCode.trim(), total) as any);
+      
+      if (result.success) {
+        const couponData = result.data;
+        const discountAmount = total * (couponData.discount / 100);
+        
+        const appliedCouponData: AppliedCoupon = {
+          id: couponData.id,
+          code: couponData.code,
+          discount: couponData.discount,
+          discountAmount,
+          minimumPrice: couponData.minimumPrice,
+          maximumPrice: couponData.maximumPrice,
+          description: couponData.description
+        };
+        
+        setAppliedCoupon(appliedCouponData);
+        setCouponCode('');
+        
+        Toast.show({
+          type: 'success',
+          text1: 'نجح',
+          text2: t('profile.coupons.discount_applied'),
+          position: 'top',
+          visibilityTime: 3000,
+        });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'خطأ',
+          text2: result.message || t('profile.coupons.invalid_code'),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      }
+          } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: 'خطأ',
+          text2: t('profile.coupons.error_applying'),
+          position: 'top',
+          visibilityTime: 4000,
+        });
+      } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+
+  // إزالة الكوبون
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    Toast.show({
+      type: 'info',
+      text1: 'تم الإزالة',
+      text2: t('profile.coupons.coupon_removed'),
+      position: 'top',
+      visibilityTime: 2000,
+    });
+  };
 
   // التحقق من إمكانية إتمام الطلب
   const canPlaceOrder = selectedAddressId !== null && addresses.length > 0;
@@ -296,6 +380,59 @@ export default function CheckoutScreen() {
           </View>
         </View>
 
+        {/* Promo Code */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Tag size={20} color="#2196F3" />
+            <Text style={styles.sectionTitle}>{t('profile.coupons.promo_code')}</Text>
+          </View>
+          
+          {appliedCoupon ? (
+            <View style={styles.appliedCouponContainer}>
+              <View style={styles.appliedCouponInfo}>
+                <Text style={styles.appliedCouponCode}>{appliedCoupon.code}</Text>
+                <Text style={styles.appliedCouponDiscount}>
+                  {t('profile.coupons.discount')}: {appliedCoupon.discount}%
+                </Text>
+                <Text style={styles.appliedCouponAmount}>
+                  -${appliedCoupon.discountAmount.toFixed(2)}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.removeCouponButton}
+                onPress={handleRemoveCoupon}
+              >
+                <X size={16} color="#dc3545" />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.promoCodeContainer}>
+              <View style={styles.promoCodeInputContainer}>
+                <TextInput
+                  style={styles.promoCodeInput}
+                  placeholder={t('profile.coupons.enter_code')}
+                  value={couponCode}
+                  onChangeText={setCouponCode}
+                  placeholderTextColor="#999"
+                />
+                <Tag size={20} color="#999" style={styles.promoCodeIcon} />
+              </View>
+              <TouchableOpacity 
+                style={[
+                  styles.applyCouponButton,
+                  (!couponCode.trim() || isApplyingCoupon) && styles.applyCouponButtonDisabled
+                ]}
+                onPress={handleApplyCoupon}
+                disabled={!couponCode.trim() || isApplyingCoupon}
+              >
+                <Text style={styles.applyCouponText}>
+                  {isApplyingCoupon ? '...' : t('profile.coupons.apply')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
         {/* Order Summary */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -343,6 +480,16 @@ export default function CheckoutScreen() {
                 ${commission.toFixed(2)}
               </Text>
             </View>
+            {appliedCoupon && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>
+                  {t('profile.coupons.discount')} ({appliedCoupon.code})
+                </Text>
+                <Text style={[styles.summaryValue, { color: '#28a745' }]}>
+                  -${couponDiscount.toFixed(2)}
+                </Text>
+              </View>
+            )}
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>{t('Total')}</Text>
               <Text style={styles.totalValue}>${finalTotal.toFixed(2)}</Text>
@@ -642,5 +789,77 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     marginBottom: 15,
+  },
+  // Promo Code Styles
+  promoCodeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  promoCodeInputContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  promoCodeInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    paddingRight: 40,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  promoCodeIcon: {
+    position: 'absolute',
+    right: 12,
+    top: 12,
+  },
+  applyCouponButton: {
+    backgroundColor: '#36c7f6',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  applyCouponButtonDisabled: {
+    backgroundColor: '#ccc',
+  },
+  applyCouponText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  appliedCouponContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8fbff',
+    borderWidth: 1,
+    borderColor: '#36c7f6',
+    borderRadius: 8,
+    padding: 16,
+  },
+  appliedCouponInfo: {
+    flex: 1,
+  },
+  appliedCouponCode: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#36c7f6',
+    marginBottom: 4,
+  },
+  appliedCouponDiscount: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+  appliedCouponAmount: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#28a745',
+  },
+  removeCouponButton: {
+    padding: 8,
   },
 }); 

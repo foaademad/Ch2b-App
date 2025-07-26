@@ -4,6 +4,7 @@ import authReducer from './slice/authSlice';
 import cartReducer from './slice/cartSlice';
 import categoryReducer from './slice/categorySlice';
 import commitionReducer from './slice/commitionScimaSlice';
+import couponReducer from './slice/couponSlice';
 import imageSearchReducer from './slice/imageSearchSlice';
 import productReducer from './slice/productSlice';
 import profileReducer from './slice/profileSlice';
@@ -17,6 +18,7 @@ export const store = configureStore({
     product: productReducer,
     category: categoryReducer,
     cart: cartReducer,
+    coupon: couponReducer,
     wishlist: wishlistReducer,
     imageSearch: imageSearchReducer,
     profile: profileReducer,
