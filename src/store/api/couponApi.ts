@@ -24,7 +24,7 @@ export const getAllActiveCoupons = () => async (dispatch: any) => {
 
 export const checkCouponCode = (code: string, totalPrice: number) => async (dispatch: any) => {
     try {
-        const response = await api.get(`/CouponCode/check-active/${encodeURIComponent(code)}?TotalPrice=${totalPrice}`);
+        const response = await api.get(`/CouponCode/check-active/${(code)}?TotalPrice=${totalPrice}`);
         const data = response.data;
         
         if (data.isSuccess) {
