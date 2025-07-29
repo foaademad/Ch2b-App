@@ -84,6 +84,32 @@ const orderSlice = createSlice({
         console.warn('⚠️ Order not found in list for update:', orderId);
       }
     },
+
+    // paid by paypal
+    paidByPaypal: (state, action: PayloadAction<{ orderId: string }>) => {
+      const { orderId } = action.payload;
+      const orderIndex = state.orders.findIndex(order => 
+        order.id === orderId || order.orderId === orderId
+      );
+      if (orderIndex !== -1) {
+        state.orders[orderIndex].status = 2;
+        console.log('✅ Order status updated in list:', { orderId });
+      } else {
+        console.warn('⚠️ Order not found in list for update:', orderId);
+      }
+    },
+
+    // pay by account bank
+    payByAccountBank: (state, action: PayloadAction<{ orderId: string }>) => {
+      const { orderId } = action.payload;
+      const orderIndex = state.orders.findIndex(order => 
+        order.id === orderId || order.orderId === orderId
+      );
+    },
+
+
+
+
   },
 });
 
@@ -98,6 +124,7 @@ export const {
   clearError,
   resetOrderState,
   updateOrderInList,
+  paidByPaypal,
 } = orderSlice.actions;
 
 export default orderSlice.reducer; 

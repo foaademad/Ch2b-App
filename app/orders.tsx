@@ -3,10 +3,11 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, CreditCard, RefreshCw, Wallet } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../constants/Shadows';
-import { getAllOrdersToUser } from '../src/store/api/orderApi';
+import { createPayPalPayment, getAllOrdersToUser } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import { getOrderStatusColor, getOrderStatusText } from '../src/store/utility/orderStatusHelper';
 
@@ -76,31 +77,102 @@ const OrdersScreen = () => {
     setSelectedPaymentMethod(method);
   };
 
-  // إتمام عملية الدفع
+    // إتمام عملية الدفع
   const handleProcessPayment = async () => {
     if (!selectedOrder || !selectedPaymentMethod) {
-      Alert.alert(
-        t('error'),
-        t('profile.payment.select_payment_method')
-      );
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('profile.payment.select_payment_method')
+      });
       return;
     }
 
-    // محاكاة معالجة الدفع
-    Alert.alert(
-      t('profile.payment.payment_successful'),
-      `${t('profile.payment.payment_successful')} $${selectedOrder.totalPrice?.toFixed(2)} via ${selectedPaymentMethod === 'paypal' ? 'PayPal' : 'Bakiyya'}`,
-      [
-        {
-          text: t('common.ok'),
-          onPress: () => {
+    if (selectedPaymentMethod === 'paypal') {
+      try {
+        // استدعاء API الدفع عبر PayPal
+        const result = await dispatch(createPayPalPayment(selectedOrder.id) as any);
+        
+        console.log('💳 PayPal API Response:', result);
+        console.log('💳 PayPal API Data:', result.data);
+        console.log('💳 PayPal API Message:', result.message);
+        
+        if (result.success) {
+          // طباعة الرابط في console لمعرفته
+          console.log('🔗 PayPal Payment Link:', result.data?.linkPayment);
+          
+          // استخدام الرابط الصحيح من linkPayment
+          if (result.data?.linkPayment && typeof result.data.linkPayment === 'string') {
+            const paypalUrl = result.data.linkPayment;
+            const supported = await Linking.canOpenURL(paypalUrl);
+            
+            if (supported) {
+              await Linking.openURL(paypalUrl);
+              handleClosePaymentModal();
+              
+              Toast.show({
+                type: 'success',
+                text1: language === 'ar' ? 'تم فتح PayPal' : 'PayPal Opened',
+                text2: language === 'ar' ? 'يرجى إتمام عملية الدفع' : 'Please complete your payment'
+              });
+              
+              // لا نغير حالة الطلب هنا - ستتغير فقط بعد إتمام الدفع الفعلي
+              console.log('💳 Payment link opened - waiting for actual payment completion');
+            } else {
+              Toast.show({
+                type: 'info',
+                text1: language === 'ar' ? 'رابط الدفع' : 'Payment Link',
+                text2: language === 'ar' ? 'تم نسخ رابط الدفع' : 'Payment link copied'
+              });
+            }
+          } else {
+            // إذا لم يكن هناك رابط، عرض معلومات الدفع
             handleClosePaymentModal();
-            // إعادة تحميل الطلبات لتحديث الحالة
-            handleRefresh();
+            
+            Toast.show({
+              type: 'success',
+              text1: language === 'ar' ? 'تم إنشاء الدفع' : 'Payment Created',
+              text2: language === 'ar' 
+                ? `المبلغ: $${selectedOrder.totalPrice?.toFixed(2)} - رقم الطلب: ${selectedOrder.id}`
+                : `Amount: $${selectedOrder.totalPrice?.toFixed(2)} - Order: ${selectedOrder.id}`
+            });
           }
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: result.message || (language === 'ar' ? 'فشل في إنشاء الدفع' : 'Failed to create payment')
+          });
         }
-      ]
-    );
+      } catch (error) {
+        console.error('❌ Payment error:', error);
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: language === 'ar' ? 'خطأ في إنشاء الدفع' : 'Error creating payment'
+        });
+      }
+    } else if (selectedPaymentMethod === 'bakiyya') {
+      // عرض معلومات الدفع لـ Bakiyya
+      const paymentInfo = {
+        amount: selectedOrder.totalPrice?.toFixed(2),
+        orderId: selectedOrder.id,
+        currency: 'USD',
+        method: 'Bakiyya'
+      };
+      
+      handleClosePaymentModal();
+      
+      Toast.show({
+        type: 'success',
+        text1: language === 'ar' ? 'معلومات الدفع' : 'Payment Information',
+        text2: language === 'ar' 
+          ? `المبلغ: $${paymentInfo.amount} - رقم الطلب: ${paymentInfo.orderId}`
+          : `Amount: $${paymentInfo.amount} - Order: ${paymentInfo.orderId}`
+      });
+      
+      console.log('Payment Info:', paymentInfo);
+    }
   };
 
   return (
@@ -200,6 +272,43 @@ const OrdersScreen = () => {
                     {t('profile.coupons.no_orders_found')}
                   </Text>
                 )}
+              </View>
+
+              {/* تفاصيل السعر */}
+              <View style={styles.priceBreakdown}>
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>
+                    {language === 'ar' ? 'سعر المنتجات' : 'Products Price'}
+                  </Text>
+                  <Text style={styles.priceValue}>
+                    ${((order.totalPrice || 0) - (order.shippingPrice || 0) - (order.tax || 0)).toFixed(2)}
+                  </Text>
+                </View>
+                
+                {(order.shippingPrice && order.shippingPrice > 0) && (
+                  <View style={styles.priceRow}>
+                    <Text style={styles.priceLabel}>
+                      {language === 'ar' ? 'الشحن' : 'Shipping'}
+                    </Text>
+                    <Text style={styles.priceValue}>
+                      ${(order.shippingPrice || 0).toFixed(2)}
+                    </Text>
+                  </View>
+                )}
+                
+                {(order.tax && order.tax > 0) && (
+                  <View style={styles.priceRow}>
+                    <Text style={styles.priceLabel}>
+                      {language === 'ar' ? 'الضرائب' : 'Taxes'}
+                    </Text>
+                    <Text style={styles.priceValue}>
+                      ${(order.tax || 0).toFixed(2)}
+                    </Text>
+                  </View>
+                )}
+                
+                {/* خط فاصل قبل المجموع */}
+                <View style={styles.priceDivider} />
               </View>
 
               <View style={styles.orderFooter}>
@@ -784,5 +893,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
+  },
+  priceBreakdown: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 16,
+    ...Shadows.medium,
+  },
+  priceRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  priceLabel: {
+    fontSize: 14,
+    color: '#666',
+  },
+  priceValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  priceDivider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginTop: 16,
+    marginBottom: 16,
   },
 }); 

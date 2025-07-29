@@ -1,4 +1,4 @@
-import { addOrderSuccess, clearCurrentOrder, setError, setLoading, setOrders, updateOrderInList } from "../slice/orderSlice";
+import { addOrderSuccess, clearCurrentOrder, paidByPaypal as paidByPaypalAction, setError, setLoading, setOrders, updateOrderInList } from "../slice/orderSlice";
 import api from "../utility/api/api";
 import { OrderRequest, OrderResponse } from "../utility/interfaces/orderInterface";
 
@@ -49,7 +49,6 @@ export const getAllOrdersToUser = (userId: string) => async (dispatch: any) => {
   }
 };
 
-// جلب جميع الطلبات للمستخدم (الاسم القديم للتوافق)
 export const getUserOrders = (userId: string) => async (dispatch: any) => {
   return getAllOrdersToUser(userId)(dispatch);
 };
@@ -107,3 +106,78 @@ export const updateOrderStatus = (orderId: string, orderStatus: number) => async
     return { success: false, message: errorMessage };
   }
 }; 
+
+// create paypal payment
+export const createPayPalPayment = (orderId: string) => async (dispatch: any) => {
+  try {
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    
+    const response = await api.get(`/PayMent/create/${orderId}`);
+    const data = response.data as OrderResponse;
+    
+    if (data.isSuccess) {
+      // لا نغير حالة الطلب هنا - ستتغير فقط بعد إتمام الدفع الفعلي
+      // dispatch(paidByPaypalAction({ orderId }));
+      return { success: true, data: data.result, message: data.message };
+    } else {
+      dispatch(setError(data.message || "Failed to create payment"));
+      return { success: false, message: data.message || "Failed to create payment" };
+    }
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while creating payment';
+    dispatch(setError(errorMessage));
+    return { success: false, message: errorMessage };
+  }
+};
+
+// التحقق من حالة الدفع وتحديث حالة الطلب عند إتمام الدفع
+export const checkPaymentStatus = (orderId: string) => async (dispatch: any) => {
+  try {
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    
+    const response = await api.get(`/PayMent/check-status/${orderId}`);
+    const data = response.data as OrderResponse;
+    
+    if (data.isSuccess && data.result?.paymentCompleted) {
+      // تحديث حالة الطلب إلى 2 (مكتمل الدفع) فقط عند إتمام الدفع الفعلي
+      dispatch(paidByPaypalAction({ orderId }));
+      return { success: true, data: data.result, message: data.message };
+    } else {
+      return { success: false, message: data.message || "Payment not completed yet" };
+    }
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while checking payment status';
+    dispatch(setError(errorMessage));
+    return { success: false, message: errorMessage };
+  }
+};
+
+
+
+// pay by account bank
+export const payByAccountBank = (orderId: string) => async (dispatch: any) => {
+  try {
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    
+    const response = await api.get(`/PayMent/pay-by-account-bank/${orderId}`);
+    const data = response.data as OrderResponse;
+
+    if (data.isSuccess) {
+      return { success: true, data: data.result, message: data.message };
+    } else {
+      dispatch(setError(data.message || "Failed to pay by account bank"));
+      return { success: false, message: data.message || "Failed to pay by account bank" };
+    }
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while paying by account bank';  
+    dispatch(setError(errorMessage));
+    return { success: false, message: errorMessage };
+  }
+};
+
+
+
+
