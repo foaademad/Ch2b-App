@@ -318,6 +318,26 @@
       "order_status_shipped": "Shipped",
       "order_status_delivered": "Delivered",
       "order_status_cancelled": "Cancelled"
+    },
+    "payment": {
+      "title": "Payment",
+      "select_method": "Select Payment Method",
+      "pay_now": "Pay Now",
+      "process_payment": "Process Payment",
+      "payment_successful": "Payment Successful",
+      "payment_failed": "Payment Failed",
+      "payment_error": "Payment Error",
+      "select_payment_method": "Please select a payment method",
+      "payment_summary": "Payment Summary",
+      "base_amount": "Base Amount",
+      "payment_fees": "Payment Fees",
+      "total_amount": "Total Amount",
+      "paypal": "PayPal",
+      "bakiyya": "Bakiyya",
+      "pay_with_paypal": "Pay with PayPal",
+      "pay_with_bakiyya": "Pay with Bakiyya",
+      "paypal_fees": "Fees: 2.9% + $0.30",
+      "bakiyya_fees": "Fees: 1.5% + $0.25"
     }
   },
   "permission_required": "Permission Required",

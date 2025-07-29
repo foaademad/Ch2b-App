@@ -344,6 +344,26 @@
       "order_status_shipped": "تم الشحن",
       "order_status_delivered": "تم التوصيل",
       "order_status_cancelled": "ملغي"
+    },
+    "payment": {
+      "title": "الدفع",
+      "select_method": "اختر طريقة الدفع",
+      "pay_now": "دفع الآن",
+      "process_payment": "إتمام الدفع",
+      "payment_successful": "تم الدفع بنجاح",
+      "payment_failed": "فشل في الدفع",
+      "payment_error": "خطأ في الدفع",
+      "select_payment_method": "يرجى اختيار طريقة دفع",
+      "payment_summary": "ملخص الدفع",
+      "base_amount": "المبلغ الأساسي",
+      "payment_fees": "رسوم الدفع",
+      "total_amount": "المجموع الإجمالي",
+      "paypal": "PayPal",
+      "bakiyya": "Bakiyya",
+      "pay_with_paypal": "الدفع عبر PayPal",
+      "pay_with_bakiyya": "الدفع عبر Bakiyya",
+      "paypal_fees": "الرسوم: 2.9% + $0.30",
+      "bakiyya_fees": "الرسوم: 1.5% + $0.25"
     }
   },
   "permission_required": "الإذن مطلوب",

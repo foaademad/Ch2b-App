@@ -69,6 +69,21 @@ const orderSlice = createSlice({
       state.error = null;
       state.success = false;
     },
+    
+    // تحديث حالة طلب في القائمة
+    updateOrderInList: (state, action: PayloadAction<{ orderId: string; orderStatus: number }>) => {
+      const { orderId, orderStatus } = action.payload;
+      const orderIndex = state.orders.findIndex(order => 
+        order.id === orderId || order.orderId === orderId
+      );
+      
+      if (orderIndex !== -1) {
+        state.orders[orderIndex].status = orderStatus;
+        console.log('✅ Order status updated in list:', { orderId, orderStatus });
+      } else {
+        console.warn('⚠️ Order not found in list for update:', orderId);
+      }
+    },
   },
 });
 
@@ -82,6 +97,7 @@ export const {
   clearSuccess,
   clearError,
   resetOrderState,
+  updateOrderInList,
 } = orderSlice.actions;
 
 export default orderSlice.reducer; 

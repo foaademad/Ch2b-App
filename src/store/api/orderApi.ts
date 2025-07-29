@@ -1,4 +1,4 @@
-import { addOrderSuccess, clearCurrentOrder, setError, setLoading, setOrders } from "../slice/orderSlice";
+import { addOrderSuccess, clearCurrentOrder, setError, setLoading, setOrders, updateOrderInList } from "../slice/orderSlice";
 import api from "../utility/api/api";
 import { OrderRequest, OrderResponse } from "../utility/interfaces/orderInterface";
 
@@ -73,6 +73,36 @@ export const getOrderDetails = (orderId: string) => async (dispatch: any) => {
     
   } catch (error: any) {
     const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while fetching order details';
+    dispatch(setError(errorMessage));
+    return { success: false, message: errorMessage };
+  }
+};
+
+// تحديث حالة الطلب
+export const updateOrderStatus = (orderId: string, orderStatus: number) => async (dispatch: any) => {
+  try {
+    dispatch(setLoading(true));
+    dispatch(setError(null));
+    
+    console.log('🔄 Updating order status:', { orderId, orderStatus });
+    
+    const response = await api.patch(`/Order/update-order-status/${orderId}?orderStatus=${orderStatus}`);
+    const data = response.data as OrderResponse;
+    
+    console.log('📦 Update order status response:', data);
+    
+    if (data.isSuccess) {
+      // تحديث الطلب في القائمة
+      dispatch(updateOrderInList({ orderId, orderStatus }));
+      return { success: true, data: data.result, message: data.message };
+    } else {
+      dispatch(setError(data.message || "Failed to update order status"));
+      return { success: false, message: data.message || "Failed to update order status" };
+    }
+    
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while updating order status';
+    console.error('❌ Error updating order status:', error);
     dispatch(setError(errorMessage));
     return { success: false, message: errorMessage };
   }
