@@ -9,7 +9,7 @@ import { Shadows } from '../constants/Shadows';
 import { getAllOrdersToUser } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import { getOrderStatusColor, getOrderStatusText } from '../src/store/utility/orderStatusHelper';
-import { processPayment } from '../src/store/utility/paymentHelper';
+
 const OrdersScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -86,48 +86,21 @@ const OrdersScreen = () => {
       return;
     }
 
-    try {
-      // استخدام وظائف الدفع الجديدة
-      const paymentResult = await processPayment(
-        selectedOrder.id,
-        selectedPaymentMethod,
-        selectedOrder.totalPrice
-      );
-
-      if (paymentResult.success) {
-        Alert.alert(
-          t('profile.payment.payment_successful'),
-          `${t('profile.payment.payment_successful')} $${selectedOrder.totalPrice?.toFixed(2)} via ${selectedPaymentMethod === 'paypal' ? 'PayPal' : 'Bakiyya'}`,
-          [
-            {
-              text: t('common.ok'),
-              onPress: () => {
-                handleClosePaymentModal();
-                // إعادة تحميل الطلبات لتحديث الحالة
-                handleRefresh();
-              }
-            }
-          ]
-        );
-      } else {
-        Alert.alert(
-          t('profile.payment.payment_failed'),
-          paymentResult.message,
-          [
-            {
-              text: t('common.ok'),
-              onPress: () => handleClosePaymentModal()
-            }
-          ]
-        );
-      }
-    } catch (error) {
-      console.error('Payment error:', error);
-      Alert.alert(
-        t('profile.payment.payment_error'),
-        t('profile.payment.payment_error')
-      );
-    }
+    // محاكاة معالجة الدفع
+    Alert.alert(
+      t('profile.payment.payment_successful'),
+      `${t('profile.payment.payment_successful')} $${selectedOrder.totalPrice?.toFixed(2)} via ${selectedPaymentMethod === 'paypal' ? 'PayPal' : 'Bakiyya'}`,
+      [
+        {
+          text: t('common.ok'),
+          onPress: () => {
+            handleClosePaymentModal();
+            // إعادة تحميل الطلبات لتحديث الحالة
+            handleRefresh();
+          }
+        }
+      ]
+    );
   };
 
   return (
