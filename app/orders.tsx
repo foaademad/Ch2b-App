@@ -148,27 +148,6 @@ const OrdersScreen = () => {
       </View>
 
       <ScrollView style={styles.content}>
-        {/* ملخص المنتجات Reviewed */}
-        {orders.some(order => order.status === 1 || order.orderStatus === 1) && (
-          <View style={styles.reviewedSummary}>
-            <View style={styles.reviewedSummaryHeader}>
-              <Text style={styles.reviewedSummaryTitle}>
-                {language === 'ar' ? 'المنتجات المُراجعة' : 'Reviewed Products'}
-              </Text>
-              <Text style={styles.reviewedSummaryCount}>
-                {orders.filter(order => order.status === 1 || order.orderStatus === 1).length} {language === 'ar' ? 'منتج' : 'products'}
-              </Text>
-            </View>
-            <View style={styles.reviewedSummaryTotal}>
-              <Text style={styles.reviewedSummaryLabel}>
-                {language === 'ar' ? 'المجموع الإجمالي:' : 'Total Amount:'}
-              </Text>
-              <Text style={styles.reviewedSummaryAmount}>
-                SAR {calculateReviewedProductsTotal().toFixed(2)}
-              </Text>
-            </View>
-          </View>
-        )}
 
         {loading ? (
           <View style={styles.loadingContainer}>
