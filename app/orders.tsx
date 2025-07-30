@@ -133,8 +133,8 @@ const OrdersScreen = () => {
               type: 'success',
               text1: language === 'ar' ? 'تم إنشاء الدفع' : 'Payment Created',
               text2: language === 'ar' 
-                ? `المبلغ: $${selectedOrder.totalPrice?.toFixed(2)} - رقم الطلب: ${selectedOrder.id}`
-                : `Amount: $${selectedOrder.totalPrice?.toFixed(2)} - Order: ${selectedOrder.id}`
+                ? `المبلغ: ${selectedOrder.totalPrice?.toFixed(2)} - رقم الطلب: ${selectedOrder.id}`
+                : `Amount: ${selectedOrder.totalPrice?.toFixed(2)} - Order: ${selectedOrder.id}`
             });
           }
         } else {
@@ -167,8 +167,8 @@ const OrdersScreen = () => {
         type: 'success',
         text1: language === 'ar' ? 'معلومات الدفع' : 'Payment Information',
         text2: language === 'ar' 
-          ? `المبلغ: $${paymentInfo.amount} - رقم الطلب: ${paymentInfo.orderId}`
-          : `Amount: $${paymentInfo.amount} - Order: ${paymentInfo.orderId}`
+          ? `المبلغ: u{paymentInfo.amount} - رقم الطلب: ${paymentInfo.orderId}`
+          : `Amount: ${paymentInfo.amount} - Order: ${paymentInfo.orderId}`
       });
       
       console.log('Payment Info:', paymentInfo);
@@ -262,7 +262,7 @@ const OrdersScreen = () => {
                           {t('profile.coupons.order_items')}: {item.quntity || item.quantity || 1}
                         </Text>
                         <Text style={styles.itemPrice}>
-                          ${(item.totalPrice || 0).toFixed(2)}
+                          {(item.totalPrice || 0).toFixed(2)} SAR
                         </Text>
                       </View>
                     </View>
@@ -281,7 +281,7 @@ const OrdersScreen = () => {
                     {language === 'ar' ? 'سعر المنتجات' : 'Products Price'}
                   </Text>
                   <Text style={styles.priceValue}>
-                    ${((order.totalPrice || 0) - (order.shippingPrice || 0) - (order.tax || 0)).toFixed(2)}
+                      {((order.totalPrice || 0) - (order.shippingPrice || 0) - (order.tax || 0)).toFixed(2)} SAR
                   </Text>
                 </View>
                 
@@ -291,7 +291,7 @@ const OrdersScreen = () => {
                       {language === 'ar' ? 'الشحن' : 'Shipping'}
                     </Text>
                     <Text style={styles.priceValue}>
-                      ${(order.shippingPrice || 0).toFixed(2)}
+                      {(order.shippingPrice || 0).toFixed(2)} SAR
                     </Text>
                   </View>
                 )}
@@ -302,7 +302,7 @@ const OrdersScreen = () => {
                       {language === 'ar' ? 'الضرائب' : 'Taxes'}
                     </Text>
                     <Text style={styles.priceValue}>
-                      ${(order.tax || 0).toFixed(2)}
+                      {(order.tax || 0).toFixed(2)} SAR
                     </Text>
                   </View>
                 )}
@@ -314,7 +314,7 @@ const OrdersScreen = () => {
               <View style={styles.orderFooter}>
                 <Text style={styles.totalLabel}>{t('profile.coupons.order_total')}</Text>
                 <Text style={styles.totalAmount}>
-                  ${(order.totalPrice || 0).toFixed(2)}
+                  {(order.totalPrice || 0).toFixed(2)} SAR
                 </Text>
               </View>
             </View>

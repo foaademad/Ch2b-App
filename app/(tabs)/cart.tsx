@@ -132,7 +132,7 @@ const CartScreen = () => {
               <Image source={{ uri: item.image }} style={styles.itemImage} />
               <View style={styles.itemDetails}>
                 <Text style={styles.itemName}>{item.title}</Text>
-                <Text style={styles.itemPrice}>${(item.totalPrice || 0).toFixed(2)}</Text>
+                <Text style={styles.itemPrice}>{item.totalPrice} SAR</Text>
                 
                 {/* Configurators */}
                 {(item as any).configuratorsInfo && (
@@ -159,16 +159,16 @@ const CartScreen = () => {
                         {t('product.weight')}: {item.physicalParametersJson.weight}
                       </Text>
                     )}
-                    {item.physicalParametersJson.height && item.physicalParametersJson.height > 0 && (
+                    {/* {item.physicalParametersJson.height && item.physicalParametersJson.height > 0 && (
                       <Text style={styles.physicalParamText}>
                         {t('product.height')}: {item.physicalParametersJson.height}
                       </Text>
-                    )}
-                    {item.physicalParametersJson.width && item.physicalParametersJson.width > 0 && (
+                    )} */}
+                    {/* {item.physicalParametersJson.width && item.physicalParametersJson.width > 0 && (
                       <Text style={styles.physicalParamText}>
                         {t('product.width')}: {item.physicalParametersJson.width}
                       </Text>
-                    )}
+                    )} */}
                   </View>
                 )}
                 
@@ -211,7 +211,7 @@ const CartScreen = () => {
       <View style={styles.footer}>
         <View style={styles.totalContainer}>
           <Text style={styles.totalLabel}>{t('cart.total')}</Text>
-          <Text style={styles.totalAmount}>${total.toFixed(2)}</Text>
+          <Text style={styles.totalAmount}>{total} SAR</Text>
         </View>
         <TouchableOpacity 
           style={[styles.checkoutButton, cart.length === 0 && styles.disabledButton]} 

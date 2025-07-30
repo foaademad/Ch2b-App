@@ -157,21 +157,63 @@ export const checkPaymentStatus = (orderId: string) => async (dispatch: any) => 
 
 
 // pay by account bank
-export const payByAccountBank = (orderId: string) => async (dispatch: any) => {
+export const payByAccountBank = (userId: string, bankTransferData: any) => async (dispatch: any) => {
   try {
+    console.log('🏦 payByAccountBank API called with:', { userId, bankTransferData });
     dispatch(setLoading(true));
     dispatch(setError(null));
     
-    const response = await api.get(`/PayMent/pay-by-account-bank/${orderId}`);
+    // إنشاء FormData لإرسال البيانات مع الملف
+    const formData = new FormData();
+    
+    // إضافة البيانات الأساسية
+    formData.append('userId', userId);
+    formData.append('bankAccountToTransferTo', bankTransferData.bankAccountToTransferTo);
+    formData.append('senderAccountName', bankTransferData.senderAccountName);
+    formData.append('amount', bankTransferData.amount.toString());
+    formData.append('senderBankName', bankTransferData.senderBankName);
+    formData.append('senderAccountNumber', bankTransferData.senderAccountNumber);
+    
+    // إضافة الملف إذا كان موجوداً
+    if (bankTransferData.transferReceiptImage) {
+      console.log('📎 Adding image to FormData:', bankTransferData.transferReceiptImage);
+      formData.append('transferReceiptImage', {
+        uri: bankTransferData.transferReceiptImage.uri,
+        type: bankTransferData.transferReceiptImage.type || 'image/jpeg',
+        name: bankTransferData.transferReceiptImage.name || 'receipt.jpg'
+      } as any);
+    } else {
+      console.log('⚠️ No image provided for bank transfer');
+    }
+    
+    console.log('📤 Sending FormData to API...');
+    console.log('🔗 API URL:', `/PayMent/create-bankTransfer/${userId}`);
+    
+    const response = await api.post(`/PayMent/create-bankTransfer/${userId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    
+    console.log('📥 API Response received:', response);
+    console.log('📊 Response status:', response.status);
+    console.log('📋 Response data:', response.data);
+    
     const data = response.data as OrderResponse;
 
     if (data.isSuccess) {
+      console.log('✅ Bank transfer API call successful');
       return { success: true, data: data.result, message: data.message };
     } else {
+      console.error('❌ Bank transfer API call failed:', data.message);
       dispatch(setError(data.message || "Failed to pay by account bank"));
       return { success: false, message: data.message || "Failed to pay by account bank" };
     }
   } catch (error: any) {
+    console.error('❌ Bank transfer API error:', error);
+    console.error('❌ Error response:', error?.response);
+    console.error('❌ Error message:', error?.message);
+    
     const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while paying by account bank';  
     dispatch(setError(errorMessage));
     return { success: false, message: errorMessage };

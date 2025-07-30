@@ -1,6 +1,6 @@
 import { getShippingTax } from '@/src/store/api/shippingTaxApi';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Package, Tag, X } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, MapPin, Package, Tag, X } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -39,25 +39,8 @@ export default function CheckoutScreen() {
     quantity: item.quntity || 1
   }));
   
-  // دوال مؤقتة - سيتم تنفيذها لاحقاً
-  const removeFromCart = (id: number) => console.log("Remove from cart:", id);
-  const addToOrderHistory = (order: any) => console.log("Add to order history:", order);
-  const clearCart = () => console.log("Clear cart");
+ 
   
-  const [shippingInfo, setShippingInfo] = useState({
-    fullName: '',
-    address: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    phone: '',
-  });
-  const [paymentMethod, setPaymentMethod] = useState('credit');
-  const [cardInfo, setCardInfo] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-  });
   const [isLoading, setIsLoading] = useState(false);
   const [shippingType, setShippingType] = useState('express'); // 'express' or 'support'
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
@@ -115,7 +98,7 @@ export default function CheckoutScreen() {
 
   // حساب الشحن بناءً على نظام الشحن الجديد
   const calculateShipping = () => {
-    if (!shippingTax || shippingTaxLoading) return 10; // قيمة افتراضية
+    if (!shippingTax || shippingTaxLoading) return 0; // قيمة افتراضية
     
     // إذا تم اختيار "Contact Support for Shipping"، اجعل الشحن 0
     if (shippingType === 'support') {
@@ -357,9 +340,9 @@ export default function CheckoutScreen() {
   if (addressesLoading) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { direction: isRTL ? 'rtl' : 'ltr' }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <ArrowLeft size={24} color="#000" />
+            {isRTL ? <ChevronRight size={24} color="#333" /> : <ChevronLeft size={24} color="#333" />}
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('Checkout')}</Text>
         </View>
@@ -372,19 +355,20 @@ export default function CheckoutScreen() {
   
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#000" />
+          {isRTL ? <ChevronRight size={24} color="#333" /> : <ChevronLeft size={24} color="#333" />}
+        
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('Checkout')}</Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { direction: isRTL ? 'rtl' : 'ltr' }]}>
         
         {/* Delivery Address */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <MapPin size={20} color="#2196F3" />
+            <MapPin size={20} color="#2196F3" style={{ marginRight: isRTL ? 0 : 8, marginLeft: isRTL ? 8 : 0 }} />
             <Text style={styles.sectionTitle}>{t('Delivery Address')}</Text>
           </View>
           
@@ -439,7 +423,7 @@ export default function CheckoutScreen() {
         {/* Shipping Type */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Package size={20} color="#2196F3" />
+            <Package size={20} color="#2196F3" style={{ marginRight: isRTL ? 0 : 8, marginLeft: isRTL ? 8 : 0 }} />
             <Text style={styles.sectionTitle}>{t('Shipping Type')}</Text>
           </View>
           
@@ -485,7 +469,7 @@ export default function CheckoutScreen() {
         {/* Promo Code */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Tag size={20} color="#2196F3" />
+            <Tag size={20} color="#2196F3" style={{ marginRight: isRTL ? 0 : 8, marginLeft: isRTL ? 8 : 0 }} />
             <Text style={styles.sectionTitle}>{t('profile.coupons.promo_code')}</Text>
           </View>
           
@@ -538,7 +522,7 @@ export default function CheckoutScreen() {
         {/* Order Summary */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Package size={20} color="#2196F3" />
+            <Package size={20} color="#2196F3" style={{ marginRight: isRTL ? 0 : 8, marginLeft: isRTL ? 8 : 0 }} />
             <Text style={styles.sectionTitle}>{t('Order Summary')}</Text>
           </View>
           {cart.map((item) => (
@@ -549,14 +533,14 @@ export default function CheckoutScreen() {
                 <Text style={styles.orderItemQuantity}>Qty: {item.quantity}</Text>
               </View>
               <Text style={styles.orderItemPrice}>
-                ${(item.price * (item.quantity || 1)).toFixed(2)}
+                {(item.price * (item.quantity || 1)).toFixed(2)} SAR
               </Text>
             </View>
           ))}
           <View style={styles.orderSummary}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>{t('Subtotal')}</Text>
-              <Text style={styles.summaryValue}>${total.toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>{total} SAR</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>
@@ -567,7 +551,7 @@ export default function CheckoutScreen() {
                   </Text>
                 )}
               </Text>
-              <Text style={styles.summaryValue}>${shipping.toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>{shipping} SAR</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>
@@ -579,7 +563,7 @@ export default function CheckoutScreen() {
                 )}
               </Text>
               <Text style={styles.summaryValue}>
-                ${commission.toFixed(2)}
+                {commission} SAR
               </Text>
             </View>
             {appliedCoupon && (
@@ -588,13 +572,13 @@ export default function CheckoutScreen() {
                   {t('profile.coupons.discount')} ({appliedCoupon.code})
                 </Text>
                 <Text style={[styles.summaryValue, { color: '#28a745' }]}>
-                  -${couponDiscount.toFixed(2)}
+                  -{couponDiscount} SAR
                 </Text>
               </View>
             )}
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>{t('Total')}</Text>
-              <Text style={styles.totalValue}>${finalTotal.toFixed(2)}</Text>
+              <Text style={styles.totalValue}>{finalTotal} SAR</Text>
             </View>
           </View>
         </View>

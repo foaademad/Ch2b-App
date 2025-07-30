@@ -7,22 +7,22 @@ import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { getAllOrdersToUser } from '@/src/store/api/orderApi';
 import {
   ArrowLeft,
   ArrowRight,
-  Bell,
+  FileText,
   Globe,
   Heart,
-  HelpCircle,
+  Info,
+  Linkedin,
   LogOut,
   MapPin,
   MessageSquare,
   Package,
-  Settings,
   Shield,
   Tag
 } from 'lucide-react-native';
@@ -75,6 +75,10 @@ const ProfileScreen = () => {
     changeLanguage(newLanguage);
   };
 
+  const openLinkedInProfile = (url: string) => {
+    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
+  };
+
   const menuItems = [
     {
       title: t('profile.orders.title'),
@@ -107,16 +111,20 @@ const ProfileScreen = () => {
   ];
 
   const settingsItems = [
- 
     {
-      title: t('profile.help_support.title'),
-      icon: <HelpCircle size={24} color="#666" />,
-      onPress: () => router.push('/support' as any),
+      title: t('profile.settings.about'),
+      icon: <Info size={24} color="#36c7f6" />,
+      onPress: () => router.push('/about' as any),
     },
     {
-      title: t('profile.settings.title'),
-      icon: <Settings size={24} color="#666" />,
-      onPress: () => router.push('/settings' as any),
+      title: t('profile.settings.terms'),
+      icon: <FileText size={24} color="#36c7f6" />,
+      onPress: () => router.push('/terms' as any),
+    },
+    {
+      title: t('profile.settings.privacy_policy'),
+      icon: <Shield size={24} color="#36c7f6" />,
+      onPress: () => router.push('/privacy-policy' as any),
     },
   ];
 
@@ -212,6 +220,28 @@ const ProfileScreen = () => {
         <LogOut size={24} color="#ff3b30"  />
         <Text style={styles.logoutText}>{t('profile.logout')}</Text>
       </TouchableOpacity>
+
+      {/* Developers Section */}
+      <View style={[styles.developersSection, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <Text style={styles.developersTitle}>{t('profile.developers.title')}</Text>
+        <View style={styles.developersContainer}>
+          <TouchableOpacity 
+            style={styles.developerCard}
+            onPress={() => openLinkedInProfile('https://www.linkedin.com/in/fouad-el-bakly-2ba15a251/')}
+          >
+            <Linkedin size={24} color="#0077b5" />
+            <Text style={styles.developerName}>Fouad Emad</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.developerCard}
+            onPress={() => openLinkedInProfile('https://www.linkedin.com/in/abdullah-ali-637517267/')}
+          >
+            <Linkedin size={24} color="#0077b5" />
+            <Text style={styles.developerName}>Abdullah Ali</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
 
     
     </ScrollView>
@@ -358,6 +388,38 @@ const styles = StyleSheet.create({
     color: '#ff3b30',
     fontSize: 16,
     fontWeight: '600',
+  },
+  developersSection: {
+    backgroundColor: '#fff',
+    marginTop: 16,
+    padding: 16,
+    marginBottom: 20,
+  },
+  developersTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  developersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  developerCard: {
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    minWidth: 120,
+    gap: 8,
+  },
+  developerName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
   },
   version: {
     textAlign: 'center',

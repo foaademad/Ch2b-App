@@ -102,9 +102,17 @@ const orderSlice = createSlice({
     // pay by account bank
     payByAccountBank: (state, action: PayloadAction<{ orderId: string }>) => {
       const { orderId } = action.payload;
+      console.log('🏦 payByAccountBank action dispatched for order:', orderId);
+      
       const orderIndex = state.orders.findIndex(order => 
         order.id === orderId || order.orderId === orderId
       );
+      if (orderIndex !== -1) {
+        state.orders[orderIndex].status = 2; // تحديث حالة الطلب إلى مكتمل الدفع
+        console.log('✅ Bank transfer payment completed for order:', orderId);
+      } else {
+        console.warn('⚠️ Order not found in list for bank transfer update:', orderId);
+      }
     },
 
 
@@ -125,6 +133,7 @@ export const {
   resetOrderState,
   updateOrderInList,
   paidByPaypal,
+  payByAccountBank,
 } = orderSlice.actions;
 
 export default orderSlice.reducer; 

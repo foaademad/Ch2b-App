@@ -1,6 +1,6 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -23,7 +23,7 @@ const PrivacyPolicyScreen = () => {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <ChevronLeft size={24} color="#333" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
+          {isRTL ? <ChevronRight size={24} color="#333" /> : <ChevronLeft size={24} color="#333" />}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('profile.settings.privacy_policy')}</Text>
       </View>
@@ -254,7 +254,7 @@ const PrivacyPolicyScreen = () => {
                 : 'If you have any questions about this privacy policy, please contact us:'
               }
             </Text>
-            <Text style={styles.contactEmail}>privacy@ourapp.com</Text>
+            <Text style={styles.contactEmail}>Zimabedakcompany@gmail.com</Text>
           </View>
         </View>
       </ScrollView>

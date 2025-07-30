@@ -1,6 +1,6 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -23,7 +23,7 @@ const AboutScreen = () => {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <ChevronLeft size={24} color="#333" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
+           {isRTL ? <ChevronRight size={24} color="#333" /> : <ChevronLeft size={24} color="#333" />}
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('profile.settings.about')}</Text>
       </View>
@@ -102,24 +102,17 @@ const AboutScreen = () => {
             </Text>
             
             <Text style={styles.contactItem}>
-              {language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'} support@ourapp.com
+              {language === 'ar' ? 'البريد الإلكتروني:' : 'Email:'} Zimabedakcompany@gmail.com
             </Text>
             <Text style={styles.contactItem}>
-              {language === 'ar' ? 'الهاتف:' : 'Phone:'} +966 50 123 4567
+              {language === 'ar' ? 'الهاتف:' : 'Phone:'} +967776896588
             </Text>
             <Text style={styles.contactItem}>
-              {language === 'ar' ? 'العنوان:' : 'Address:'} الرياض، المملكة العربية السعودية
+              {language === 'ar' ? 'العنوان:' : 'Address:'} اليمن _ حضرموت _ تريم
             </Text>
           </View>
 
-          <View style={styles.versionSection}>
-            <Text style={styles.versionText}>
-              {language === 'ar' ? 'الإصدار:' : 'Version:'} 1.0.0
-            </Text>
-            <Text style={styles.copyrightText}>
-              © 2024 Our App. {language === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved'}
-            </Text>
-          </View>
+         
         </View>
       </ScrollView>
     </View>
@@ -171,7 +164,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 16,
-    textAlign: 'center',
+   
   },
   description: {
     fontSize: 16,

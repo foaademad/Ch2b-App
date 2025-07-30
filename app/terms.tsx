@@ -1,6 +1,6 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -23,7 +23,8 @@ const TermsScreen = () => {
           style={styles.backButton} 
           onPress={() => router.back()}
         >
-          <ChevronLeft size={24} color="#333" style={{ transform: [{ rotate: isRTL ? '180deg' : '0deg' }] }} />
+          {isRTL ? <ChevronRight size={24} color="#333" /> : <ChevronLeft size={24} color="#333" />}
+        
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('profile.settings.terms')}</Text>
       </View>
@@ -117,8 +118,8 @@ const TermsScreen = () => {
             </Text>
             <Text style={styles.termsText}>
               {language === 'ar' 
-                ? 'يمكن إرجاع المنتجات خلال 14 يوماً من تاريخ الاستلام إذا كانت في حالتها الأصلية. سيتم معالجة الاسترداد خلال 5-7 أيام عمل.'
-                : 'Products can be returned within 14 days of receipt if they are in their original condition. Refunds will be processed within 5-7 business days.'
+                ? 'لا يمكن إرجاع الطلب إذا كان في حالته السليمة أو إذا كان هناك ضرر أو عيب من عيوب المستخدم. لا يتم قبول الإرجاع إلا إذا كان المنتج به عيب تقني أو عيب تصنيع، والمدة المسموح بها للإرجاع هي 5 أيام فقط بعد استلام المنتج.'
+                : 'Orders cannot be returned if they are in good condition or if there is damage or defect caused by the user. Returns are only accepted if the product has a technical defect or manufacturing defect, and the allowed period for returns is only 5 days after receiving the product.'
               }
             </Text>
           </View>
@@ -153,8 +154,8 @@ const TermsScreen = () => {
             </Text>
             <Text style={styles.termsText}>
               {language === 'ar' 
-                ? 'تخضع هذه الشروط والأحكام لقوانين المملكة العربية السعودية. أي نزاعات ستخضع لاختصاص المحاكم السعودية.'
-                : 'These terms and conditions are governed by the laws of the Kingdom of Saudi Arabia. Any disputes will be subject to the jurisdiction of Saudi courts.'
+                ? 'تخضع هذه الشروط والأحكام لقوانين اليمن. أي نزاعات ستخضع لاختصاص المحاكم اليمنية.'
+                : 'These terms and conditions are governed by the laws of Yemen. Any disputes will be subject to the jurisdiction of Yemeni courts.'
               }
             </Text>
           </View>
@@ -169,7 +170,7 @@ const TermsScreen = () => {
                 : 'If you have any questions about these terms and conditions, please contact us:'
               }
             </Text>
-            <Text style={styles.contactEmail}>legal@ourapp.com</Text>
+            <Text style={styles.contactEmail}>Zimabedakcompany@gmail.com</Text>
           </View>
         </View>
       </ScrollView>
