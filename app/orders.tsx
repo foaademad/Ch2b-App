@@ -1,15 +1,29 @@
+
 import { useLanguage } from '@/src/context/LanguageContext';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, CreditCard, RefreshCw, Wallet } from 'lucide-react-native';
+import { Formik } from 'formik';
+import { ArrowLeft, Building2, CreditCard, RefreshCw, Upload, Wallet } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Linking, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, Linking, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
+import * as Yup from 'yup';
 import { Shadows } from '../constants/Shadows';
-import { createPayPalPayment, getAllOrdersToUser } from '../src/store/api/orderApi';
+import { createPayPalPayment, getAllOrdersToUser, payByAccountBank } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import { getOrderStatusColor, getOrderStatusText } from '../src/store/utility/orderStatusHelper';
+
+// List of banks for the dropdown
+const banks = [
+  { label: 'Al Rajhi Bank', value: 'al_rajhi' },
+  { label: 'Saudi National Bank (SNB)', value: 'snb' },
+  { label: 'Riyad Bank', value: 'riyad' },
+  { label: 'Alinma Bank', value: 'alinma' },
+  { label: 'Banque Saudi Fransi', value: 'bsf' },
+];
 
 const OrdersScreen = () => {
   const { t } = useTranslation();
@@ -18,29 +32,29 @@ const OrdersScreen = () => {
   const dispatch = useDispatch();
   const [isRTL, setIsRTL] = useState(language === 'ar');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showBankTransferModal, setShowBankTransferModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'bakiyya' | null>(null);
-  
+  const [transferReceiptImage, setTransferReceiptImage] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState(1); // Track current step
+  const [isLoading, setIsLoading] = useState(false);  
   // Redux state
   const { orders, loading, error } = useSelector((state: RootState) => state.order);
   const { authModel } = useSelector((state: RootState) => state.auth);
   
   useEffect(() => {
     setIsRTL(language === 'ar');
-    // جلب طلبات المستخدم عند تحميل الصفحة
     if (authModel?.result?.userId) {
       dispatch(getAllOrdersToUser(authModel.result.userId) as any);
     }
   }, [language, dispatch, authModel]);
 
-  // إعادة تحميل الطلبات
   const handleRefresh = () => {
     if (authModel?.result?.userId) {
       dispatch(getAllOrdersToUser(authModel.result.userId) as any);
     }
   };
 
-  // تنسيق التاريخ
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     try {
@@ -51,33 +65,108 @@ const OrdersScreen = () => {
     }
   };
 
-  // حساب السعر الإجمالي للمنتجات التي حالتها Reviewed
   const calculateReviewedProductsTotal = () => {
     return orders
       .filter(order => order.status === 1 || order.orderStatus === 1)
       .reduce((total, order) => total + (order.totalPrice || 0), 0);
   };
 
-  // فتح نافذة الدفع
   const handlePaymentPress = (order: any) => {
     setSelectedOrder(order);
     setShowPaymentModal(true);
     setSelectedPaymentMethod(null);
   };
 
-  // إغلاق نافذة الدفع
   const handleClosePaymentModal = () => {
     setShowPaymentModal(false);
     setSelectedOrder(null);
     setSelectedPaymentMethod(null);
   };
 
-  // اختيار طريقة الدفع
+  const handleCloseBankTransferModal = () => {
+    setShowBankTransferModal(false);
+    setSelectedOrder(null);
+    setSelectedPaymentMethod(null);
+    setTransferReceiptImage(null);
+    setCurrentStep(1); // Reset to first step
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setTransferReceiptImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert(
+        language === 'ar' ? 'خطأ' : 'Error',
+        language === 'ar' ? 'حدث خطأ أثناء اختيار الصورة' : 'An error occurred while selecting the image'
+      );
+    }
+  };
+
+  const bankTransferValidationSchema = Yup.object().shape({
+    bankAccountToTransferTo: Yup.string()
+      .required(language === 'ar' ? 'يرجى اختيار البنك' : 'Please select a bank'),
+    senderBankName: Yup.string()
+      .required(language === 'ar' ? 'اسم البنك مطلوب' : 'Bank name is required')
+      .min(2, language === 'ar' ? 'اسم البنك يجب أن يكون على الأقل حرفين' : 'Bank name must be at least 2 characters'),
+    senderAccountName: Yup.string()
+      .required(language === 'ar' ? 'اسم الحساب مطلوب' : 'Account name is required')
+      .min(2, language === 'ar' ? 'اسم الحساب يجب أن يكون على الأقل حرفين' : 'Account name must be at least 2 characters'),
+    senderAccountNumber: Yup.string()
+      .required(language === 'ar' ? 'رقم الحساب مطلوب' : 'Account number is required')
+      .matches(/^\d+$/, language === 'ar' ? 'رقم الحساب يجب أن يحتوي على أرقام فقط' : 'Account number must contain only numbers'),
+    amount: Yup.number()
+      .required(language === 'ar' ? 'المبلغ مطلوب' : 'Amount is required')
+      .positive(language === 'ar' ? 'المبلغ يجب أن يكون موجب' : 'Amount must be positive')
+      .min(0.01, language === 'ar' ? 'المبلغ يجب أن يكون أكبر من صفر' : 'Amount must be greater than zero'),
+  });
+
+  // handle bank transfer submit
+  const handleBankTransferSubmit = (values: any) => {
+    if (!transferReceiptImage) {
+      Toast.show({
+        type: 'error',
+        text1: language === 'ar' ? 'صورة الإيصال مطلوبة' : 'Receipt image required',
+        text2: language === 'ar' ? 'يرجى اختيار صورة إيصال التحويل' : 'Please select a transfer receipt image'
+      });
+     
+      return;
+    }
+
+    const transferData = {
+      ...values,
+      orderId: selectedOrder?.id,
+      receiptImage: transferReceiptImage,
+      orderTotal: selectedOrder?.totalPrice?.toFixed(2)
+      
+    };
+
+    console.log('Bank Transfer Data:', transferData);
+    
+    Toast.show({
+      type: 'success',
+      text1: language === 'ar' ? 'تم إرسال بيانات التحويل' : 'Transfer details sent',
+      text2: language === 'ar' ? 'سيتم مراجعة التحويل قريباً' : 'Transfer will be reviewed soon'
+    });
+
+    dispatch(payByAccountBank(authModel?.result?.userId as string, transferData) as any);
+
+    handleCloseBankTransferModal();
+  };
+
   const handlePaymentMethodSelect = (method: 'paypal' | 'bakiyya') => {
     setSelectedPaymentMethod(method);
   };
 
-    // إتمام عملية الدفع
   const handleProcessPayment = async () => {
     if (!selectedOrder || !selectedPaymentMethod) {
       Toast.show({
@@ -90,7 +179,6 @@ const OrdersScreen = () => {
 
     if (selectedPaymentMethod === 'paypal') {
       try {
-        // استدعاء API الدفع عبر PayPal
         const result = await dispatch(createPayPalPayment(selectedOrder.id) as any);
         
         console.log('💳 PayPal API Response:', result);
@@ -98,10 +186,8 @@ const OrdersScreen = () => {
         console.log('💳 PayPal API Message:', result.message);
         
         if (result.success) {
-          // طباعة الرابط في console لمعرفته
           console.log('🔗 PayPal Payment Link:', result.data?.linkPayment);
           
-          // استخدام الرابط الصحيح من linkPayment
           if (result.data?.linkPayment && typeof result.data.linkPayment === 'string') {
             const paypalUrl = result.data.linkPayment;
             const supported = await Linking.canOpenURL(paypalUrl);
@@ -116,7 +202,6 @@ const OrdersScreen = () => {
                 text2: language === 'ar' ? 'يرجى إتمام عملية الدفع' : 'Please complete your payment'
               });
               
-              // لا نغير حالة الطلب هنا - ستتغير فقط بعد إتمام الدفع الفعلي
               console.log('💳 Payment link opened - waiting for actual payment completion');
             } else {
               Toast.show({
@@ -126,7 +211,6 @@ const OrdersScreen = () => {
               });
             }
           } else {
-            // إذا لم يكن هناك رابط، عرض معلومات الدفع
             handleClosePaymentModal();
             
             Toast.show({
@@ -153,25 +237,8 @@ const OrdersScreen = () => {
         });
       }
     } else if (selectedPaymentMethod === 'bakiyya') {
-      // عرض معلومات الدفع لـ Bakiyya
-      const paymentInfo = {
-        amount: selectedOrder.totalPrice?.toFixed(2),
-        orderId: selectedOrder.id,
-        currency: 'USD',
-        method: 'Bakiyya'
-      };
-      
-      handleClosePaymentModal();
-      
-      Toast.show({
-        type: 'success',
-        text1: language === 'ar' ? 'معلومات الدفع' : 'Payment Information',
-        text2: language === 'ar' 
-          ? `المبلغ: u{paymentInfo.amount} - رقم الطلب: ${paymentInfo.orderId}`
-          : `Amount: ${paymentInfo.amount} - Order: ${paymentInfo.orderId}`
-      });
-      
-      console.log('Payment Info:', paymentInfo);
+      setShowBankTransferModal(true);
+
     }
   };
 
@@ -193,7 +260,6 @@ const OrdersScreen = () => {
       </View>
 
       <ScrollView style={styles.content}>
-
         {loading ? (
           <View style={styles.loadingContainer}>
             <Text style={styles.loadingText}>{t('profile.coupons.loading_orders')}</Text>
@@ -233,7 +299,6 @@ const OrdersScreen = () => {
                 </View>
               </View>
 
-              {/* زر الدفع للمنتجات التي حالتها Reviewed */}
               {(order.status === 1 || order.orderStatus === 1) && (
                 <TouchableOpacity 
                   style={styles.paymentButton}
@@ -274,7 +339,6 @@ const OrdersScreen = () => {
                 )}
               </View>
 
-              {/* تفاصيل السعر */}
               <View style={styles.priceBreakdown}>
                 <View style={styles.priceRow}>
                   <Text style={styles.priceLabel}>
@@ -307,7 +371,6 @@ const OrdersScreen = () => {
                   </View>
                 )}
                 
-                {/* خط فاصل قبل المجموع */}
                 <View style={styles.priceDivider} />
               </View>
 
@@ -321,8 +384,7 @@ const OrdersScreen = () => {
           ))
         )}
       </ScrollView>
-
-      {/* Modal الدفع */}
+      {/* model of payment */}
       <Modal
         visible={showPaymentModal}
         animationType="slide"
@@ -331,7 +393,6 @@ const OrdersScreen = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            {/* Header */}
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderLeft}>
                 <View style={styles.modalHeaderIcon}>
@@ -346,7 +407,6 @@ const OrdersScreen = () => {
               </TouchableOpacity>
             </View>
 
-            {/* Introductory Text */}
             <Text style={styles.modalDescription}>
               {language === 'ar' 
                 ? 'يرجى اختيار طريقة دفع لإتمام طلبك بأمان وسهولة'
@@ -354,7 +414,6 @@ const OrdersScreen = () => {
               }
             </Text>
 
-            {/* Total Amount */}
             <View style={styles.totalAmountContainer}>
               <Text style={styles.totalAmountLabel}>
                 {language === 'ar' ? 'المبلغ الإجمالي' : 'Total Amount'}
@@ -364,7 +423,6 @@ const OrdersScreen = () => {
               </Text>
             </View>
 
-            {/* Payment Method Selection */}
             <View style={styles.paymentMethodSection}>
               <View style={styles.sectionHeader}>
                 <CreditCard size={16} color="#36c7f6" />
@@ -450,7 +508,6 @@ const OrdersScreen = () => {
               </View>
             </View>
 
-            {/* Action Buttons */}
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.cancelButton}
@@ -478,6 +535,242 @@ const OrdersScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Bank Transfer Modal with Two Steps */}
+      <Modal
+        visible={showBankTransferModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleCloseBankTransferModal}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.bankTransferModalContent}>
+            {/* Header */}
+            <View style={styles.modalHeader}>
+              <View style={styles.modalHeaderLeft}>
+                <View style={[styles.modalHeaderIcon, { backgroundColor: '#ff9500' }]}>
+                  <Building2 size={20} color="#fff" />
+                </View>
+                <Text style={styles.modalTitle}>
+                  {language === 'ar' ? 'إرسال تفاصيل التحويل البنكي' : 'Send Bank Transfer Details'}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={handleCloseBankTransferModal}>
+                <Text style={styles.closeButton}>×</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Step Indicator */}
+            <View style={styles.stepIndicatorContainer}>
+              <View style={[styles.stepIndicator, currentStep === 1 ? styles.activeStep : styles.completedStep]}>
+                <Text style={styles.stepIndicatorText}>1</Text>
+              </View>
+              <View style={styles.stepConnector} />
+              <View style={[styles.stepIndicator, currentStep === 2 ? styles.activeStep : styles.inactiveStep]}>
+                <Text style={styles.stepIndicatorText}>2</Text>
+              </View>
+            </View>
+            <View style={styles.stepLabelsContainer}>
+              <Text style={[styles.stepLabel, currentStep === 1 && styles.activeStepLabel]}>
+                {language === 'ar' ? 'اختيار البنك' : 'Bank Selection'}
+              </Text>
+              <Text style={[styles.stepLabel, currentStep === 2 && styles.activeStepLabel]}>
+                {language === 'ar' ? 'تفاصيل التحويل' : 'Transfer Details'}
+              </Text>
+            </View>
+
+            <Formik
+              initialValues={{
+                bankAccountToTransferTo: '',
+                senderBankName: '',
+                senderAccountName: '',
+                senderAccountNumber: '',
+                amount: selectedOrder?.totalPrice?.toFixed(2) || ''
+              }}
+              validationSchema={bankTransferValidationSchema}
+              onSubmit={handleBankTransferSubmit}
+            >
+              {({ handleChange, handleBlur, handleSubmit, values, errors, touched, isValid, setFieldValue }) => (
+                <ScrollView style={styles.formContainer} showsVerticalScrollIndicator={false}>
+                  {currentStep === 1 && (
+                    <View style={styles.formSection}>
+                      
+                      <View style={styles.fullWidthInput}>
+                        <Text style={styles.inputLabel}>
+                          {language === 'ar' ? 'البنك المستلم' : 'Select Receiving Bank'}
+                        </Text>
+                        <Picker
+                          selectedValue={values.bankAccountToTransferTo}
+                          style={[styles.picker, errors.bankAccountToTransferTo && touched.bankAccountToTransferTo && styles.errorInput]}
+                          onValueChange={(itemValue: any) => setFieldValue('bankAccountToTransferTo', itemValue)}
+                        >
+                          <Picker.Item label={language === 'ar' ? 'اختر البنك' : 'Select a bank'} value="" />
+                          {banks.map((bank) => (
+                            <Picker.Item key={bank.value} label={bank.label} value={bank.value} />
+                          ))}
+                        </Picker>
+                        {errors.bankAccountToTransferTo && touched.bankAccountToTransferTo && (
+                          <Text style={styles.errorText}>{errors.bankAccountToTransferTo as string}</Text>
+                        )}
+                      </View>
+                    </View>
+                  )}
+
+                  {currentStep === 2 && (
+                    <>
+                      <View style={styles.formSection}>
+                        
+                        <View style={styles.twoColumnLayout}>
+                          <View style={styles.inputColumn}>
+                            <Text style={styles.inputLabel}>
+                              {language === 'ar' ? 'اسم البنك المرسل' : 'Sender Bank Name'}
+                            </Text>
+                            <TextInput
+                              style={[styles.textInput, errors.senderBankName && touched.senderBankName && styles.errorInput]}
+                              placeholder={language === 'ar' ? 'أدخل اسم البنك' : 'Enter bank name'}
+                              placeholderTextColor="#999"
+                              value={values.senderBankName}
+                              onChangeText={handleChange('senderBankName')}
+                              onBlur={handleBlur('senderBankName')}
+                            />
+                            {errors.senderBankName && touched.senderBankName && (
+                              <Text style={styles.errorText}>{errors.senderBankName as string}</Text>
+                            )}
+                          </View>
+
+                          <View style={styles.inputColumn}>
+                            <Text style={styles.inputLabel}>
+                              {language === 'ar' ? 'اسم الحساب المرسل' : 'Sender Account Name'}
+                            </Text>
+                            <TextInput
+                              style={[styles.textInput, errors.senderAccountName && touched.senderAccountName && styles.errorInput]}
+                              placeholder={language === 'ar' ? 'أدخل اسم الحساب' : 'Enter account name'}
+                              placeholderTextColor="#999"
+                              value={values.senderAccountName}
+                              onChangeText={handleChange('senderAccountName')}
+                              onBlur={handleBlur('senderAccountName')}
+                            />
+                            {errors.senderAccountName && touched.senderAccountName && (
+                              <Text style={styles.errorText}>{errors.senderAccountName as string}</Text>
+                            )}
+                          </View>
+                        </View>
+
+                        <View style={styles.fullWidthInput}>
+                          <Text style={styles.inputLabel}>
+                            {language === 'ar' ? 'رقم الحساب المرسل' : 'Sender Account Number'}
+                          </Text>
+                          <TextInput
+                            style={[styles.textInput, errors.senderAccountNumber && touched.senderAccountNumber && styles.errorInput]}
+                            placeholder={language === 'ar' ? 'أدخل رقم الحساب' : 'Enter account number'}
+                            placeholderTextColor="#999"
+                            value={values.senderAccountNumber}
+                            onChangeText={handleChange('senderAccountNumber')}
+                            onBlur={handleBlur('senderAccountNumber')}
+                            keyboardType="numeric"
+                          />
+                          {errors.senderAccountNumber && touched.senderAccountNumber && (
+                            <Text style={styles.errorText}>{errors.senderAccountNumber as string}</Text>
+                          )}
+                        </View>
+                      </View>
+
+                      <View style={styles.formSection}>
+                        
+                        <View style={styles.fullWidthInput}>
+                          <Text style={styles.inputLabel}>
+                            {language === 'ar' ? 'المبلغ' : 'Amount'}
+                          </Text>
+                          <TextInput
+                            style={[styles.textInput, errors.amount && touched.amount && styles.errorInput]}
+                            placeholder={language === 'ar' ? 'أدخل المبلغ' : 'Enter amount'}
+                            placeholderTextColor="#999"
+                            value={values.amount}
+                            onChangeText={handleChange('amount')}
+                            onBlur={handleBlur('amount')}
+                            keyboardType="numeric"
+                          />
+                          {errors.amount && touched.amount && (
+                            <Text style={styles.errorText}>{errors.amount as string}</Text>
+                          )}
+                          <Text style={styles.orderTotalText}>
+                            {language === 'ar' ? 'المجموع الإجمالي للطلب' : 'Order Total'}: SAR {selectedOrder?.totalPrice?.toFixed(2)}
+                          </Text>
+                        </View>
+
+                        <View style={styles.fullWidthInput}>
+                          <Text style={styles.inputLabel}>
+                            {language === 'ar' ? 'صورة إيصال التحويل' : 'Transfer Receipt Image'}
+                          </Text>
+                          <TouchableOpacity style={styles.imageUploadButton} onPress={handlePickImage}>
+                            <Upload size={20} color="#36c7f6" />
+                            <Text style={styles.imageUploadText}>
+                              {language === 'ar' ? 'اختر ملف' : 'Choose file'}
+                            </Text>
+                          </TouchableOpacity>
+                          <Text style={styles.noFileText}>
+                            {transferReceiptImage ? 
+                              (language === 'ar' ? 'تم اختيار الصورة' : 'Image selected') : 
+                              (language === 'ar' ? 'لم يتم اختيار ملف' : 'No file chosen')
+                            }
+                          </Text>
+                          {transferReceiptImage && (
+                            <Image source={{ uri: transferReceiptImage }} style={styles.previewImage} />
+                          )}
+                        </View>
+                      </View>
+                    </>
+                  )}
+
+                  <View style={styles.formActions}>
+                    {currentStep === 1 ? (
+                      <>
+                        <TouchableOpacity
+                          style={styles.cancelButton}
+                          onPress={handleCloseBankTransferModal}
+                        >
+                          <Text style={styles.cancelButtonText}>
+                            {language === 'ar' ? 'إلغاء' : 'Cancel'}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.nextButton, !values.bankAccountToTransferTo && styles.disabledButton]}
+                          onPress={() => setCurrentStep(2)}
+                          disabled={!values.bankAccountToTransferTo}
+                        >
+                          <Text style={styles.nextButtonText}>
+                            {language === 'ar' ? 'التالي' : 'Next'}
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    ) : (
+                      <>
+                        <TouchableOpacity
+                          style={styles.backButton}
+                          onPress={() => setCurrentStep(1)}
+                        >
+                          <Text style={styles.backButtonText}>
+                            {language === 'ar' ? 'رجوع' : 'Back'}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={[styles.submitButton, !isValid && styles.disabledButton]}
+                          onPress={() => handleSubmit()}
+                          disabled={!isValid}
+                        >
+                          <Text style={styles.submitButtonText}>
+                            {language === 'ar' ? 'إرسال التحويل' : 'Submit Transfer'}
+                          </Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                </ScrollView>
+              )}
+            </Formik>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -500,6 +793,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 16,
+    marginTop: 16,
   },
   headerTitle: {
     fontSize: 20,
@@ -587,7 +881,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 16,
   },
-    statusText: {
+  statusText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
@@ -685,6 +979,7 @@ const styles = StyleSheet.create({
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    padding: 10,
     alignItems: 'center',
     marginBottom: 16,
   },
@@ -824,9 +1119,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    
+    padding: 10,
     borderWidth: 1,
     borderColor: '#e0e0e0',
     borderRadius: 8,
@@ -858,42 +1152,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     opacity: 0.7,
   },
-  reviewedSummary: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    ...Shadows.medium,
-  },
-  reviewedSummaryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  reviewedSummaryTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  reviewedSummaryCount: {
-    fontSize: 14,
-    color: '#666',
-  },
-  reviewedSummaryTotal: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  reviewedSummaryLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  reviewedSummaryAmount: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
   priceBreakdown: {
     backgroundColor: '#f8f9fa',
     borderRadius: 12,
@@ -923,4 +1181,183 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 16,
   },
-}); 
+  bankTransferModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '95%',
+    maxWidth: 500,
+    maxHeight: '90%',
+    ...Shadows.large,
+  },
+  formContainer: {
+    padding: 20,
+  },
+  formSection: {
+    marginBottom: 24,
+  },
+  twoColumnLayout: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  inputColumn: {
+    flex: 1,
+  },
+  fullWidthInput: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+    backgroundColor: '#fff',
+    color: '#333',
+  },
+  picker: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
+    color: '#333',
+  },
+  errorInput: {
+    borderColor: '#f44336',
+  },
+  
+  orderTotalText: {
+    fontSize: 14,
+    color: '#36c7f6',
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  imageUploadButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: '#f8f9fa',
+    gap: 8,
+  },
+  imageUploadText: {
+    fontSize: 16,
+    color: '#36c7f6',
+    fontWeight: '500',
+  },
+  noFileText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
+  previewImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginTop: 12,
+    backgroundColor: '#f0f0f0',
+  },
+  submitButton: {
+    flex: 1,
+    backgroundColor: '#36c7f6',
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    
+    ...Shadows.medium,
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  nextButton: {
+    flex: 1,
+    backgroundColor: '#36c7f6',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+    // marginTop: 16,
+    ...Shadows.medium,
+  },
+  nextButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  
+  backButtonText: {
+    fontSize: 16,
+    color: '#666',
+    fontWeight: '500',
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  stepIndicatorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  stepIndicator: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeStep: {
+    backgroundColor: '#36c7f6',
+  },
+  completedStep: {
+    backgroundColor: '#4caf50',
+  },
+  inactiveStep: {
+    backgroundColor: '#e0e0e0',
+  },
+  stepIndicatorText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  stepConnector: {
+    width: 160,
+    height: 4,
+    backgroundColor: '#e0e0e0',
+    marginHorizontal: 8,
+  },
+  stepLabelsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  stepLabel: {
+    fontSize: 14,
+    color: '#666',
+    flex: 1,
+    textAlign: 'center',
+  },
+  activeStepLabel: {
+    color: '#36c7f6',
+    fontWeight: '600',
+  },
+});
