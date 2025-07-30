@@ -1,5 +1,6 @@
 
 import { useLanguage } from '@/src/context/LanguageContext';
+import { TransferFormValues } from '@/src/store/utility/interfaces/orderInterface';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
@@ -15,7 +16,6 @@ import { Shadows } from '../constants/Shadows';
 import { createPayPalPayment, getAllOrdersToUser, payByAccountBank } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import { getOrderStatusColor, getOrderStatusText } from '../src/store/utility/orderStatusHelper';
-import { TransferFormValues } from '@/src/store/utility/interfaces/orderInterface';
 
 // List of banks for the dropdown
 const banks = [
@@ -36,7 +36,7 @@ const OrdersScreen = () => {
   const [showBankTransferModal, setShowBankTransferModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'bakiyya' | null>(null);
-  const [transferReceiptImage, setTransferReceiptImage] = useState<File | null>(null);
+  const [transferReceiptImage, setTransferReceiptImage] = useState<{ uri: string; type?: string; name?: string } | null>(null);
   const [currentStep, setCurrentStep] = useState(1); // Track current step
   const [isLoading, setIsLoading] = useState(false);  
   // Redux state
@@ -102,7 +102,7 @@ const OrdersScreen = () => {
       });
 
       if (!result.canceled && result.assets[0]) {
-        setTransferReceiptImage(result.assets[0].uri as unknown as File);
+        setTransferReceiptImage(result.assets[0]);
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -132,7 +132,7 @@ const OrdersScreen = () => {
   });
 
   // handle bank transfer submit
-  const handleBankTransferSubmit = (values: any) => {
+  const handleBankTransferSubmit = async (values: any) => {
     if (!transferReceiptImage) {
       Toast.show({
         type: 'error',
@@ -143,30 +143,43 @@ const OrdersScreen = () => {
       return;
     }
 
-    const transferData = {
-      userId: authModel?.result?.userId,
-      accountId: authModel?.result?.userId,
-      toAccount: selectedOrder?.id,
-      fromBankName: values.bankAccountToTransferTo,
-      fromAccountName: values.senderAccountName,
-      fromAccountNumber: values.senderAccountNumber,
-      transferImage: transferReceiptImage,
-      amount: values.amount,
-      orderId: selectedOrder?.id,
+    try {
+      // تحويل الصورة إلى File
+      const response = await fetch(transferReceiptImage.uri);
+      const blob = await response.blob();
+      const file = new File([blob], 'transfer_receipt.jpg', { type: 'image/jpeg' });
+
+      const transferData = {
+        userId: authModel?.result?.userId,
+        accountId: authModel?.result?.userId,
+        toAccount: selectedOrder?.id,
+        fromBankName: values.bankAccountToTransferTo,
+        fromAccountName: values.senderAccountName,
+        fromAccountNumber: values.senderAccountNumber,
+        transferImage: file,
+        amount: values.amount,
+        orderId: selectedOrder?.id,
+      };
+
+      console.log('Bank Transfer Data:', transferData);
       
-    };
+      Toast.show({
+        type: 'success',
+        text1: language === 'ar' ? 'تم إرسال بيانات التحويل' : 'Transfer details sent',
+        text2: language === 'ar' ? 'سيتم مراجعة التحويل قريباً' : 'Transfer will be reviewed soon'
+      });
 
-    console.log('Bank Transfer Data:', transferData);
-    
-    Toast.show({
-      type: 'success',
-      text1: language === 'ar' ? 'تم إرسال بيانات التحويل' : 'Transfer details sent',
-      text2: language === 'ar' ? 'سيتم مراجعة التحويل قريباً' : 'Transfer will be reviewed soon'
-    });
+      dispatch(payByAccountBank(authModel?.result?.userId as string, transferData as TransferFormValues) as any);
 
-    dispatch(payByAccountBank(authModel?.result?.userId as string, transferData as TransferFormValues) as any);
-
-    handleCloseBankTransferModal();
+      handleCloseBankTransferModal();
+    } catch (error) {
+      console.error('Error processing image:', error);
+      Toast.show({
+        type: 'error',
+        text1: language === 'ar' ? 'خطأ في معالجة الصورة' : 'Error processing image',
+        text2: language === 'ar' ? 'يرجى المحاولة مرة أخرى' : 'Please try again'
+      });
+    }
   };
 
   const handlePaymentMethodSelect = (method: 'paypal' | 'bakiyya') => {
