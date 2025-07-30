@@ -1,5 +1,6 @@
 
 import { useLanguage } from '@/src/context/LanguageContext';
+import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { Formik } from 'formik';
@@ -7,7 +8,6 @@ import { ArrowLeft, Building2, CreditCard, RefreshCw, Upload, Wallet } from 'luc
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Image, Linking, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
@@ -15,6 +15,7 @@ import { Shadows } from '../constants/Shadows';
 import { createPayPalPayment, getAllOrdersToUser, payByAccountBank } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import { getOrderStatusColor, getOrderStatusText } from '../src/store/utility/orderStatusHelper';
+import { TransferFormValues } from '@/src/store/utility/interfaces/orderInterface';
 
 // List of banks for the dropdown
 const banks = [
@@ -35,7 +36,7 @@ const OrdersScreen = () => {
   const [showBankTransferModal, setShowBankTransferModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'bakiyya' | null>(null);
-  const [transferReceiptImage, setTransferReceiptImage] = useState<string | null>(null);
+  const [transferReceiptImage, setTransferReceiptImage] = useState<File | null>(null);
   const [currentStep, setCurrentStep] = useState(1); // Track current step
   const [isLoading, setIsLoading] = useState(false);  
   // Redux state
@@ -101,7 +102,7 @@ const OrdersScreen = () => {
       });
 
       if (!result.canceled && result.assets[0]) {
-        setTransferReceiptImage(result.assets[0].uri);
+        setTransferReceiptImage(result.assets[0].uri as unknown as File);
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -143,10 +144,15 @@ const OrdersScreen = () => {
     }
 
     const transferData = {
-      ...values,
+      userId: authModel?.result?.userId,
+      accountId: authModel?.result?.userId,
+      toAccount: selectedOrder?.id,
+      fromBankName: values.bankAccountToTransferTo,
+      fromAccountName: values.senderAccountName,
+      fromAccountNumber: values.senderAccountNumber,
+      transferImage: transferReceiptImage,
+      amount: values.amount,
       orderId: selectedOrder?.id,
-      receiptImage: transferReceiptImage,
-      orderTotal: selectedOrder?.totalPrice?.toFixed(2)
       
     };
 
@@ -158,7 +164,7 @@ const OrdersScreen = () => {
       text2: language === 'ar' ? 'سيتم مراجعة التحويل قريباً' : 'Transfer will be reviewed soon'
     });
 
-    dispatch(payByAccountBank(authModel?.result?.userId as string, transferData) as any);
+    dispatch(payByAccountBank(authModel?.result?.userId as string, transferData as TransferFormValues) as any);
 
     handleCloseBankTransferModal();
   };
@@ -715,7 +721,7 @@ const OrdersScreen = () => {
                             }
                           </Text>
                           {transferReceiptImage && (
-                            <Image source={{ uri: transferReceiptImage }} style={styles.previewImage} />
+                            <Image source={{ uri: transferReceiptImage.uri as string }} style={styles.previewImage} />
                           )}
                         </View>
                       </View>

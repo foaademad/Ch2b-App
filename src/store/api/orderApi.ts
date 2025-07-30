@@ -1,6 +1,6 @@
 import { addOrderSuccess, clearCurrentOrder, paidByPaypal as paidByPaypalAction, setError, setLoading, setOrders, updateOrderInList } from "../slice/orderSlice";
 import api from "../utility/api/api";
-import { OrderRequest, OrderResponse } from "../utility/interfaces/orderInterface";
+import { OrderRequest, OrderResponse, TransferFormValues } from "../utility/interfaces/orderInterface";
 
 export const addOrder = (orderData: OrderRequest) => async (dispatch: any) => {
   try {
@@ -107,6 +107,10 @@ export const updateOrderStatus = (orderId: string, orderStatus: number) => async
   }
 }; 
 
+
+
+// =============================================
+
 // create paypal payment
 export const createPayPalPayment = (orderId: string) => async (dispatch: any) => {
   try {
@@ -157,38 +161,37 @@ export const checkPaymentStatus = (orderId: string) => async (dispatch: any) => 
 
 
 // pay by account bank
-export const payByAccountBank = (userId: string, bankTransferData: any) => async (dispatch: any) => {
+export const payByAccountBank = (userId: string, bankTransferData: TransferFormValues) => async (dispatch: any) => {
   try {
     console.log('🏦 payByAccountBank API called with:', { userId, bankTransferData });
     dispatch(setLoading(true));
     dispatch(setError(null));
     
     // إنشاء FormData لإرسال البيانات مع الملف
-    const formData = new FormData();
-    
-    // إضافة البيانات الأساسية
-    formData.append('userId', userId);
-    formData.append('bankAccountToTransferTo', bankTransferData.bankAccountToTransferTo);
-    formData.append('senderAccountName', bankTransferData.senderAccountName);
-    formData.append('amount', bankTransferData.amount.toString());
-    formData.append('senderBankName', bankTransferData.senderBankName);
-    formData.append('senderAccountNumber', bankTransferData.senderAccountNumber);
-    
-    // إضافة الملف إذا كان موجوداً
-    if (bankTransferData.transferReceiptImage) {
-      console.log('📎 Adding image to FormData:', bankTransferData.transferReceiptImage);
-      formData.append('transferReceiptImage', {
-        uri: bankTransferData.transferReceiptImage.uri,
-        type: bankTransferData.transferReceiptImage.type || 'image/jpeg',
-        name: bankTransferData.transferReceiptImage.name || 'receipt.jpg'
-      } as any);
-    } else {
-      console.log('⚠️ No image provided for bank transfer');
-    }
-    
-    console.log('📤 Sending FormData to API...');
-    console.log('🔗 API URL:', `/PayMent/create-bankTransfer/${userId}`);
-    
+    const { fromBankName, fromAccountNumber, fromAccountName, orderId, amount, transferImage, accountId } = bankTransferData;
+      const payObj = {
+        bankName: fromBankName,
+        accountNumber: fromAccountNumber,
+        accounName: fromAccountName,
+        orderId: orderId,
+        userId: userId,
+        amount: Number(amount),
+        imageTransferFile: transferImage,
+        accountId: accountId,
+      };
+      const formData = new FormData();
+      formData.append("bankName", payObj.bankName);
+      formData.append("accountNumber", payObj.accountNumber);
+      formData.append("accounName", payObj.accounName);
+      formData.append("orderId", payObj.orderId || "");
+      formData.append("userId", payObj.userId || "");
+      formData.append("amount", payObj.amount.toString());
+      formData.append("accountId", payObj.accountId);
+      formData.append(
+        "imageTransferFile",
+        payObj.imageTransferFile || new Blob()
+      );
+
     const response = await api.post(`/PayMent/create-bankTransfer/${userId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

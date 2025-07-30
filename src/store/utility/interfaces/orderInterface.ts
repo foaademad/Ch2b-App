@@ -48,3 +48,17 @@ export interface OrderState {
   error: string | null;
   success: boolean;
 } 
+
+
+
+export interface TransferFormValues {
+  orderId: string;
+  userId: string;
+  accountId: string;
+  toAccount: string;
+  fromBankName: string;
+  fromAccountName: string;
+  fromAccountNumber: string;
+  transferImage: File | null;
+  amount: string;
+} 
