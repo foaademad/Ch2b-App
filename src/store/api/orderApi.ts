@@ -1,5 +1,7 @@
+import { setBankAccounts, setBankAccountsError, setBankAccountsLoading } from "../slice/bankAccountSlice";
 import { addOrderSuccess, clearCurrentOrder, paidByPaypal as paidByPaypalAction, setError, setLoading, setOrders, updateOrderInList } from "../slice/orderSlice";
 import api from "../utility/api/api";
+import { BankAccountResponse } from "../utility/interfaces/bankAccountInterface";
 import { OrderRequest, OrderResponse, TransferFormValues } from "../utility/interfaces/orderInterface";
 
 export const addOrder = (orderData: OrderRequest) => async (dispatch: any) => {
@@ -213,10 +215,7 @@ export const payByAccountBank = (userId: string, bankTransferData: TransferFormV
       return { success: false, message: data.message || "Failed to pay by account bank" };
     }
   } catch (error: any) {
-    console.error('❌ Bank transfer API error:', error);
-    console.error('❌ Error response:', error?.response);
-    console.error('❌ Error message:', error?.message);
-    
+   
     const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while paying by account bank';  
     dispatch(setError(errorMessage));
     return { success: false, message: errorMessage };
@@ -224,5 +223,27 @@ export const payByAccountBank = (userId: string, bankTransferData: TransferFormV
 };
 
 
+//fetch all bank accounts
+export const fetchAllBankAccounts = () => async (dispatch: any) => {
+  try {
+    dispatch(setBankAccountsLoading(true));
+    dispatch(setBankAccountsError(null));
+    
+    const response = await api.get(`/AccountBank/get-all`);
+    const data = response.data as BankAccountResponse;
+    
+    if (data.isSuccess) {
+      dispatch(setBankAccounts(data.result || []));
+      return { success: true, data: data.result };
+    } else {
+      dispatch(setBankAccountsError(data.message || "Failed to fetch bank accounts"));
+      return { success: false, message: data.message || "Failed to fetch bank accounts" };
+    }
+  } catch (error: any) {
+    const errorMessage = error?.response?.data?.message || error?.message || 'An error occurred while fetching bank accounts';
+    dispatch(setBankAccountsError(errorMessage));
+    return { success: false, message: errorMessage };
+  }
+};
 
 

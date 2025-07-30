@@ -64,7 +64,7 @@ const ProfileScreen = () => {
   const ordersCount = orders.length;
 
   // معلومات البروفايل من API أو ثابتة إذا لم تتوفر
-  const profileImage = 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D';
+  const profileImage = 'https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80';
   const userName = profile?.user?.fullName || 'John Doe';
   const userEmail = profile?.user?.email || 'john.doe@example.com';
 
@@ -75,10 +75,7 @@ const ProfileScreen = () => {
     changeLanguage(newLanguage);
   };
 
-  const openLinkedInProfile = (url: string) => {
-    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
-  };
-
+ 
   const menuItems = [
     {
       title: t('profile.orders.title'),
@@ -221,28 +218,7 @@ const ProfileScreen = () => {
         <Text style={styles.logoutText}>{t('profile.logout')}</Text>
       </TouchableOpacity>
 
-      {/* Developers Section */}
-      <View style={[styles.developersSection, { direction: isRTL ? 'rtl' : 'ltr' }]}>
-        <Text style={styles.developersTitle}>{t('profile.developers.title')}</Text>
-        <View style={styles.developersContainer}>
-          <TouchableOpacity 
-            style={styles.developerCard}
-            onPress={() => openLinkedInProfile('https://www.linkedin.com/in/fouad-el-bakly-2ba15a251/')}
-          >
-            <Linkedin size={24} color="#0077b5" />
-            <Text style={styles.developerName}>Fouad Emad</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.developerCard}
-            onPress={() => openLinkedInProfile('https://www.linkedin.com/in/abdullah-ali-637517267/')}
-          >
-            <Linkedin size={24} color="#0077b5" />
-            <Text style={styles.developerName}>Abdullah Ali</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
+      
     
     </ScrollView>
   );
@@ -389,43 +365,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  developersSection: {
-    backgroundColor: '#fff',
-    marginTop: 16,
-    padding: 16,
-    marginBottom: 20,
-  },
-  developersTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  developersContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-  developerCard: {
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    minWidth: 120,
-    gap: 8,
-  },
-  developerName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-  },
-  version: {
-    textAlign: 'center',
-    color: '#666',
-    fontSize: 12,
-    marginTop: 16,
-    marginBottom: 32,
-  },
+ 
 });

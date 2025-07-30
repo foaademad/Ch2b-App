@@ -1,9 +1,9 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight,  Linkedin } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const AboutScreen = () => {
   const { t } = useTranslation();
@@ -15,7 +15,12 @@ const AboutScreen = () => {
     setIsRTL(language === "ar");
   }, [language]);
 
+  const openLinkedInProfile = (url: string) => {
+    Linking.openURL(url).catch((err) => console.error('An error occurred', err));
+  };
+
   return (
+
     <View style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       {/* Header */}
       <View style={[styles.header, { direction: isRTL ? 'rtl' : 'ltr' }]}>
@@ -114,7 +119,32 @@ const AboutScreen = () => {
 
          
         </View>
+
+        {/* Developers Section */}
+      <View style={[styles.developersSection, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <Text style={styles.developersTitle}>{t('profile.developers.title')}</Text>
+        <View style={styles.developersContainer}>
+          <TouchableOpacity 
+            style={styles.developerCard}
+            onPress={() => openLinkedInProfile('https://www.linkedin.com/in/fouad-el-bakly-2ba15a251/')}
+          >
+            <Linkedin size={24} color="#0077b5" />
+            <Text style={styles.developerName}>Fouad Emad</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.developerCard}
+            onPress={() => openLinkedInProfile('https://www.linkedin.com/in/abdullah-ali-637517267/')}
+          >
+            <Linkedin size={24} color="#0077b5" />
+            <Text style={styles.developerName}>Abdullah Ali</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       </ScrollView>
+      
+
     </View>
   );
 };
@@ -221,6 +251,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#999',
     textAlign: 'center',
+  },
+  developersSection: {
+    backgroundColor: '#fff',
+    marginTop: 16,
+    padding: 16,
+    marginBottom: 20,
+  },
+  developersTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  developersContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  developerCard: {
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    minWidth: 120,
+    gap: 8,
+  },
+  developerName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+  },
+  version: {
+    textAlign: 'center',
+    color: '#666',
+    fontSize: 12,
+    marginTop: 16,
+    marginBottom: 32,
   },
 });
 

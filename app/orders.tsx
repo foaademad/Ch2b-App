@@ -13,18 +13,11 @@ import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
 import { Shadows } from '../constants/Shadows';
-import { createPayPalPayment, getAllOrdersToUser, payByAccountBank } from '../src/store/api/orderApi';
+import { createPayPalPayment, fetchAllBankAccounts, getAllOrdersToUser, payByAccountBank } from '../src/store/api/orderApi';
 import { RootState } from '../src/store/store';
 import { getOrderStatusColor, getOrderStatusText } from '../src/store/utility/orderStatusHelper';
 
-// List of banks for the dropdown
-const banks = [
-  { label: 'Al Rajhi Bank', value: 'al_rajhi' },
-  { label: 'Saudi National Bank (SNB)', value: 'snb' },
-  { label: 'Riyad Bank', value: 'riyad' },
-  { label: 'Alinma Bank', value: 'alinma' },
-  { label: 'Banque Saudi Fransi', value: 'bsf' },
-];
+
 
 const OrdersScreen = () => {
   const { t } = useTranslation();
@@ -42,13 +35,22 @@ const OrdersScreen = () => {
   // Redux state
   const { orders, loading, error } = useSelector((state: RootState) => state.order);
   const { authModel } = useSelector((state: RootState) => state.auth);
+  const { bankAccounts } = useSelector((state: RootState) => state.bankAccount);
   
+  // Debug: Log bank accounts to console
+  console.log('🏦 Bank Accounts from Redux:', bankAccounts);
   useEffect(() => {
     setIsRTL(language === 'ar');
     if (authModel?.result?.userId) {
       dispatch(getAllOrdersToUser(authModel.result.userId) as any);
     }
   }, [language, dispatch, authModel]);
+
+  useEffect(() => {
+    if (authModel?.result?.userId) {
+      dispatch(fetchAllBankAccounts() as any);
+    }
+  }, [dispatch]);
 
   const handleRefresh = () => {
     if (authModel?.result?.userId) {
@@ -151,9 +153,9 @@ const OrdersScreen = () => {
 
       const transferData = {
         userId: authModel?.result?.userId,
-        accountId: authModel?.result?.userId,
+        accountId: values.bankAccountToTransferTo,
         toAccount: selectedOrder?.id,
-        fromBankName: values.bankAccountToTransferTo,
+        fromBankName: values.senderBankName,
         fromAccountName: values.senderAccountName,
         fromAccountNumber: values.senderAccountNumber,
         transferImage: file,
@@ -163,15 +165,17 @@ const OrdersScreen = () => {
 
       console.log('Bank Transfer Data:', transferData);
       
+     
+
+      dispatch(payByAccountBank(authModel?.result?.userId as string, transferData as TransferFormValues) as any);
+
+      handleCloseBankTransferModal();
+      handleClosePaymentModal();
       Toast.show({
         type: 'success',
         text1: language === 'ar' ? 'تم إرسال بيانات التحويل' : 'Transfer details sent',
         text2: language === 'ar' ? 'سيتم مراجعة التحويل قريباً' : 'Transfer will be reviewed soon'
       });
-
-      dispatch(payByAccountBank(authModel?.result?.userId as string, transferData as TransferFormValues) as any);
-
-      handleCloseBankTransferModal();
     } catch (error) {
       console.error('Error processing image:', error);
       Toast.show({
@@ -624,8 +628,8 @@ const OrdersScreen = () => {
                           onValueChange={(itemValue: any) => setFieldValue('bankAccountToTransferTo', itemValue)}
                         >
                           <Picker.Item label={language === 'ar' ? 'اختر البنك' : 'Select a bank'} value="" />
-                          {banks.map((bank) => (
-                            <Picker.Item key={bank.value} label={bank.label} value={bank.value} />
+                          {bankAccounts.map((bank: any) => (
+                            <Picker.Item key={bank.id} label={bank.nameOfBank} value={bank.id} style={{color: 'black'}}  />
                           ))}
                         </Picker>
                         {errors.bankAccountToTransferTo && touched.bankAccountToTransferTo && (
