@@ -131,6 +131,24 @@ export const getUserById = async (userId: string) => {
 }
 
 
+export const loginWithGoogle = async () => {
+  return async (dispatch: any, getState: () => RootState) => {
+    try {
+      dispatch(setLoading(true));
+      const token = getState().auth.authModel?.result?.token;
+      const response = await api.post("/Account/google/signin", { token });
+      console.log("response from google", response.data);
+      dispatch(setAuthState(response.data));
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      throw error;
+    }
+    finally {
+      dispatch(setLoading(false));
+    }
+  }
+}
+
 
 export const logoutApi = async (dispatch: any) => {
   await AsyncStorage.removeItem("authModelAdmin");

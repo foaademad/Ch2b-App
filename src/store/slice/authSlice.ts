@@ -25,18 +25,21 @@ interface IAuthModel {
     refreshTokenExpiresOn?: string;
   } | null;
   userType: number | null;
+  loginWithGoogle: string | null;
 }
 
 interface AuthState {
   loading: boolean;
   error: string | null;
   authModel: IAuthModel | null;
+  loginWithGoogle: string | null;
 }
 
 const initialState: AuthState = {
   loading: false,
   error: null,
   authModel: null,
+  loginWithGoogle: null,
 };
 
 const authSlice = createSlice({
@@ -89,6 +92,9 @@ const authSlice = createSlice({
     // لجلب البيانات من التخزين عند تشغيل التطبيق
     loadAuthFromStorage: (state, action: PayloadAction<IAuthModel | null>) => {
       state.authModel = action.payload;
+    },
+    setLoginWithGoogle: (state, action: PayloadAction<string | null>) => {
+      state.loginWithGoogle = action.payload;
     }
   },
 });
@@ -100,7 +106,8 @@ export const {
   logout,
   login,
   register,
-  loadAuthFromStorage
+  loadAuthFromStorage,
+  setLoginWithGoogle
 } = authSlice.actions;
 
 export default authSlice.reducer;

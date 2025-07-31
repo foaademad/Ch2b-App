@@ -1,3 +1,4 @@
+import { loginWithGoogle } from "@/src/store/api/authApi";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useRouter } from "expo-router";
@@ -13,6 +14,7 @@ import {
   ViewStyle
 } from "react-native";
 import Animated, { FadeInDown, FadeInRight, FadeOutRight } from "react-native-reanimated";
+import { useDispatch } from "react-redux";
 import { useLanguage } from "../src/context/LanguageContext";
 import LanguageToggle from "../src/language/LanguageToggle";
 
@@ -22,6 +24,7 @@ const WelcomeScreen = (props: Props) => {
   const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
   const router = useRouter(); // استخدام useRouter
+  const dispatch = useDispatch();
 
   // تحديث isRTL عند تغيير اللغة
   useEffect(() => {
@@ -64,6 +67,7 @@ const WelcomeScreen = (props: Props) => {
               >
                 {t("description")}
               </Animated.Text>
+              {/* login with email */}
               <View style={styles.socialLoginWrapper}>
                 <Animated.View
                   style={styles.link}
@@ -82,12 +86,16 @@ const WelcomeScreen = (props: Props) => {
                   </TouchableOpacity>
                 </Animated.View>
               </View>
+
+
+
+              {/* login with google */}
               <View style={styles.socialLoginWrapper}>
                 <Animated.View
                   entering={FadeInDown.delay(700).duration(300)}
                   exiting={FadeInDown.delay(800).duration(300)}
                 >
-                  <TouchableOpacity style={styles.link}>
+                  <TouchableOpacity style={styles.link} onPress={() => dispatch(loginWithGoogle() as any)}>
                     <View style={[styles.linkContent, isRTL && { flexDirection: "row-reverse" }]}>
                       <Ionicons name="logo-google" size={18} color="red" />
                       <Text style={styles.linkText}>{t("continue_with_gmail")}</Text>
@@ -95,19 +103,10 @@ const WelcomeScreen = (props: Props) => {
                   </TouchableOpacity>
                 </Animated.View>
               </View>
-              <View style={styles.socialLoginWrapper}>
-                <Animated.View
-                  entering={FadeInDown.delay(800).duration(300)}
-                  exiting={FadeInDown.delay(900).duration(300)}
-                >
-                  <TouchableOpacity style={styles.link}>
-                    <View style={[styles.linkContent, isRTL && { flexDirection: "row-reverse" }]}>
-                      <Ionicons name="logo-facebook" size={18} color="blue" />
-                      <Text style={styles.linkText}>{t("continue_with_apple")}</Text>
-                    </View>
-                  </TouchableOpacity>
-                </Animated.View>
-              </View>
+              
+
+
+
 
               <Text style={[styles.loginTxt, isRTL && { textAlign: "right" }]}>
                 {t("already_have_account")}
