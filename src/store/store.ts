@@ -13,6 +13,7 @@ import profileReducer from './slice/profileSlice';
 import shippingTaxReducer from './slice/shippingTaxSlice';
 import problemReducer from './slice/supportSlice';
 import wishlistReducer from './slice/wishlistSlice';
+import imageDynamicReducer from './slice/imageDynamicSlice';
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
     problem: problemReducer,
     address: addressReducer,
     shippingTax: shippingTaxReducer,
+    imageDynamic: imageDynamicReducer,
   },
 });
 
