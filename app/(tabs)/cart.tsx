@@ -125,7 +125,7 @@ const CartScreen = () => {
         <ScrollView style={styles.content}>
           {cart.map((item, index) => (
             <TouchableOpacity 
-              key={`cart-item-${item.productId}-${index}`} 
+              key={`cart-item-${item.id || 'temp'}-${item.productId}-${index}`} 
               style={styles.cartItem}
               onPress={() => handleProductPress(item.productId || '', (item as any).originalProductId)}
             >

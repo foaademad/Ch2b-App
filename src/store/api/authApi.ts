@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logout, setAuthState, setError, setLoading } from '../slice/authSlice';
+import { logout, setAuthState, setError, setForgotPassword, setLoading } from '../slice/authSlice';
 import { RootState } from '../store';
 import api from '../utility/api/api';
 import { IRegisterUser } from '../utility/interfaces/authInterface';
@@ -155,4 +155,42 @@ export const logoutApi = async (dispatch: any) => {
   await AsyncStorage.removeItem("RefreshToken");
   await AsyncStorage.removeItem("authModel");
   return dispatch(logout());
+}
+
+
+
+export const forgotPassword = (email: string) => {
+  return async (dispatch: any) => {
+    try {
+      console.log("forgotPassword API called with email:", email);
+      dispatch(setLoading(true));
+      const response = await api.post("/Account/sendresetpassword", { email });
+      dispatch(setForgotPassword(response.data));  
+      console.log("response from forgot password", response.data);
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      console.error("Error in forgotPassword API:", error);
+      let errorMsg = 'Failed to send reset email';
+      if (error.response && error.response.data) {
+        if (error.response.data.errors) {
+          errorMsg = Object.values(error.response.data.errors).flat().join(' \n ');
+        } else if (error.response.data.title) {
+          errorMsg = error.response.data.title;
+        } else if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        } else if (typeof error.response.data === 'string') {
+          errorMsg = error.response.data;
+        }
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      
+      console.log("Error message:", errorMsg);
+      dispatch(setError(errorMsg));
+      return { success: false, error: errorMsg };
+    }
+    finally {
+      dispatch(setLoading(false));
+    }
+  }
 }

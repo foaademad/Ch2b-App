@@ -33,6 +33,7 @@ interface AuthState {
   error: string | null;
   authModel: IAuthModel | null;
   loginWithGoogle: string | null;
+  forgotPassword: string | null;
 }
 
 const initialState: AuthState = {
@@ -40,6 +41,7 @@ const initialState: AuthState = {
   error: null,
   authModel: null,
   loginWithGoogle: null,
+  forgotPassword: null,
 };
 
 const authSlice = createSlice({
@@ -95,6 +97,9 @@ const authSlice = createSlice({
     },
     setLoginWithGoogle: (state, action: PayloadAction<string | null>) => {
       state.loginWithGoogle = action.payload;
+    },
+    setForgotPassword: (state, action: PayloadAction<string | null>) => {
+      state.forgotPassword = action.payload;
     }
   },
 });
@@ -107,7 +112,8 @@ export const {
   login,
   register,
   loadAuthFromStorage,
-  setLoginWithGoogle
+  setLoginWithGoogle,
+  setForgotPassword
 } = authSlice.actions;
 
 export default authSlice.reducer;

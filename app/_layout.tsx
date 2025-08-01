@@ -129,6 +129,7 @@ export default function RootLayout() {
                             <Stack.Screen name="(tabs)" />
                             <Stack.Screen name="signin" options={{ presentation: 'modal' }} />
                             <Stack.Screen name="signup" options={{ presentation: 'modal' }} />
+                            <Stack.Screen name="forgot-password" options={{ presentation: 'modal' }} />
                             <Stack.Screen name="addresses" />
                             <Stack.Screen name="category-products" />
                             <Stack.Screen name="checkout" />

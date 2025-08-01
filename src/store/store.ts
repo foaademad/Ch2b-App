@@ -6,6 +6,7 @@ import cartReducer from './slice/cartSlice';
 import categoryReducer from './slice/categorySlice';
 import commitionReducer from './slice/commitionScimaSlice';
 import couponReducer from './slice/couponSlice';
+import imageDynamicReducer from './slice/imageDynamicSlice';
 import imageSearchReducer from './slice/imageSearchSlice';
 import orderReducer from './slice/orderSlice';
 import productReducer from './slice/productSlice';
@@ -13,7 +14,6 @@ import profileReducer from './slice/profileSlice';
 import shippingTaxReducer from './slice/shippingTaxSlice';
 import problemReducer from './slice/supportSlice';
 import wishlistReducer from './slice/wishlistSlice';
-import imageDynamicReducer from './slice/imageDynamicSlice';
 
 export const store = configureStore({
   reducer: {

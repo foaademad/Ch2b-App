@@ -169,7 +169,9 @@ const LoginScreen = (props: Props) => {
                 <View
                   style={[
                     styles.inputContainer,
-                    isRTL && { flexDirection: "row-reverse" },
+                    isRTL && { flexDirection: "row-reverse",width: "97%" },
+
+
                   ]}
                 >
                   <Ionicons name="mail-outline" size={20} color="#333" />
@@ -220,7 +222,7 @@ const LoginScreen = (props: Props) => {
                 )}
 
                 {/* Forgot Password */}
-                <TouchableOpacity onPress={() => {}}>
+                <TouchableOpacity onPress={() => router.push("/forgot-password")}>
                   <Text
                     style={[styles.forgotText, isRTL && { textAlign: "right" }]}
                   >
