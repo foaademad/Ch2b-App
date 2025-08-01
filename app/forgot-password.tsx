@@ -25,8 +25,8 @@ const ForgotPasswordSchema = (t: any) =>
       .required(t("forgot_password.email_required")),
   });
 
-type Props = {};
-const ForgotPasswordScreen = (props: Props) => {
+
+const ForgotPasswordScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
