@@ -21,12 +21,12 @@ export default function NotFoundScreen() {
         Animated.timing(bounceAnim, {
           toValue: 1,
           duration: 1500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(bounceAnim, {
           toValue: 0,
           duration: 1500,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ])
     ).start();
@@ -35,7 +35,7 @@ export default function NotFoundScreen() {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   }, []);
 

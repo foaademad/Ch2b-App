@@ -5,15 +5,15 @@ import { Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Animated,
-  Dimensions,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Animated,
+    Dimensions,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from "react-redux";
@@ -125,24 +125,24 @@ const SignupScreen = () => {
             Animated.timing(ball.x, {
               toValue: Math.random() * Dimensions.get('window').width,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(ball.x, {
               toValue: Math.random() * Dimensions.get('window').width,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]),
           Animated.sequence([
             Animated.timing(ball.y, {
               toValue: Math.random() * Dimensions.get('window').height,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(ball.y, {
               toValue: Math.random() * Dimensions.get('window').height,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]),
         ]);

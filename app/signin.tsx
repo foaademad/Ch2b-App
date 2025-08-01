@@ -58,24 +58,24 @@ const LoginScreen = (props: Props) => {
             Animated.timing(ball.x, {
               toValue: Math.random() * Dimensions.get('window').width,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(ball.x, {
               toValue: Math.random() * Dimensions.get('window').width,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]),
           Animated.sequence([
             Animated.timing(ball.y, {
               toValue: Math.random() * Dimensions.get('window').height,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
             Animated.timing(ball.y, {
               toValue: Math.random() * Dimensions.get('window').height,
               duration: 5000 + Math.random() * 5000,
-              useNativeDriver: true,
+              useNativeDriver: false,
             }),
           ]),
         ]);

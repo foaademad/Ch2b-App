@@ -1,6 +1,6 @@
 import { useLanguage } from '@/src/context/LanguageContext';
 import { useRouter } from 'expo-router';
-import { ChevronLeft, ChevronRight,  Linkedin } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Linkedin } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -180,13 +180,7 @@ const styles = StyleSheet.create({
     margin: 16,
     padding: 20,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
+    boxShadow: '0px 2px 3.84px rgba(0, 0, 0, 0.1)',
     elevation: 5,
   },
   title: {

@@ -138,9 +138,14 @@ export default function RootLayout() {
                             <Stack.Screen name="orders" />
                             <Stack.Screen name="payment-methods" />
                             <Stack.Screen name="privacy" />
+                            <Stack.Screen name="privacy-policy" />
                             <Stack.Screen name="product/[id]" />
+                            <Stack.Screen name="search" />
                             <Stack.Screen name="settings" />
                             <Stack.Screen name="support" />
+                            <Stack.Screen name="terms" />
+                            <Stack.Screen name="about" />
+                            <Stack.Screen name="coupons" />
                         </Stack>
                         <Toast />
                     </AppInitializer>
