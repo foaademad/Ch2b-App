@@ -16,9 +16,8 @@ import Animated, { FadeInDown, FadeInRight, FadeOutRight } from "react-native-re
 import { useDispatch } from "react-redux";
 import { useLanguage } from "../src/context/LanguageContext";
 import LanguageToggle from "../src/language/LanguageToggle";
-// sign in whit google
-import { loginWithGoogle } from "@/src/store/api/authApi";
-import * as Google from "expo-auth-session/providers/google";
+import Toast from "react-native-toast-message";
+
 
 
 
@@ -29,50 +28,13 @@ const WelcomeScreen = (props: Props) => {
   // login with google
   const [userinfo , setUserInfo] = React.useState<any>(null);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: "823503063923-vanivmt5ua443s2qfbregmefra2rel5o.apps.googleusercontent.com",
-    iosClientId: "823503063923-ok3inktthimltqpll01sf242eg1bn63n.apps.googleusercontent.com",
-    webClientId: "823503063923-1uodj4vbkedfin2n24vt8jhf25kilsch.apps.googleusercontent.com",
-  });
-  async function handleGoogleLogin() {
-    if (response?.type === "success") {
-      setIsLoading(true);
-      try {
-        const userInfoResponse = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-          headers: { Authorization: `Bearer ${response.authentication?.accessToken}` },
-        });
-        const userInfo = await userInfoResponse.json();
-        setUserInfo(userInfo);
-    
-        // استدعاء دالة تسجيل الدخول الخاصة بك باستخدام التوكن
-        const googleToken = response.authentication?.accessToken;
-        if (googleToken) {
-          const result = await dispatch(loginWithGoogle(googleToken) as any); // استدعاء دالة loginWithGoogle مع dispatch
-          if (result.success) {
-            router.replace("/(tabs)"); // توجيه المستخدم إلى الصفحة الرئيسية بعد النجاح
-          } else {
-            console.error("Login failed:", result.error);
-          }
-        }
-      } catch (error) {
-        console.error("Google login error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else if (response?.type === "error") {
-      console.error("Google auth error:", response.error);
-    }
-  }
-
+ 
+  
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
   
-  // Handle Google login response
-  useEffect(() => {
-    handleGoogleLogin();
-  }, [response]);
-
+ 
   
   const router = useRouter(); // استخدام useRouter
   const dispatch = useDispatch();
@@ -148,7 +110,12 @@ const WelcomeScreen = (props: Props) => {
                 >
                   <TouchableOpacity 
                     style={[styles.link, isLoading && styles.disabledLink]} 
-                    onPress={() => !isLoading && promptAsync()}
+                    onPress={()=>{
+                      Toast.show({
+                        text1: "This will be implemented in the future",
+                        type: "error",
+                      });
+                    }}
                     disabled={isLoading}
                   >
                     <View style={[styles.linkContent, isRTL && { flexDirection: "row-reverse" }]}>
