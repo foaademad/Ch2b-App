@@ -131,48 +131,7 @@ export const getUserById = async (userId: string) => {
 }
 
 
-export const loginWithGoogle = async (googleToken: string) => {
-  return async (dispatch: any) => {
-    try {
-      dispatch(setLoading(true));
-      
-      // إرسال Google token إلى الخادم
-      const response = await api.post("/Account/google/signin", { 
-        token: googleToken 
-      });
-      
-      console.log("response from google", response.data);
-      
-      // حفظ البيانات في AsyncStorage
-      await AsyncStorage.setItem("authModelAdmin", JSON.stringify(response.data));
-      if (response.data.result?.refreshToken) {
-        await AsyncStorage.setItem("RefreshToken", response.data.result.refreshToken);
-      }
-      
-      dispatch(setAuthState(response.data));
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      let errorMsg = 'Google login failed';
-      if (error.response && error.response.data) {
-        if (error.response.data.errors) {
-          errorMsg = Object.values(error.response.data.errors).flat().join(' \n ');
-        } else if (error.response.data.title) {
-          errorMsg = error.response.data.title;
-        } else if (error.response.data.message) {
-          errorMsg = error.response.data.message;
-        } else if (typeof error.response.data === 'string') {
-          errorMsg = error.response.data;
-        }
-      } else if (error.message) {
-        errorMsg = error.message;
-      }
-      dispatch(setError(errorMsg));
-      return { success: false, error: errorMsg };
-    } finally {
-      dispatch(setLoading(false));
-    }
-  }
-}
+
 
 
 export const logoutApi = async (dispatch: any) => {

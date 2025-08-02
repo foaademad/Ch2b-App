@@ -113,7 +113,7 @@ const WelcomeScreen = (props: Props) => {
                     onPress={()=>{
                       Toast.show({
                         text1: "This will be implemented in the future",
-                        type: "error",
+                        type: "info",
                       });
                     }}
                     disabled={isLoading}

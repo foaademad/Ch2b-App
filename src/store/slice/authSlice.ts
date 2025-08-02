@@ -102,9 +102,7 @@ const authSlice = createSlice({
     loadAuthFromStorage: (state, action: PayloadAction<IAuthModel | null>) => {
       state.authModel = action.payload;
     },
-    setLoginWithGoogle: (state, action: PayloadAction<string | null>) => {
-      state.loginWithGoogle = action.payload;
-    },
+   
     setForgotPassword: (state, action: PayloadAction<string | null>) => {
       state.forgotPassword = action.payload;
     }
@@ -119,7 +117,7 @@ export const {
   login,
   register,
   loadAuthFromStorage,
-  setLoginWithGoogle,
+  
   setForgotPassword
 } = authSlice.actions;
 
