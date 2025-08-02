@@ -7,7 +7,7 @@ import { RootState } from '@/src/store/store';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { getAllOrdersToUser } from '@/src/store/api/orderApi';
@@ -18,7 +18,6 @@ import {
   Globe,
   Heart,
   Info,
-  Linkedin,
   LogOut,
   MapPin,
   MessageSquare,
@@ -50,6 +49,8 @@ const ProfileScreen = () => {
   const handleLogout = useCallback(async () => {
     await logoutApi(dispatch);
     router.replace('/');
+    // No need to reload the app - router.replace will handle navigation
+    // Updates.reloadAsync() is not available in development mode for production apps
   }, [dispatch]);
   
 

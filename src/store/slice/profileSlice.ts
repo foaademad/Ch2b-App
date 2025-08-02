@@ -1,5 +1,5 @@
 
-import { createSlice, PayloadAction } from "@reduxjs/toolkit"; 
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { ProfileDto } from "../utility/interfaces/profileInterface";
 
 interface ProfileState {
@@ -27,8 +27,13 @@ const profileSlice = createSlice({
         setError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload;
         },
+        clearProfile: (state) => {
+            state.profile = null;
+            state.isLoading = false;
+            state.error = null;
+        },
     },
 });
 
-export const { setProfile, setLoading, setError } = profileSlice.actions;
+export const { setProfile, setLoading, setError, clearProfile } = profileSlice.actions;
 export default profileSlice.reducer;

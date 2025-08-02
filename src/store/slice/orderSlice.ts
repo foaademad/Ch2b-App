@@ -136,4 +136,7 @@ export const {
   payByAccountBank,
 } = orderSlice.actions;
 
+// Alias for resetOrderState for consistency
+export const clearOrders = resetOrderState;
+
 export default orderSlice.reducer; 

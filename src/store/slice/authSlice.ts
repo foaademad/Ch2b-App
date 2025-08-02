@@ -1,6 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IRegisterUser, UserRole } from "../utility/interfaces/authInterface";
+import { clearAddresses } from './addressSlice';
+import { clearCart } from './cartSlice';
+import { clearCoupons } from './couponSlice';
+import { clearOrders } from './orderSlice';
+import { clearCurrentProduct } from './productSlice';
+import { clearProfile } from './profileSlice';
+import { clearWishlist } from './wishlistSlice';
 
 interface IAuthModel {
   isAuthenticated: boolean;
@@ -115,5 +122,19 @@ export const {
   setLoginWithGoogle,
   setForgotPassword
 } = authSlice.actions;
+
+// Thunk action لمسح جميع البيانات عند تسجيل الخروج
+export const logoutAndClearAllData = () => {
+  return (dispatch: any) => {
+    dispatch(logout());
+    dispatch(clearCart());
+    dispatch(clearWishlist());
+    dispatch(clearProfile());
+    dispatch(clearOrders());
+    dispatch(clearAddresses());
+    dispatch(clearCoupons());
+    dispatch(clearCurrentProduct());
+  };
+};
 
 export default authSlice.reducer;

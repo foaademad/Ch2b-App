@@ -8,6 +8,7 @@ import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLanguage } from '../src/context/LanguageContext';
 import { fetchAddresses } from '../src/store/api/addressApi';
+import { getCartItems } from '../src/store/api/cartApi';
 import { getCommition } from '../src/store/api/commitionScimaApi';
 import { checkCouponCode } from '../src/store/api/couponApi';
 import { addOrder } from '../src/store/api/orderApi';
@@ -56,6 +57,14 @@ export default function CheckoutScreen() {
       dispatch(fetchAddresses(authModel.result.userId) as any);
     }
   }, [dispatch, authModel]);
+
+  // تحديث السلة عند تغيير المستخدم
+  useEffect(() => {
+    if (authModel?.result?.userId) {
+      // إعادة جلب عناصر السلة للمستخدم الجديد
+      dispatch(getCartItems() as any);
+    }
+  }, [dispatch, authModel?.result?.userId]);
 
   // حساب العمولة بناءً على نظام العمولة الجديد
   const calculateCommission = () => {
@@ -249,22 +258,45 @@ export default function CheckoutScreen() {
       }
 
       // تحضير بيانات الطلب
+      console.log('Cart items before filtering:', cartItems);
+      
       const orderItems = cartItems
-        .filter(item => item.id && item.id.toString().trim() !== '') // فلترة العناصر التي لها ID صحيح
+        .filter(item => {
+          // التحقق من وجود productId أو id
+          const hasValidId = (item.id && item.id.toString().trim() !== '') || 
+                           (item.productId && item.productId.toString().trim() !== '');
+          // التحقق من وجود سعر إيجابي
+          const hasValidPrice = (item.totalPrice && item.totalPrice > 0) || 
+                              (item.price && item.price > 0);
+          
+          console.log('Item validation:', {
+            itemId: item.id,
+            productId: item.productId,
+            totalPrice: item.totalPrice,
+            price: item.price,
+            hasValidId,
+            hasValidPrice
+          });
+          
+          return hasValidId && hasValidPrice;
+        })
         .map(item => ({
-          productId: item.id!.toString(),
-          totalPrice: item.totalPrice || 0,
+          productId: item.productId || item.id?.toString() || '',
+          totalPrice: item.totalPrice || (item.price || 0) * (item.quntity || 1) || 0,
           quntity: item.quntity || 1,
           linkItemUrl: item.image || '',
-          cartItemId: Number(item.id),
+          cartItemId: item.id ? Number(item.id) : 0,
         }));
+      
+      console.log('Order items after filtering:', orderItems);
 
       // التحقق من وجود عناصر صالحة
       if (orderItems.length === 0) {
+        console.log('No valid order items found. Cart items count:', cartItems.length);
         Toast.show({
           type: 'error',
           text1: 'خطأ',
-          text2: 'لا توجد منتجات صالحة في السلة',
+          text2: `لا توجد منتجات صالحة في السلة (${cartItems.length} عنصر في السلة)`,
           position: 'top',
           visibilityTime: 4000,
         });

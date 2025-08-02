@@ -6,7 +6,8 @@ import { useRouter } from 'expo-router';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 
@@ -15,87 +16,129 @@ const CartScreen = () => {
   const { language, isRTL } = useLanguage();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { items: cart, isLoading } = useSelector((state: RootState) => state.cart);
+  const { items: cart, isLoading, error } = useSelector((state: RootState) => state.cart);
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
   const [cartRequested, setCartRequested] = React.useState(false);
 
   useEffect(() => {
     if (userId && cart.length === 0 && !isLoading && !cartRequested) {
       setCartRequested(true);
-      dispatch(getCartItems() as any);
+      // معالجة الأخطاء عند جلب عناصر الكارت
+      dispatch(getCartItems() as any).catch((error: any) => {
+        console.log("Error fetching cart items:", error);
+        // لا نريد أن يسبب هذا كراش للتطبيق
+        // يمكن إضافة رسالة للمستخدم هنا إذا لزم الأمر
+        Toast.show({
+          type: "error",
+          text1: t('cart.load_cart_error'),
+          text2: t('cart.network_error')
+        });
+      });
     }
   }, [dispatch, userId, cart.length, isLoading, cartRequested]);
 
+  // عرض رسالة خطأ إذا كان هناك خطأ
+  useEffect(() => {
+    if (error) {
+      console.log("Cart error:", error);
+      // يمكن إضافة Toast أو Alert هنا إذا لزم الأمر
+    }
+  }, [error]);
+
   const total = cart.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
 
-  const handleQuantityChange = (itemIndex: number, change: number) => {
-    const item = cart[itemIndex];
-    if (item && userId) {
-      const newQuantity = Math.max(1, (item.quntity || 1) + change);
-      
-      // If item has an id from backend, update via API
-      if (item.id) {
-        dispatch(updateCartItem(userId, item.id.toString(), newQuantity, item) as any);
-      } else {
-        // For newly added items without backend id, update local state only
-        const updatedItem = { 
-          ...item, 
-          quntity: newQuantity,
-          totalPrice: (item.price || 0) * newQuantity
-        };
+  const handleQuantityChange = async (itemIndex: number, change: number) => {
+    try {
+      const item = cart[itemIndex];
+      if (item && userId) {
+        const newQuantity = Math.max(1, (item.quntity || 1) + change);
         
-        // Update local cart state
-        const updatedCart = [...cart];
-        updatedCart[itemIndex] = updatedItem;
-        dispatch(setCartItems(updatedCart));
+        // If item has an id from backend, update via API
+        if (item.id) {
+          await dispatch(updateCartItem(userId, item.id.toString(), newQuantity, item) as any);
+        } else {
+          // For newly added items without backend id, update local state only
+          const updatedItem = { 
+            ...item, 
+            quntity: newQuantity,
+            totalPrice: (item.price || 0) * newQuantity
+          };
+          
+          // Update local cart state
+          const updatedCart = [...cart];
+          updatedCart[itemIndex] = updatedItem;
+          dispatch(setCartItems(updatedCart));
+        }
       }
+    } catch (error) {
+      console.log("Error updating quantity:", error);
+      Alert.alert(
+        t('common.error'),
+        t('cart.update_quantity_error'),
+        [{ text: t('common.ok') }]
+      );
     }
   };
 
   const handleProductPress = (productId: string, originalProductId?: string) => {
-    // Use originalProductId if available, otherwise extract from productId
-    let targetProductId = originalProductId || productId;
-    
-    // If no originalProductId provided, try to extract it from productId
-    if (!originalProductId) {
-
-      const colonIndex = productId.indexOf(':');
-      if (colonIndex !== -1) {
-
-        const substring = productId.substring(0, colonIndex);
-        const lastDashIndex = substring.lastIndexOf('-');
-        if (lastDashIndex !== -1) {
-          targetProductId = productId.substring(0, lastDashIndex);
+    try {
+      // Use originalProductId if available, otherwise extract from productId
+      let targetProductId = originalProductId || productId;
+      
+      // If no originalProductId provided, try to extract it from productId
+      if (!originalProductId) {
+        const colonIndex = productId.indexOf(':');
+        if (colonIndex !== -1) {
+          const substring = productId.substring(0, colonIndex);
+          const lastDashIndex = substring.lastIndexOf('-');
+          if (lastDashIndex !== -1) {
+            targetProductId = productId.substring(0, lastDashIndex);
+          }
         }
       }
-    }
-    
-    // Ensure we have a valid product ID before navigation
-    if (targetProductId && targetProductId.trim() !== '') {
-      console.log(`Navigating from cart to product: ${targetProductId}`);
-      router.push(`/product/${targetProductId}`);
-    } else {
-      console.error(`Invalid product ID: ${targetProductId} from ${productId}`);
+      
+      // Ensure we have a valid product ID before navigation
+      if (targetProductId && targetProductId.trim() !== '') {
+        console.log(`Navigating from cart to product: ${targetProductId}`);
+        router.push(`/product/${targetProductId}`);
+      } else {
+        console.error(`Invalid product ID: ${targetProductId} from ${productId}`);
+      }
+    } catch (error) {
+      console.log("Error navigating to product:", error);
     }
   };
 
   const handleCheckout = () => {
-    if (cart.length > 0) {
-      router.push('/checkout');
+    try {
+      if (cart.length > 0) {
+        router.push('/checkout');
+      }
+    } catch (error) {
+      console.log("Error navigating to checkout:", error);
     }
   };
 
-  const handleRemoveFromCart = (itemIndex: number) => {
-    const item = cart[itemIndex];
-    if (userId && item) {
-      if (item.id) {
-        // If item has backend id, remove via API
-        dispatch(removeFromCart(userId, item.id.toString()) as any);
-      } else {
-        // For newly added items without backend id, remove from local state only
-        const updatedCart = cart.filter((_, idx) => idx !== itemIndex);
-        dispatch(setCartItems(updatedCart));
+  const handleRemoveFromCart = async (itemIndex: number) => {
+    try {
+      const item = cart[itemIndex];
+      if (userId && item) {
+        if (item.id) {
+          // If item has backend id, remove via API
+          await dispatch(removeFromCart(userId, item.id.toString()) as any);
+        } else {
+          // For newly added items without backend id, remove from local state only
+          const updatedCart = cart.filter((_, idx) => idx !== itemIndex);
+          dispatch(setCartItems(updatedCart));
+        }
       }
+    } catch (error) {
+      console.log("Error removing item from cart:", error);
+      Alert.alert(
+        t('common.error'),
+        t('cart.remove_item_error'),
+        [{ text: t('common.ok') }]
+      );
     }
   };
 

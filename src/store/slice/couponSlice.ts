@@ -20,8 +20,13 @@ const couponSlice = createSlice({
         setError: (state, action: PayloadAction<string | null>) => {
             state.error = action.payload || null;
         },
+        clearCoupons: (state) => {
+            state.coupons = [];
+            state.loading = false;
+            state.error = null;
+        },
     },
 });
 
-export const { setCoupons, setLoading, setError } = couponSlice.actions;
+export const { setCoupons, setLoading, setError, clearCoupons } = couponSlice.actions;
 export default couponSlice.reducer; 

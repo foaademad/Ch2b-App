@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logout, setAuthState, setError, setForgotPassword, setLoading } from '../slice/authSlice';
+import { logoutAndClearAllData, setAuthState, setError, setForgotPassword, setLoading } from '../slice/authSlice';
 import { RootState } from '../store';
 import api from '../utility/api/api';
 import { IRegisterUser } from '../utility/interfaces/authInterface';
@@ -131,19 +131,44 @@ export const getUserById = async (userId: string) => {
 }
 
 
-export const loginWithGoogle = async () => {
-  return async (dispatch: any, getState: () => RootState) => {
+export const loginWithGoogle = async (googleToken: string) => {
+  return async (dispatch: any) => {
     try {
       dispatch(setLoading(true));
-      const token = getState().auth.authModel?.result?.token;
-      const response = await api.post("/Account/google/signin", { token });
+      
+      // إرسال Google token إلى الخادم
+      const response = await api.post("/Account/google/signin", { 
+        token: googleToken 
+      });
+      
       console.log("response from google", response.data);
+      
+      // حفظ البيانات في AsyncStorage
+      await AsyncStorage.setItem("authModelAdmin", JSON.stringify(response.data));
+      if (response.data.result?.refreshToken) {
+        await AsyncStorage.setItem("RefreshToken", response.data.result.refreshToken);
+      }
+      
       dispatch(setAuthState(response.data));
       return { success: true, data: response.data };
     } catch (error: any) {
-      throw error;
-    }
-    finally {
+      let errorMsg = 'Google login failed';
+      if (error.response && error.response.data) {
+        if (error.response.data.errors) {
+          errorMsg = Object.values(error.response.data.errors).flat().join(' \n ');
+        } else if (error.response.data.title) {
+          errorMsg = error.response.data.title;
+        } else if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        } else if (typeof error.response.data === 'string') {
+          errorMsg = error.response.data;
+        }
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      dispatch(setError(errorMsg));
+      return { success: false, error: errorMsg };
+    } finally {
       dispatch(setLoading(false));
     }
   }
@@ -151,10 +176,20 @@ export const loginWithGoogle = async () => {
 
 
 export const logoutApi = async (dispatch: any) => {
+  // مسح جميع البيانات من AsyncStorage
   await AsyncStorage.removeItem("authModelAdmin");
   await AsyncStorage.removeItem("RefreshToken");
   await AsyncStorage.removeItem("authModel");
-  return dispatch(logout());
+  
+  // مسح أي بيانات أخرى قد تكون مخزنة
+  await AsyncStorage.removeItem("cart");
+  await AsyncStorage.removeItem("wishlist");
+  await AsyncStorage.removeItem("profile");
+  await AsyncStorage.removeItem("orders");
+  await AsyncStorage.removeItem("addresses");
+  await AsyncStorage.removeItem("coupons");
+  
+  return dispatch(logoutAndClearAllData());
 }
 
 

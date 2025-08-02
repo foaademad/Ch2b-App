@@ -8,16 +8,26 @@ export const addToCart = (userId: string, cartItem: CartItemDto) => {
   return async (dispatch: AppDispatch, getState: () => RootState) => {
     const token = getState().auth.authModel?.result?.token;
     console.log("token", token);
+    
+    // فحص إذا كان المستخدم مسجل دخول
+    if (!userId || !token) {
+      console.log("User not authenticated");
+      Toast.show({
+        type: "error",
+        text1: "Please login to add items to cart"
+      });
+      return;
+    }
+
     try {
       dispatch(setLoading(true));
       const response = await api.post(`/Cart/addtocart/${userId}`, cartItem, {
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
-          
         },
-    });
-    console.log(token);
+      });
+      console.log(token);
    
       // Update local state immediately for better UX
       dispatch(addToCartAction(cartItem));
@@ -30,15 +40,29 @@ export const addToCart = (userId: string, cartItem: CartItemDto) => {
       return response.data;
     } catch (error: any) {
       console.log("error", error);
-      dispatch(setError("error.message"));
+      
+      // معالجة أنواع مختلفة من الأخطاء
+      let errorMessage = "Failed to add item to cart";
+      if (error.response?.status === 404) {
+        errorMessage = "Cart service not available";
+      } else if (error.response?.status === 401) {
+        errorMessage = "Please login again";
+      } else if (error.response?.status === 500) {
+        errorMessage = "Server error, please try again later";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      dispatch(setError(errorMessage));
       dispatch(setLoading(false));
       
       Toast.show({
         type: "error",
-        text1: "Failed to add item to cart"
+        text1: errorMessage
       });
       
-      throw error;
+      // لا نريد أن نرمي الخطأ مرة أخرى لمنع الكراش
+      return null;
     }
   };
 };
@@ -46,6 +70,17 @@ export const addToCart = (userId: string, cartItem: CartItemDto) => {
 export const updateCartItem = (userId: string, cartItemId: string, quntity: number, cartItem: CartItemDto) => {
     return async (dispatch: AppDispatch, getState: () => RootState) => {
       const token = getState().auth.authModel?.result?.token;
+      
+      // فحص إذا كان المستخدم مسجل دخول
+      if (!userId || !token) {
+        console.log("User not authenticated");
+        Toast.show({
+          type: "error",
+          text1: "Please login to update cart"
+        });
+        return;
+      }
+
       try {
         dispatch(setLoading(true));
   
@@ -81,13 +116,30 @@ export const updateCartItem = (userId: string, cartItemId: string, quntity: numb
   
         return response.data;
       } catch (error: any) {
-        dispatch(setError(error.message));
+        console.log("Error updating cart item:", error);
+        
+        // معالجة أنواع مختلفة من الأخطاء
+        let errorMessage = "Failed to update cart item";
+        if (error.response?.status === 404) {
+          errorMessage = "Cart item not found";
+        } else if (error.response?.status === 401) {
+          errorMessage = "Please login again";
+        } else if (error.response?.status === 500) {
+          errorMessage = "Server error, please try again later";
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        dispatch(setError(errorMessage));
         dispatch(setLoading(false));
+        
         Toast.show({
           type: "error",
-          text1: "Failed to update cart item"
+          text1: errorMessage
         });
-        throw error;
+        
+        // لا نريد أن نرمي الخطأ مرة أخرى لمنع الكراش
+        return null;
       }
     };
   };
@@ -95,6 +147,17 @@ export const updateCartItem = (userId: string, cartItemId: string, quntity: numb
 export const removeFromCart = (userId: string,  cartItemId : string) => {
     return async (dispatch: AppDispatch, getState: () => RootState) => {
         const token = getState().auth.authModel?.result?.token;
+        
+        // فحص إذا كان المستخدم مسجل دخول
+        if (!userId || !token) {
+          console.log("User not authenticated");
+          Toast.show({
+            type: "error",
+            text1: "Please login to remove items from cart"
+          });
+          return;
+        }
+
         try {
             dispatch(setLoading(true));
             const response = await api.delete(`/Cart/removeitem/${userId}/${cartItemId}`, {
@@ -115,15 +178,30 @@ export const removeFromCart = (userId: string,  cartItemId : string) => {
             
             return response.data;
         } catch (error: any) {
-            dispatch(setError(error.message));
+            console.log("Error removing from cart:", error);
+            
+            // معالجة أنواع مختلفة من الأخطاء
+            let errorMessage = "Failed to remove item from cart";
+            if (error.response?.status === 404) {
+              errorMessage = "Cart item not found";
+            } else if (error.response?.status === 401) {
+              errorMessage = "Please login again";
+            } else if (error.response?.status === 500) {
+              errorMessage = "Server error, please try again later";
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            
+            dispatch(setError(errorMessage));
             dispatch(setLoading(false));
             
             Toast.show({
                 type: "error",
-                text1: "Failed to remove item from cart"
+                text1: errorMessage
             });
             
-            throw error;
+            // لا نريد أن نرمي الخطأ مرة أخرى لمنع الكراش
+            return null;
         }
     }
 }
@@ -133,8 +211,17 @@ export const getCartItems = () => {
     return async (dispatch: AppDispatch, getState: () => RootState) => {
         const userId = getState().auth.authModel?.result?.userId;
         const token = getState().auth.authModel?.result?.token;
-        console.log("token", token);
-        console.log("userId", userId);
+        console.log("Getting cart items for userId:", userId);
+        console.log("Token available:", !!token);
+        
+        // فحص إذا كان المستخدم مسجل دخول
+        if (!userId || !token) {
+          console.log("User not authenticated, clearing cart");
+          dispatch(setCartItems([]));
+          dispatch(setLoading(false));
+          return null;
+        }
+
         try {
             dispatch(setLoading(true));
             const response = await api.get(`/Cart/getcart/${userId}`,{
@@ -159,9 +246,27 @@ export const getCartItems = () => {
             return response.data;
         } catch (error: any) {
             console.log("Cart API Error:", error);
-            dispatch(setError(error.message));
+            
+            // معالجة أنواع مختلفة من الأخطاء
+            let errorMessage = "Failed to load cart items";
+            if (error.response?.status === 404) {
+              errorMessage = "Cart service not available";
+              // في حالة 404، نضع كارت فارغ بدلاً من إظهار خطأ
+              dispatch(setCartItems([]));
+            } else if (error.response?.status === 401) {
+              errorMessage = "Please login again";
+              dispatch(setCartItems([]));
+            } else if (error.response?.status === 500) {
+              errorMessage = "Server error, please try again later";
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            
+            dispatch(setError(errorMessage));
             dispatch(setLoading(false));
-            throw error;
+            
+            // لا نريد أن نرمي الخطأ مرة أخرى لمنع الكراش
+            return null;
         }
     }
 }

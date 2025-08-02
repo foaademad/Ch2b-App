@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from "axios";
 import { router } from 'expo-router';
 import Toast from "react-native-toast-message";
-import { logout } from '../../slice/authSlice';
+import { logoutAndClearAllData } from '../../slice/authSlice';
 import { store } from '../../store';
 
 const api = axios.create({
@@ -69,10 +69,17 @@ api.interceptors.response.use(
 
         if (!refreshToken) {
           console.warn("No refresh token found");
-          // تسجيل الخروج من Redux
-          store.dispatch(logout());
+          // تسجيل الخروج من Redux مع مسح جميع البيانات
+          store.dispatch(logoutAndClearAllData());
           await AsyncStorage.removeItem("authModelAdmin");
           await AsyncStorage.removeItem("RefreshToken");
+          await AsyncStorage.removeItem("authModel");
+          await AsyncStorage.removeItem("cart");
+          await AsyncStorage.removeItem("wishlist");
+          await AsyncStorage.removeItem("profile");
+          await AsyncStorage.removeItem("orders");
+          await AsyncStorage.removeItem("addresses");
+          await AsyncStorage.removeItem("coupons");
         
           // عرض تنبيه للمستخدم
           Toast.show({
@@ -116,9 +123,16 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // حذف البيانات وتوجيه المستخدم لتسجيل الدخول
-        store.dispatch(logout());
+        store.dispatch(logoutAndClearAllData());
         await AsyncStorage.removeItem("authModelAdmin");
         await AsyncStorage.removeItem("RefreshToken");
+        await AsyncStorage.removeItem("authModel");
+        await AsyncStorage.removeItem("cart");
+        await AsyncStorage.removeItem("wishlist");
+        await AsyncStorage.removeItem("profile");
+        await AsyncStorage.removeItem("orders");
+        await AsyncStorage.removeItem("addresses");
+        await AsyncStorage.removeItem("coupons");
 
         Toast.show({
           type: "error",

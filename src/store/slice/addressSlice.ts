@@ -76,4 +76,7 @@ export const {
   resetAddressState,
 } = addressSlice.actions;
 
+// Alias for resetAddressState for consistency
+export const clearAddresses = resetAddressState;
+
 export default addressSlice.reducer; 

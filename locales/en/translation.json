@@ -438,7 +438,13 @@
     "empty_cart": "No products in your cart",
     "shop_now": "Shop Now",
     "total": "Total",
-    "proceed_to_checkout": "Proceed to Checkout"
+    "proceed_to_checkout": "Proceed to Checkout",
+    "update_quantity_error": "Failed to update item quantity",
+    "remove_item_error": "Failed to remove item from cart",
+    "load_cart_error": "Failed to load cart items",
+    "network_error": "Network error, please check your connection",
+    "server_error": "Server error, please try again later",
+    "login_required": "Please login to access your cart"
   },
   "categories": {
     "title": "Categories",
@@ -489,7 +495,8 @@
     "go_back": "Go Back",
     "unknown_error": "Unknown error occurred",
     "back": "Back",
-    "ok": "OK"
+    "ok": "OK",
+    "error": "Error"
   },
   "product": {
     "no_ratings": "No ratings yet",

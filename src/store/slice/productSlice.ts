@@ -53,8 +53,12 @@ const productSlice = createSlice({
                 state.currentCategory.currentPage = (state.currentCategory.currentPage || 1) + 1;
             }
         },
+        clearCurrentProduct: (state) => {
+            state.currentProduct = null;
+            state.currentCategory = null;
+        },
     },
 });
 
-export const { getProductsBest, getProductsNew, setLoading, setLoadingMore, setError, setCurrentProduct, setCurrentCategory, addMoreProducts } = productSlice.actions;
+export const { getProductsBest, getProductsNew, setLoading, setLoadingMore, setError, setCurrentProduct, setCurrentCategory, addMoreProducts, clearCurrentProduct } = productSlice.actions;
 export default productSlice.reducer;

@@ -628,7 +628,13 @@
     "empty_cart": "لا توجد منتجات في السلة",
     "shop_now": "تسوق الآن",
     "total": "الإجمالي",
-    "proceed_to_checkout": "إتمام الشراء"
+    "proceed_to_checkout": "إتمام الشراء",
+    "update_quantity_error": "فشل في تحديث كمية المنتج",
+    "remove_item_error": "فشل في إزالة المنتج من السلة",
+    "load_cart_error": "فشل في تحميل منتجات السلة",
+    "network_error": "خطأ في الشبكة، يرجى التحقق من الاتصال",
+    "server_error": "خطأ في الخادم، يرجى المحاولة مرة أخرى لاحقاً",
+    "login_required": "يرجى تسجيل الدخول للوصول إلى السلة"
   },
   "categories": {
     "title": "الفئات",
@@ -679,7 +685,8 @@
     "go_back": "العودة",
     "unknown_error": "حدث خطأ غير معروف",
     "back": "العودة",
-    "ok": "موافق"
+    "ok": "موافق",
+    "error": "خطأ"
   },
   "home": {
     "newArrivals": "وصل حديثاً",
