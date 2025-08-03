@@ -13,7 +13,6 @@ import {
   ViewStyle
 } from "react-native";
 import Animated, { FadeInDown, FadeInRight, FadeOutRight } from "react-native-reanimated";
-import { useDispatch } from "react-redux";
 import { useLanguage } from "../src/context/LanguageContext";
 import LanguageToggle from "../src/language/LanguageToggle";
 import Toast from "react-native-toast-message";
@@ -23,11 +22,11 @@ import Toast from "react-native-toast-message";
 
 
 
-type Props = {};
-const WelcomeScreen = (props: Props) => {
+
+const WelcomeScreen = () => {
   // login with google
-  const [userinfo , setUserInfo] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+
+  const [isLoading] = React.useState(false);
  
   
   const { t } = useTranslation();
@@ -37,7 +36,7 @@ const WelcomeScreen = (props: Props) => {
  
   
   const router = useRouter(); // استخدام useRouter
-  const dispatch = useDispatch();
+
 
   // تحديث isRTL عند تغيير اللغة
   useEffect(() => {

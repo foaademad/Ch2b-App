@@ -27,7 +27,7 @@ export default function CheckoutScreen() {
   const { shippingTax, loading: shippingTaxLoading } = useSelector((state: RootState) => state.shippingTax);
   const { addresses, loading: addressesLoading } = useSelector((state: RootState) => state.address);
   const { authModel } = useSelector((state: RootState) => state.auth);
-  const { loading: orderLoading, error: orderError, success: orderSuccess } = useSelector((state: RootState) => state.order);
+  // const { loading: orderLoading, error: orderError, success: orderSuccess } = useSelector((state: RootState) => state.order);
   const userType = useSelector((state: RootState) => (state.auth.authModel?.result as any)?.userType) || 0;
   
   const cart = cartItems.map(item => ({
@@ -42,7 +42,7 @@ export default function CheckoutScreen() {
   
  
   
-  const [isLoading, setIsLoading] = useState(false);
+  // const [ setIsLoading] = useState(false);
   const [shippingType, setShippingType] = useState('express'); // 'express' or 'support'
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [couponCode, setCouponCode] = useState('');
@@ -208,7 +208,7 @@ export default function CheckoutScreen() {
           visibilityTime: 4000,
         });
       }
-          } catch (error) {
+          } catch (error: any) {
         Toast.show({
           type: 'error',
           text1: 'خطأ',
@@ -241,7 +241,7 @@ export default function CheckoutScreen() {
       return;
     }
     
-    setIsLoading(true);
+    // setIsLoading(true);
     
     try {
       const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
@@ -355,7 +355,7 @@ export default function CheckoutScreen() {
         });
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error placing order:', error);
       Toast.show({
         type: 'error',
@@ -365,7 +365,7 @@ export default function CheckoutScreen() {
         visibilityTime: 4000,
       });
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 

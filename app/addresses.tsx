@@ -14,50 +14,50 @@ import { addNewAddress, deleteExistingAddress, fetchAddresses } from '../src/sto
 import { RootState } from '../src/store/store';
 
 // بيانات الدول والمدن
-const countries = [
-  { label: 'Saudi Arabia', value: 'saudi' },
-  { label: 'Yemen', value: 'yemen' },
-];
+// const countries = [
+//   { label: 'Saudi Arabia', value: 'saudi' },
+//   { label: 'Yemen', value: 'yemen' },
+// ];
 
-const citiesByCountry: Record<string, { label: string; value: string }[]> = {
-  saudi: [
-    { label: 'Riyadh Region', value: 'Riyadh' },
-    { label: 'Makkah Region', value: 'Makkah' },
-    { label: 'Eastern Province', value: 'Eastern Province' },
-    { label: 'Asir Region', value: 'Asir' },
-    { label: 'Jazan Region', value: 'Jazan' },
-    { label: 'Najran Region', value: 'Najran' },
-    { label: 'Al Bahah Region', value: 'Al Bahah' },
-    { label: 'Al Jouf Region', value: 'Al Jouf' },
-    { label: 'Northern Borders Region', value: 'Northern Borders' },
-    { label: 'Qassim Region', value: 'Qassim' },
-    { label: 'Hail Region', value: 'Hail' },
-    { label: 'Tabuk Region', value: 'Tabuk' },
-    { label: 'Madinah Region', value: 'Madinah' },
-  ],
-  yemen: [
-    { label: 'Sana\'a', value: 'Sana\'a' },
-    { label: 'Aden', value: 'Aden' },
-    { label: 'Taiz', value: 'Taiz' },
-    { label: 'Al Hudaydah', value: 'Al Hudaydah' },
-    { label: 'Ibb', value: 'Ibb' },
-    { label: 'Dhamar', value: 'Dhamar' },
-    { label: 'Al Mahwit', value: 'Al Mahwit' },
-    { label: 'Amran', value: 'Amran' },
-    { label: 'Sana\'a (Governorate)', value: 'Sana\'a Governorate' },
-    { label: 'Sa\'dah', value: 'Sa\'dah' },
-    { label: 'Al Jawf', value: 'Al Jawf' },
-    { label: 'Marib', value: 'Marib' },
-    { label: 'Al Bayda', value: 'Al Bayda' },
-    { label: 'Abyan', value: 'Abyan' },
-    { label: 'Lahij', value: 'Lahij' },
-    { label: 'Al Dhale\'e', value: 'Al Dhale\'e' },
-    { label: 'Shabwah', value: 'Shabwah' },
-    { label: 'Hadramout', value: 'Hadramout' },
-    { label: 'Al Mahrah', value: 'Al Mahrah' },
-    { label: 'Socotra', value: 'Socotra' },
-  ],
-};
+// const citiesByCountry: Record<string, { label: string; value: string }[]> = {
+//   saudi: [
+//     { label: 'Riyadh Region', value: 'Riyadh' },
+//     { label: 'Makkah Region', value: 'Makkah' },
+//     { label: 'Eastern Province', value: 'Eastern Province' },
+//     { label: 'Asir Region', value: 'Asir' },
+//     { label: 'Jazan Region', value: 'Jazan' },
+//     { label: 'Najran Region', value: 'Najran' },
+//     { label: 'Al Bahah Region', value: 'Al Bahah' },
+//     { label: 'Al Jouf Region', value: 'Al Jouf' },
+//     { label: 'Northern Borders Region', value: 'Northern Borders' },
+//     { label: 'Qassim Region', value: 'Qassim' },
+//     { label: 'Hail Region', value: 'Hail' },
+//     { label: 'Tabuk Region', value: 'Tabuk' },
+//     { label: 'Madinah Region', value: 'Madinah' },
+//   ],
+//   yemen: [
+//     { label: 'Sana\'a', value: 'Sana\'a' },
+//     { label: 'Aden', value: 'Aden' },
+//     { label: 'Taiz', value: 'Taiz' },
+//     { label: 'Al Hudaydah', value: 'Al Hudaydah' },
+//     { label: 'Ibb', value: 'Ibb' },
+//     { label: 'Dhamar', value: 'Dhamar' },
+//     { label: 'Al Mahwit', value: 'Al Mahwit' },
+//     { label: 'Amran', value: 'Amran' },
+//     { label: 'Sana\'a (Governorate)', value: 'Sana\'a Governorate' },
+//     { label: 'Sa\'dah', value: 'Sa\'dah' },
+//     { label: 'Al Jawf', value: 'Al Jawf' },
+//     { label: 'Marib', value: 'Marib' },
+//     { label: 'Al Bayda', value: 'Al Bayda' },
+//     { label: 'Abyan', value: 'Abyan' },
+//     { label: 'Lahij', value: 'Lahij' },
+//     { label: 'Al Dhale\'e', value: 'Al Dhale\'e' },
+//     { label: 'Shabwah', value: 'Shabwah' },
+//     { label: 'Hadramout', value: 'Hadramout' },
+//     { label: 'Al Mahrah', value: 'Al Mahrah' },
+//     { label: 'Socotra', value: 'Socotra' },
+//   ],
+// };
 
 // دالة للحصول على الترجمة حسب اللغة
 const getTranslatedCountries = (t: any) => [

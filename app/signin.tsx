@@ -31,8 +31,8 @@ const LoginSchema = (t: any) =>
       .required(t("login.password_required")),
   });
 
-type Props = {};
-const LoginScreen = (props: Props) => {
+
+const LoginScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
@@ -85,7 +85,7 @@ const LoginScreen = (props: Props) => {
     };
 
     animateBalls();
-  }, []);
+  }, [balls]);
 
   // Login
   const handleLogin = async (values: any, { setSubmitting }: any) => {

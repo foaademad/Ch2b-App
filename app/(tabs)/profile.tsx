@@ -44,14 +44,14 @@ const ProfileScreen = () => {
     if (profile?.user?.id) {
       dispatch(getAllOrdersToUser(profile.user.id) as any);
     }
-  }, [language, profile]);
+  }, [language, profile, dispatch]);
 
   const handleLogout = useCallback(async () => {
     await logoutApi(dispatch);
     router.replace('/');
     // No need to reload the app - router.replace will handle navigation
     // Updates.reloadAsync() is not available in development mode for production apps
-  }, [dispatch]);
+  }, [dispatch, router]);
   
 
   // استخدام Redux مباشرة بدلاً من ShopContext

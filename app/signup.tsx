@@ -89,7 +89,7 @@ const getValidationSchema = (t: any, accountType: string) => {
 
 const SignupScreen = () => {
   const dispatch = useDispatch();
-  const { loading, error, authModel } = useSelector((state: RootState) => state.auth);
+  const { loading } = useSelector((state: RootState) => state.auth);
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
@@ -288,7 +288,7 @@ const SignupScreen = () => {
         setImageName(asset.uri.split("/").pop() || t("signup.image_uploaded"));
         handleChange("companyImage", asset.uri);
       }
-    } catch (error) {
+    } catch (error: any) {
       Toast.show({
         type: 'error',
         text1: t('signup.error'),

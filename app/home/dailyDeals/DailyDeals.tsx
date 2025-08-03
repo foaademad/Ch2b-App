@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import ProductCard from '../../../components/products/ProductCard';
@@ -36,7 +36,7 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
   const { t } = useTranslation();
 
   // جلب المنتجات للصفحات الحالية لكل كاتيجوري
-  const fetchProducts = async (pages: { [catId: string]: number }, append = false) => {
+  const fetchProducts = useCallback(async (pages: { [catId: string ]: number }, append = false) => {
     setError(null);
     try {
       setLoadingMore(!loading);
@@ -63,7 +63,9 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
       );
       setProducts(prev => {
         const merged = append ? [...prev, ...allResults] : allResults;
-        if (onProductsChange) onProductsChange(merged); // تمرير المنتجات للأب
+        if (onProductsChange && typeof onProductsChange === 'function') {
+          onProductsChange(merged); // تمرير المنتجات للأب
+        }
         return shuffleArray(merged);
       });
       setHasMore(anyHasMore);
@@ -73,7 +75,7 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [ onProductsChange, loading]);
 
   // أول تحميل
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function DailyDeals({ onProductsChange }: { onProductsChange?: (p
     setCategoryPages(initialPages);
     setLoading(true);
     fetchProducts(initialPages, false);
-  }, []);
+  }, [fetchProducts]);
 
   // زر تحميل المزيد
   const handleLoadMore = () => {

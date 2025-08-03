@@ -67,7 +67,7 @@ export default function SupportScreen() {
   } | null>(null);
 
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
-  const { isLoading, error, problem } = useSelector((state: RootState) => state.problem);
+  const { error, problem } = useSelector((state: RootState) => state.problem);
   useEffect(() => {
     if (error) {
       Toast.show({

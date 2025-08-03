@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Animated, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -84,7 +84,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({ category, level, onPress, i
 
 export default function CategoriesScreen() {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const dispatch = useDispatch();
   const router = useRouter();
   const { categories, loading, error } = useSelector((state: RootState) => state.category);
@@ -103,7 +103,7 @@ export default function CategoriesScreen() {
   );
 
   // دالة للبحث في جميع الفئات (الرئيسية والفرعية)
-  const searchInAllCategories = (searchTerm: string) => {
+  const searchInAllCategories = useCallback((searchTerm: string) => {
     if (!searchTerm.trim()) {
       return mainCategoriesWithChildren;
     }
@@ -141,7 +141,7 @@ export default function CategoriesScreen() {
     });
 
     return results;
-  };
+  }, [categories, mainCategoriesWithChildren]);
 
   const [search, setSearch] = useState('');
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -152,7 +152,7 @@ export default function CategoriesScreen() {
   useEffect(() => {
     const searchResults = searchInAllCategories(search);
     setFilteredCategories(searchResults);
-  }, [search, categories]);
+  }, [search, categories, searchInAllCategories]);
 
   useEffect(() => {
     // عند أول تحميل الصفحة

@@ -31,7 +31,7 @@ const OrdersScreen = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'paypal' | 'bakiyya' | null>(null);
   const [transferReceiptImage, setTransferReceiptImage] = useState<{ uri: string; type?: string; name?: string } | null>(null);
   const [currentStep, setCurrentStep] = useState(1); // Track current step
-  const [isLoading, setIsLoading] = useState(false);  
+  
   // Redux state
   const { orders, loading, error } = useSelector((state: RootState) => state.order);
   const { authModel } = useSelector((state: RootState) => state.auth);
@@ -50,7 +50,7 @@ const OrdersScreen = () => {
     if (authModel?.result?.userId) {
       dispatch(fetchAllBankAccounts() as any);
     }
-  }, [dispatch]);
+  }, [dispatch, authModel]);
 
   const handleRefresh = () => {
     if (authModel?.result?.userId) {
@@ -63,16 +63,16 @@ const OrdersScreen = () => {
     try {
       const date = new Date(dateString);
       return date.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US');
-    } catch (error) {
+    } catch (error: any) {
       return dateString;
     }
   };
 
-  const calculateReviewedProductsTotal = () => {
-    return orders
-      .filter(order => order.status === 1 || order.orderStatus === 1)
-      .reduce((total, order) => total + (order.totalPrice || 0), 0);
-  };
+  // const calculateReviewedProductsTotal = () => {
+  //   return orders
+  //     .filter(order => order.status === 1 || order.orderStatus === 1)
+  //     .reduce((total, order) => total + (order.totalPrice || 0), 0);
+  // };
 
   const handlePaymentPress = (order: any) => {
     setSelectedOrder(order);
@@ -106,7 +106,7 @@ const OrdersScreen = () => {
       if (!result.canceled && result.assets[0]) {
         setTransferReceiptImage(result.assets[0]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error picking image:', error);
       Alert.alert(
         language === 'ar' ? 'خطأ' : 'Error',
@@ -176,7 +176,7 @@ const OrdersScreen = () => {
         text1: language === 'ar' ? 'تم إرسال بيانات التحويل' : 'Transfer details sent',
         text2: language === 'ar' ? 'سيتم مراجعة التحويل قريباً' : 'Transfer will be reviewed soon'
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing image:', error);
       Toast.show({
         type: 'error',

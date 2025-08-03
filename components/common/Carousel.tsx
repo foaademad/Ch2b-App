@@ -19,12 +19,12 @@ const Carousel: React.FC<CarouselProps> = ({
   const scrollViewRef = useRef<ScrollView>(null);
   const { width: windowWidth } = Dimensions.get('window');
   const dispatch = useDispatch();
-  const { image, loading, error } = useSelector((state: RootState) => state.imageDynamic);
+  const { image } = useSelector((state: RootState) => state.imageDynamic);
 
   useEffect(() => {
     dispatch(getImageDynamic() as any);
     // console.log("image", image?.images);
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     if (autoPlay && image && Array.isArray(image) && image.length > 1) {

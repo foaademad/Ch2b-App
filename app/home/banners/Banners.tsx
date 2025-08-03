@@ -3,12 +3,11 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { Shadows } from '../../../constants/Shadows';
-import { useLanguage } from '../../../src/context/LanguageContext';
 import banners from './bannersData';
 
 const EnhancedCarousel = () => {
   const { t } = useTranslation();
-  const { language } = useLanguage();
+ 
 
   return (
     <View style={{ marginBottom: 16 }}>
@@ -16,7 +15,7 @@ const EnhancedCarousel = () => {
         data={banners}
         autoPlay={true}
         autoPlayInterval={3000}
-        renderItem={({ item }) => (
+        renderItem={({ item }: { item: any }) => (
           <View style={styles.bannerContainer}>
             <Image
               source={{ uri: item.image }}

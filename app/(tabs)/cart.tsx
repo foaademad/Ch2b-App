@@ -13,12 +13,13 @@ import { Shadows } from '../../constants/Shadows';
 
 const CartScreen = () => {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const router = useRouter();
   const dispatch = useDispatch();
   const { items: cart, isLoading, error } = useSelector((state: RootState) => state.cart);
   const userId = useSelector((state: RootState) => state.auth.authModel?.result?.userId);
-  const [cartRequested, setCartRequested] = React.useState(false);
+  const [cartRequested, setCartRequested] = React.useState(false); 
+  
 
   useEffect(() => {
     if (userId && cart.length === 0 && !isLoading && !cartRequested) {
@@ -35,7 +36,7 @@ const CartScreen = () => {
         });
       });
     }
-  }, [dispatch, userId, cart.length, isLoading, cartRequested]);
+  }, [dispatch, userId, cart.length, isLoading, cartRequested, t]);
 
   // عرض رسالة خطأ إذا كان هناك خطأ
   useEffect(() => {

@@ -1,13 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useLanguage } from '../src/context/LanguageContext';
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const { t } = useTranslation();
   const { language, isRTL } = useLanguage();
 
   const settingsSections = [

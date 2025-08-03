@@ -26,7 +26,7 @@ import { AppDispatch, RootState } from "../../src/store/store";
 
 export default function ProductDetails() {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const { isRTL } = useLanguage();
   const { id } = useLocalSearchParams();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
@@ -56,7 +56,7 @@ export default function ProductDetails() {
   useEffect(() => {
     if (id) dispatch(getProductById(id as string));
     
-  }, [id]);
+  }, [id, dispatch]);
 
   console.log("Current product state:", currentProduct);
 

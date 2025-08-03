@@ -6,8 +6,6 @@ import { useLanguage } from '../../../src/context/LanguageContext';
 import featuredBrands from './featuredBrandsData';
 
 const BrandItem = ({ item }: { item: any }) => {
-  const { t } = useTranslation();
-  const { language } = useLanguage();
 
   return (
     <TouchableOpacity

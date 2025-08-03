@@ -2,7 +2,7 @@ import { useLanguage } from '@/src/context/LanguageContext';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Camera, Filter, Search, X } from 'lucide-react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -75,13 +75,19 @@ const SearchScreen = () => {
 
   // Debounced text search
   const debouncedTextSearch = useCallback(
-    debounce((text: string) => {
+    (text: string) => {
       if (text.trim()) {
         dispatch(searchByText({ title: text, page: 1, language }) as any);
       }
-    }, 500),
+    },
     [dispatch, language]
   );
+
+  const debouncedSearch = useMemo(
+    () => debounce(debouncedTextSearch, 500),
+    [debouncedTextSearch]
+  );
+  
 
   // Handle image search on mount
   useEffect(() => {
@@ -104,9 +110,9 @@ const SearchScreen = () => {
   // Handle text search
   useEffect(() => {
     if (!imageFile) {
-      debouncedTextSearch(searchText);
+      debouncedSearch(searchText);
     }
-  }, [searchText, imageFile, debouncedTextSearch]);
+  }, [searchText, imageFile, debouncedSearch]);
 
   // Apply filters
   useEffect(() => {

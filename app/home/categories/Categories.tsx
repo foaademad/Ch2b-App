@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import { ChevronDown, X } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -30,7 +30,7 @@ const CategoryItem = ({
   isSelected: boolean;
   onPress: (id: string) => void;
 }) => {
-  const { t } = useTranslation();
+  
   const { language, isRTL } = useLanguage();
 
   // دالة لتقصير الاسم
@@ -80,7 +80,7 @@ const ModalCategoryItem = ({
   onPress: (id: string) => void;
   isSelected: boolean;
 }) => {
-  const { t } = useTranslation();
+
   const { language, isRTL } = useLanguage();
 
   return (
@@ -115,10 +115,10 @@ const ITEM_WIDTH = 130; // ✅ العرض المناسب لكل عنصر
 
 const Categories = () => {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const { categories, loading } = useSelector((state: RootState) => state.category);
+  const { categories } = useSelector((state: RootState) => state.category);
   const currentCategory = useSelector((state: RootState) => state.product.currentCategory);
   const [pendingCategory, setPendingCategory] = useState<string | null>(null);
 
@@ -126,8 +126,8 @@ const Categories = () => {
     .filter((cat) => cat.parentId === null)
     .flatMap((cat) => cat.children || []);
 
-  const allCategory = { categoryId: 'all', id: 'all', nameEn: 'All', nameAr: 'الكل' } as CategoryDto;
-  const categoriesWithAll = [allCategory, ...subCategories];
+  const allCategory = useMemo(() => ({ categoryId: 'all', id: 'all', nameEn: 'All', nameAr: 'الكل' }) as CategoryDto, []);
+  const categoriesWithAll = useMemo(() => [allCategory, ...subCategories], [subCategories, allCategory]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [modalVisible, setModalVisible] = useState(false);
@@ -191,7 +191,7 @@ const Categories = () => {
         });
       }
     }
-  }, [selectedCategory, categoriesWithAll.length]);
+  }, [selectedCategory, categoriesWithAll.length,categoriesWithAll,flatListRef]);
 
   // راقب التغيير في currentCategory
   useEffect(() => {
@@ -199,7 +199,7 @@ const Categories = () => {
       router.push("/category-products");
       setPendingCategory(null);
     }
-  }, [currentCategory, pendingCategory, router]);
+  }, [currentCategory, pendingCategory, router, dispatch]);
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);

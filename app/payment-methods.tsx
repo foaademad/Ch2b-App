@@ -1,13 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useLanguage } from '../src/context/LanguageContext';
 
 const PaymentMethodsScreen = () => {
   const router = useRouter();
-  const { t } = useTranslation();
+ 
   const { language, isRTL } = useLanguage();
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
 

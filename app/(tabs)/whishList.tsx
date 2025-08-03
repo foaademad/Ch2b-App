@@ -12,7 +12,7 @@ import { Shadows } from '../../constants/Shadows';
 
 const WishlistScreen = () => {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const dispatch = useDispatch();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'sellers'

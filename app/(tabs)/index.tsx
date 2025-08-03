@@ -6,10 +6,10 @@ import { Camera, Search } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { Shadows } from '../../constants/Shadows';
 import { getProducts } from '../../src/store/api/productApi';
-import { AppDispatch, RootState } from '../../src/store/store';
+import { AppDispatch } from '../../src/store/store';
 import EnhancedCarousel from '../home/banners/Banners';
 import BestSellers from '../home/bestSellers/BestSellers';
 import Categories from '../home/categories/Categories';
@@ -18,7 +18,7 @@ import NewArrivals from '../home/newArrivals/NewArrivals';
 
 function AnimatedSearchBar() {
  const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
   const widthAnim = useRef(new Animated.Value(0.85)).current;
@@ -124,12 +124,8 @@ const searchStyles = StyleSheet.create({
 });
 
 const HomeScreen = () => {
-  const { t } = useTranslation();
-  const { language } = useLanguage();
   const dispatch = useDispatch<AppDispatch>();
-  const router = useRouter();
-  const { currentCategory } = useSelector((state: RootState) => state.product);
-  const [dailyDealsProducts, setDailyDealsProducts] = useState<ProductDto[]>([]);
+  const [setDailyDealsProducts] = useState<ProductDto[]>([]);
 
   useEffect(() => {
     dispatch(getProducts());
@@ -146,7 +142,7 @@ const HomeScreen = () => {
         <Categories />
         <NewArrivals />
         <BestSellers />
-        <DailyDeals onProductsChange={setDailyDealsProducts} />
+        <DailyDeals onProductsChange={setDailyDealsProducts as any} />
       </ScrollView>
     </View>
   );

@@ -26,8 +26,8 @@ const ResendConfirmationSchema = (t: any) =>
       .required(t("resend_confirmation.email_required")),
   });
 
-type Props = {};
-const ResendConfirmationScreen = (props: Props) => {
+
+const ResendConfirmationScreen = () => {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
@@ -78,7 +78,7 @@ const ResendConfirmationScreen = (props: Props) => {
     };
 
     animateBalls();
-  }, []);
+  }, [balls]);
 
   // Resend Confirmation Email
   const handleResendConfirmation = async (values: any, { setSubmitting }: any) => {

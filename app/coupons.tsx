@@ -19,7 +19,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 
 const CouponsScreen = () => {
-  const { language, changeLanguage } = useLanguage();
+  const { language } = useLanguage();
   const [isRTL, setIsRTL] = useState(language === "ar");
   const { t } = useTranslation();
   const router = useRouter();
@@ -42,7 +42,7 @@ const CouponsScreen = () => {
         t('profile.coupons.code_copied'),
         [{ text: 'OK' }]
       );
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Error', 'Failed to copy code');
     }
   };
@@ -81,7 +81,7 @@ const CouponsScreen = () => {
       if (isNaN(date.getTime())) return 'غير محدد';
       const formattedDate = date.toLocaleDateString(isRTL ? 'ar-SA' : 'en-US');
       return formattedDate || 'غير محدد';
-    } catch (error) {
+    } catch (error: any) {
       return 'غير محدد';
     }
   };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../../src/context/LanguageContext";
 

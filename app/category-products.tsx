@@ -11,10 +11,7 @@ import { getallProductByCategoryId } from '../src/store/api/productApi';
 import { RootState } from '../src/store/store';
 import { ProductDto } from '../src/store/utility/interfaces/productInterface';
 
-const { width: screenWidth } = Dimensions.get('window');
-const ITEM_WIDTH = 175; // عرض كل منتج
 const ITEM_MARGIN = 10; // الهامش بين المنتجات
-const CONTAINER_PADDING = 20; // padding الحاوية
 
 // حساب عدد الأعمدة بناءً على عرض الشاشة
 const calculateNumColumns = () => {
@@ -27,7 +24,7 @@ const calculateNumColumns = () => {
 
 export default function CategoryProductsScreen() {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const dispatch = useDispatch();
   const router = useRouter();
   const { currentCategory, loading, loadingMore, error } = useSelector((state: RootState) => state.product);

@@ -17,11 +17,11 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onPress }) => {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const { isRTL } = useLanguage();
   const rating = Number(product.featuredValues?.find(value => value.name === 'rating')?.value) || 0;
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
-  const starsArray = Array(fullStars).fill('★');
+  // const starsArray = Array(fullStars).fill('★');
   const dispatch = useDispatch();
   const wishlist = useSelector((state: RootState) => state.wishlist.wishlist);
   const isFavorite = wishlist.some(

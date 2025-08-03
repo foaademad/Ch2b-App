@@ -10,7 +10,7 @@ const { width } = Dimensions.get('window');
 
 export default function NotFoundScreen() {
   const { t } = useTranslation();
-  const { language, isRTL } = useLanguage();
+  const {  isRTL } = useLanguage();
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -37,7 +37,7 @@ export default function NotFoundScreen() {
       duration: 1000,
       useNativeDriver: false,
     }).start();
-  }, []);
+  }, [bounceAnim, fadeAnim ]);
 
   const iconTranslateY = bounceAnim.interpolate({
     inputRange: [0, 1],

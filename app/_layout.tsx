@@ -76,11 +76,11 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
       setIsAuthLoaded(true);
       SplashScreen.hideAsync();
     }
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     initializeApp();
-  }, []);
+  }, [initializeApp]);
 
   // مراقبة التغييرات في حالة المصادقة
   useEffect(() => {
@@ -91,13 +91,13 @@ function AppInitializer({ children }: { children: React.ReactNode }) {
         router.replace("/");
       }
     }
-  }, [isAuthenticated, authModel?.result?.token, isAuthLoaded]);
+  }, [isAuthenticated, authModel?.result?.token, isAuthLoaded, router]);
 
   useEffect(() => {
     if (isAuthLoaded && shouldRedirect) {
       router.replace(shouldRedirect === "tabs" ? "/(tabs)" : "/");
     }
-  }, [isAuthLoaded, shouldRedirect]);
+  }, [isAuthLoaded, shouldRedirect, router]);
 
   if (!isAuthLoaded) {
     return (
