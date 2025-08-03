@@ -6,7 +6,7 @@ import { logoutAndClearAllData } from '../../slice/authSlice';
 import { store } from '../../store';
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api", 
+  baseURL: "https://api.ch2b.net/api", 
   headers: {
     "Content-Type": "application/json",
     
