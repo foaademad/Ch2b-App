@@ -19,6 +19,7 @@
     "email": "Email*",
     "password": "Password*",
     "forgot_password": "Forgot password?",
+    "confirm_email": "Confirm Email",
     "login_button": "Login",
     "dont_have_account": "Don't have an account? ",
     "sign_up": "Create Account",
@@ -48,6 +49,22 @@
     "success_message": "Password reset instructions have been sent to your email",
     "error_title": "Error",
     "error_message": "Failed to send reset email. Please try again."
+  },
+  "resend_confirmation": {
+    "title": "Resend Confirmation Email",
+    "subtitle": "Enter your email address and we'll send you a new confirmation link",
+    "email_label": "Email*",
+    "email_placeholder": "Enter your email address",
+    "resend_button": "Resend Verification Email",
+    "back_to_login": "← Back to Login",
+    "remember_password": "Remember your password? Back to Login",
+    "sending": "Sending...",
+    "email_invalid": "Invalid email address",
+    "email_required": "Email is required",
+    "success_title": "Email Sent",
+    "success_message": "Confirmation email has been sent to your email address",
+    "error_title": "Error",
+    "error_message": "Failed to send confirmation email. Please try again."
   },
   "signup": {
     "title": "Sign Up Form",

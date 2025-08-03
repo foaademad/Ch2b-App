@@ -221,14 +221,24 @@ const LoginScreen = (props: Props) => {
                   <Text style={styles.errorText}>{errors.password}</Text>
                 )}
 
-                {/* Forgot Password */}
-                <TouchableOpacity onPress={() => router.push("/forgot-password")}>
-                  <Text
-                    style={[styles.forgotText, isRTL && { textAlign: "right" }]}
-                  >
-                    {t("login.forgot_password")}
-                  </Text>
-                </TouchableOpacity>
+                {/* Forgot Password and Resend Confirmation */}
+                <View style={[styles.linksContainer, isRTL && { flexDirection: "row-reverse" }]}>
+                  <TouchableOpacity onPress={() => router.push("/forgot-password")}>
+                    <Text
+                      style={[styles.forgotText, isRTL && { textAlign: "right" }]}
+                    >
+                      {t("login.forgot_password")}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity onPress={() => router.push("/resend-confirmation" as any)}>
+                    <Text
+                      style={[styles.confirmEmailText, isRTL && { textAlign: "right" }]}
+                    >
+                      {t("login.confirm_email")}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
 
                 {/* Login Button */}
                 <TouchableOpacity
@@ -357,7 +367,18 @@ const styles = StyleSheet.create({
     color: "#36C7F6",
     fontSize: 14,
     textAlign: "right",
+    fontWeight: "500",
+  },
+  linksContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 24,
+  },
+  confirmEmailText: {
+    color: "#36C7F6",
+    fontSize: 14,
+    textAlign: "left",
     fontWeight: "500",
   },
   loginButton: {

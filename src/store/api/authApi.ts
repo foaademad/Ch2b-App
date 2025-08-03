@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { logoutAndClearAllData, setAuthState, setError, setForgotPassword, setLoading } from '../slice/authSlice';
+import { logoutAndClearAllData, setAuthState, setError, setForgotPassword, setLoading, setResendConfirmation } from '../slice/authSlice';
 import { RootState } from '../store';
 import api from '../utility/api/api';
 import { IRegisterUser } from '../utility/interfaces/authInterface';
@@ -185,6 +185,36 @@ export const forgotPassword = (email: string) => {
     }
     finally {
       dispatch(setLoading(false));
+    }
+  }
+}
+
+
+
+export const resendConfirmation = (email: string) => {
+  return async (dispatch: any) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await api.post("/Account/resendVerification", { email });
+      dispatch(setResendConfirmation(response.data));
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      let errorMsg = 'Failed to resend confirmation';
+      if (error.response && error.response.data) {
+        if (error.response.data.errors) {
+          errorMsg = Object.values(error.response.data.errors).flat().join(' \n ');
+        } else if (error.response.data.title) {
+          errorMsg = error.response.data.title;
+        } else if (error.response.data.message) {
+          errorMsg = error.response.data.message;
+        } else if (typeof error.response.data === 'string') {
+          errorMsg = error.response.data;
+        }
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+      dispatch(setError(errorMsg));
+      return { success: false, error: errorMsg };
     }
   }
 }

@@ -41,6 +41,7 @@ interface AuthState {
   authModel: IAuthModel | null;
   loginWithGoogle: string | null;
   forgotPassword: string | null;
+  resendConfirmation: string | null;
 }
 
 const initialState: AuthState = {
@@ -49,6 +50,7 @@ const initialState: AuthState = {
   authModel: null,
   loginWithGoogle: null,
   forgotPassword: null,
+  resendConfirmation: null,
 };
 
 const authSlice = createSlice({
@@ -105,6 +107,10 @@ const authSlice = createSlice({
    
     setForgotPassword: (state, action: PayloadAction<string | null>) => {
       state.forgotPassword = action.payload;
+    },
+
+    setResendConfirmation: (state, action: PayloadAction<string | null>) => {
+      state.resendConfirmation = action.payload;
     }
   },
 });
@@ -118,7 +124,8 @@ export const {
   register,
   loadAuthFromStorage,
   
-  setForgotPassword
+  setForgotPassword,
+  setResendConfirmation
 } = authSlice.actions;
 
 // Thunk action لمسح جميع البيانات عند تسجيل الخروج
