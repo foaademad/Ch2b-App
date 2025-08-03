@@ -133,8 +133,6 @@ export default function RootLayout() {
                             <Stack.Screen name="addresses" />
                             <Stack.Screen name="category-products" />
                             <Stack.Screen name="checkout" />
-                            <Stack.Screen name="edit-profile" />
-                            <Stack.Screen name="notifications" />
                             <Stack.Screen name="orders" />
                             <Stack.Screen name="payment-methods" />
                             <Stack.Screen name="privacy" />

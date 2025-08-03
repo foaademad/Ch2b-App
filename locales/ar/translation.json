@@ -72,7 +72,7 @@
       "email": "الايميل*",
       "password": "الباسورد*",
       "confirm_password": "تأكيد كلمة المرور*",
-      
+      "registering": "جاري التسجيل...",
       "registration_successful": "تم إنشاء حسابك بنجاح",
       "registration_failed": "فشل إنشاء حسابك",
       

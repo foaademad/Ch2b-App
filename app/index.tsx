@@ -79,7 +79,7 @@ const WelcomeScreen = () => {
               >
                 {t("description")}
               </Animated.Text>
-              {/* login with email */}
+              {/* signup  */}
               <View style={styles.socialLoginWrapper}>
                 <Animated.View
                   style={styles.link}
@@ -87,7 +87,7 @@ const WelcomeScreen = () => {
                   exiting={FadeInDown.delay(700).duration(300)}
                 >
                   <TouchableOpacity
-                      onPress={() => router.replace("/signin")}
+                      onPress={() => router.replace("/signup")}
                     >
                     <View style={[styles.linkContent, isRTL && { flexDirection: "row-reverse" }]}>
                       <Ionicons name="mail-outline" size={18} color="black" />

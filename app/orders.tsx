@@ -372,18 +372,16 @@ const OrdersScreen = () => {
                   </Text>
                 </View>
                 
-                {(order.shippingPrice && order.shippingPrice > 0) && (
-                  <View style={styles.priceRow}>
-                    <Text style={styles.priceLabel}>
-                      {language === 'ar' ? 'الشحن' : 'Shipping'}
-                    </Text>
-                    <Text style={styles.priceValue}>
-                      {(order.shippingPrice || 0).toFixed(2)} SAR
-                    </Text>
-                  </View>
-                )}
+                <View style={styles.priceRow}>
+                  <Text style={styles.priceLabel}>
+                    {language === 'ar' ? 'الشحن' : 'Shipping'}
+                  </Text>
+                  <Text style={styles.priceValue}>
+                    {(order.shippingPrice || 0).toFixed(2)} SAR
+                  </Text>
+                </View>
                 
-                {(order.tax && order.tax > 0) && (
+               
                   <View style={styles.priceRow}>
                     <Text style={styles.priceLabel}>
                       {language === 'ar' ? 'الضرائب' : 'Taxes'}
@@ -392,7 +390,7 @@ const OrdersScreen = () => {
                       {(order.tax || 0).toFixed(2)} SAR
                     </Text>
                   </View>
-                )}
+              
                 
                 <View style={styles.priceDivider} />
               </View>
@@ -1187,6 +1185,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    
     marginBottom: 8,
   },
   priceLabel: {

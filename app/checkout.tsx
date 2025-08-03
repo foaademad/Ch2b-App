@@ -70,12 +70,6 @@ export default function CheckoutScreen() {
   const calculateCommission = () => {
     if (!commition || commitionLoading) return 0;
     
-    // إذا تم اختيار "Contact Support for Shipping"، اجعل العمولة 0
-    if (shippingType === 'support') {
-      console.log("Commission set to 0 due to Contact Support shipping");
-      return 0;
-    }
-    
     const totalQuantity = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0);
     
