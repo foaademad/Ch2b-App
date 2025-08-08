@@ -11,8 +11,8 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@expo/config-plugins": "^10.1.2",
-    "@expo/prebuild-config": "^9.0.11",
+    "@expo/config-plugins": "~10.1.1",
+    "@expo/prebuild-config": "~9.0.0",
     "@expo/vector-icons": "^14.1.0",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/datetimepicker": "8.4.1",
@@ -45,7 +45,7 @@
     "i18next-browser-languagedetector": "^8.1.0",
     "lodash": "^4.17.21",
     "lucide-react-native": "^0.511.0",
-    "react": "19.0.0",
+    "react": "^19.0.0",
     "react-cookies": "^0.1.1",
     "react-dom": "^19.0.0",
     "react-i18next": "^15.5.1",
