@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Appppppp",
-    "slug": "Appppppp",
+    "name": "ZI-MABEDK",
+    "slug": "ZI-MABEDK",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "appppppp",
+    "scheme": "zimabedk",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -16,12 +16,13 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.fouad_emad.ZIMABEDK"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/icon.png"
     },
     "plugins": [
       "expo-router",
@@ -37,6 +38,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c7551eb3-56d4-49d2-a0e6-fb3dc033efed"
+      }
+    },
+    "owner": "fouad_emad"
   }
 }
